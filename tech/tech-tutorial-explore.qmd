@@ -1,0 +1,314 @@
+# Tech Tutorial: Explore {.unnumbered}
+
+::: {.project-meta}
+**Tech Tutorial — Explore.** A *Tech Tutorial* shows you how to carry out the
+techniques from this unit in the software your section uses. Pick **one**
+tool and follow its tab; the question, the data, and the statistical reasoning
+are identical across all three.
+
+- **StatLens** — nothing to install; runs in your browser. The *fundamentals* path.
+- **Jamovi** — a free, menu-driven statistics program.
+- **R** — code-based; reproducible and what the wider community uses.
+
+Your choice of tool persists across every tabset in the book, so you only pick once.
+:::
+
+## The data {#sec-tech-explore-data}
+
+We use a small, **synthetic** first-day class survey — 50 students, with two
+categorical variables and three numerical ones. (It stands in for a real survey;
+no actual student records are involved.)
+
+| Variable | Type | Meaning |
+|---|---|---|
+| `year` | categorical | First-year, Sophomore, Junior, Senior |
+| `housing` | categorical | On-campus or Off-campus |
+| `study_hours` | numerical | hours spent studying in a typical week |
+| `sleep_hours` | numerical | typical nightly sleep |
+| `commute_min` | numerical | one-way commute, in minutes |
+
+**Get the file:** [`class_survey.csv`]({{< var data-url >}}/class_survey.csv){download="class_survey.csv"}.
+The Jamovi and StatLens steps below load this exact file.
+
+## What you'll do {#sec-tech-explore-skills}
+
+Five core Explore skills, each in your chosen tool:
+
+1. Get to know the data and classify variables
+2. Summarize **one categorical** variable
+3. Summarize **one numerical** variable
+4. Compare a numerical variable **across groups**
+5. Explore the **relationship** between two numerical variables
+
+---
+
+## 1. Get to know the data {#sec-tech-explore-overview}
+
+Before any chart, look at the data and decide each variable's type — *categorical*
+(labels) or *numerical* (measured amounts). This is a thinking step, not a
+calculation: no tool decides it for you.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Descriptive Statistics explorer]({{< var tool-url >}}/explore/descriptive/?csv={{< var data-url >}}/class_survey.csv){target="_blank"} — the class survey loads automatically.
+2.  Use the **variable dropdown** to see every column. Numerical variables
+    (`study_hours`, `sleep_hours`, `commute_min`) can be charted here; the
+    categorical ones (`year`, `housing`) you'll explore in steps 2 and 4.
+
+### Jamovi
+
+1.  Download `class_survey.csv` (link above) and open it: **☰ → Open → This PC**.
+2.  In the **Data** tab, click each variable and check its **Measure type** —
+    set `year` and `housing` to **Nominal**, and the three counts to **Continuous**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-explore-setup
+#| echo: true
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+survey <- read_csv("../datasets/class_survey.csv") |>
+  mutate(year = factor(year,
+           levels = c("First-year", "Sophomore", "Junior", "Senior")))
+
+glimpse(survey)
+```
+
+:::
+
+---
+
+## 2. Summarize one categorical variable {#sec-tech-explore-onecat}
+
+For a categorical variable we report a **frequency table** (counts and
+proportions) and a **bar chart**. We'll use `year`.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [One Categorical Variable explorer]({{< var tool-url >}}/explore/one-cat/?csv={{< var data-url >}}/class_survey.csv){target="_blank"}.
+2.  Choose **`year`**. Read the **frequency table** and the **bar chart**: which
+    class year is most common?
+
+### Jamovi
+
+1.  **Exploration → Descriptives.** Put `year` in **Variables**.
+2.  Tick **Frequency tables**. Under **Plots**, turn on **Bar plot**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-explore-onecat
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-height: 3
+#| fig-cap: "Class year of the 50 surveyed students."
+#| fig-alt: "Bar chart of class year showing first-years most common, then sophomores, juniors, and seniors."
+
+# Frequency table: counts and proportions
+survey |>
+  count(year) |>
+  mutate(proportion = round(n / sum(n), 2))
+
+ggplot(survey, aes(x = year)) +
+  geom_bar(fill = "#3E5496") +
+  labs(x = "Class year", y = "Count") +
+  theme_minimal(base_size = 12)
+```
+
+:::
+
+---
+
+## 3. Summarize one numerical variable {#sec-tech-explore-onenum}
+
+For a numerical variable we describe **shape**, **center**, and **spread**, and
+watch for **outliers**. We'll use `study_hours`. Because the distribution is
+right-skewed with a high outlier, the **median and IQR** are more trustworthy
+than the mean and SD.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Descriptive Statistics explorer]({{< var tool-url >}}/explore/descriptive/?csv={{< var data-url >}}/class_survey.csv&chart=histogram){target="_blank"}.
+2.  Choose **`study_hours`**. Read the **histogram** (note the right skew and the
+    lone high value), then switch the chart to a **box plot**.
+3.  Read the **mean, median, SD, and IQR** from the summary panel.
+
+### Jamovi
+
+1.  **Exploration → Descriptives.** Put `study_hours` in **Variables**.
+2.  Request **Mean, Median, Std. deviation, IQR**.
+3.  Under **Plots**, turn on **Histogram** and **Box plot**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-explore-onenum
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-height: 3
+#| fig-cap: "Weekly study hours: histogram (left) and box plot (right). The distribution is right-skewed with one high outlier."
+#| fig-alt: "A right-skewed histogram of weekly study hours centered near 13 with one value near 39; a box plot flags that high value as an outlier."
+
+library(patchwork)
+
+# Mean/SD vs. median/IQR — note the mean sits above the median (skew)
+survey |>
+  summarize(mean = mean(study_hours), median = median(study_hours),
+            sd = sd(study_hours), IQR = IQR(study_hours))
+
+p1 <- ggplot(survey, aes(study_hours)) +
+  geom_histogram(binwidth = 4, fill = "#3E5496", color = "white") +
+  labs(x = "Study hours / week", y = "Count") +
+  theme_minimal(base_size = 12)
+
+p2 <- ggplot(survey, aes(y = study_hours)) +
+  geom_boxplot(fill = "#3E5496") +
+  labs(y = "Study hours / week") +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_blank())
+
+p1 + p2
+```
+
+:::
+
+---
+
+## 4. Compare a numerical variable across groups {#sec-tech-explore-grouped}
+
+To see whether a numerical variable differs between groups, use **side-by-side
+box plots** and a **grouped summary**. We'll compare `commute_min` for
+On-campus vs. Off-campus students.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Grouped Statistics explorer]({{< var tool-url >}}/explore/grouped/?csv={{< var data-url >}}/class_survey.csv){target="_blank"}.
+2.  Set the response to **`commute_min`** and the grouping variable to
+    **`housing`**. Compare the two box plots and the group medians.
+
+### Jamovi
+
+1.  **Exploration → Descriptives.** Put `commute_min` in **Variables** and
+    `housing` in **Split by**.
+2.  Request **Median** and **IQR**; under **Plots**, turn on **Box plot**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-explore-grouped
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-height: 3
+#| fig-cap: "One-way commute time for on-campus vs. off-campus students."
+#| fig-alt: "Side-by-side boxplots showing off-campus students have a higher and more variable commute than on-campus students."
+
+survey |>
+  group_by(housing) |>
+  summarize(median = median(commute_min), IQR = IQR(commute_min), n = n())
+
+ggplot(survey, aes(x = housing, y = commute_min, fill = housing)) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(x = "Housing", y = "Commute (min, one-way)") +
+  theme_minimal(base_size = 12)
+```
+
+:::
+
+---
+
+## 5. Explore a relationship between two numerical variables {#sec-tech-explore-twonum}
+
+For two numerical variables, use a **scatterplot** and the **correlation** `r`.
+We'll look at `study_hours` vs. `sleep_hours`. Not every pair is related — part
+of the skill is reading a weak relationship honestly.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Regression / Scatterplot explorer]({{< var tool-url >}}/explore/regression/?csv={{< var data-url >}}/class_survey.csv&x=study_hours&y=sleep_hours){target="_blank"}.
+2.  Read the **scatterplot** and the reported **correlation `r`**. Is there a
+    clear trend, or only a weak one?
+
+### Jamovi
+
+1.  **Regression → Correlation Matrix.** Add `study_hours` and `sleep_hours`.
+2.  Read **Pearson's r**. For the plot, use **Exploration → Scatterplot**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-explore-twonum
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-height: 3
+#| fig-cap: "Study hours vs. nightly sleep. The cloud of points shows little association."
+#| fig-alt: "A scatterplot of study hours against nightly sleep with no clear trend; correlation is near zero."
+
+# Correlation coefficient
+survey |> summarize(r = round(cor(study_hours, sleep_hours), 2))
+
+ggplot(survey, aes(x = study_hours, y = sleep_hours)) +
+  geom_point(color = "#3E5496", size = 2) +
+  labs(x = "Study hours / week", y = "Sleep (hours / night)") +
+  theme_minimal(base_size = 12)
+```
+
+:::
+
+---
+
+::: {.callout-tip collapse="true"}
+## Going further in R (optional)
+
+If you chose the R path and want guided, hands-on practice, the OpenIntro *IMS*
+interactive tutorials cover this unit in depth (free, runs in your browser):
+
+- [Language of data](https://openintro.shinyapps.io/ims-01-data-01/){target="_blank"}
+- [Visualizing categorical data](https://openintro.shinyapps.io/ims-02-explore-01/){target="_blank"}
+- [Visualizing numerical data](https://openintro.shinyapps.io/ims-02-explore-02/){target="_blank"}
+- [Summarizing with statistics](https://openintro.shinyapps.io/ims-02-explore-03/){target="_blank"}
+- [Visualizing two variables](https://openintro.shinyapps.io/ims-03-model-01/){target="_blank"}
+
+They use the same `tidyverse` style as the R tab above.
+:::
+
+## Check yourself {#sec-tech-explore-check}
+
+You can now, in your chosen tool:
+
+- [ ] open a data file and classify each variable as categorical or numerical;
+- [ ] make a frequency table and bar chart for a categorical variable;
+- [ ] make a histogram and box plot and report center and spread for a numerical variable;
+- [ ] compare a numerical variable across groups with side-by-side box plots;
+- [ ] make a scatterplot and report the correlation for two numerical variables.
+
+These are exactly the moves you'll need for the **Explore project** that follows.

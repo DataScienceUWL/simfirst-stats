@@ -1,0 +1,51 @@
+# Preface {.unnumbered}
+
+## For instructors {.unnumbered}
+
+This textbook is designed around the **simulation-based inference** (SBI) approach popularized by Lock, Lock, Lock, Lock, and Lock in *Statistics: Unlocking the Power of Data*. The pedagogical sequence is:
+
+**EDA → Simulation inference → Theoretical inference → Probability → Modeling**
+
+The book contains more material than most one-semester courses will cover. The 28 chapters are organized into six parts, and instructors should select the chapters that fit their curriculum. A typical 15-week course might cover:
+
+- **Part I: Explore** (Chapters 1–5): Weeks 1–3
+- **Part II: Simulate** (Chapters 6–9): Weeks 4–6
+- **Part III: Calculate** (Chapters 10–13): Weeks 7–9
+- **Part IV: Relationships** (Chapters 14–20): Weeks 10–13
+- **Part V: Foundations** (Chapters 21–25): Select chapters as needed
+- **Part VI: Design** (Chapters 26–28): As time permits
+
+Parts V (probability foundations) and VI (power/sample size) are included for courses that need them but can be omitted without loss of continuity.
+
+## StatLens integration {.unnumbered}
+
+[StatLens](https://learnlens.org/statlens/) is a free, browser-based statistics toolkit that supports the simulation-first approach. The text features StatLens throughout but is written to be self-contained — instructors who prefer StatKey, R's `infer` package, or other tools can substitute freely.
+
+StatLens activities in this text use URL parameters for reproducibility. For example:
+
+```
+https://learnlens.org/statlens/simulate/bootstrap-mean/?seed=42&n=30
+```
+
+The `seed` parameter ensures every student who uses the same link gets identical results, enabling graded simulation-based assignments.
+
+## Accessibility {.unnumbered}
+
+This textbook is designed to meet [WCAG 2.1 AA](https://www.w3.org/WAI/WCAG21/quickref/) accessibility standards:
+
+- **Text**: Atkinson Hyperlegible font, designed for readers with low vision
+- **Math**: MathJax rendering with screen reader support
+- **Color**: All color choices meet 4.5:1 contrast ratio; information is never conveyed by color alone
+- **Structure**: Semantic HTML with proper heading hierarchy
+- **Images**: All figures include descriptive alt text
+- **Navigation**: Full keyboard accessibility with visible focus indicators
+
+If you encounter accessibility barriers, please file an issue on the book's GitHub repository.
+
+## Acknowledgments {.unnumbered}
+
+This book remixes and augments material from two open-source textbooks published by the [OpenIntro](https://www.openintro.org/) project: *Introduction to Modern Statistics* (IMS) by Mine Çetinkaya-Rundel and Johanna Hardin, and *OpenIntro Statistics* by David Diez, Mine Çetinkaya-Rundel, and Christopher Barr. Their commitment to open education made this work possible.
+
+The simulation-first pedagogy is inspired by the Lock family's pioneering work in *Statistics: Unlocking the Power of Data*.
+
+StatLens was developed at the University of Wisconsin-La Crosse with support from the Department of Mathematics and Statistics.

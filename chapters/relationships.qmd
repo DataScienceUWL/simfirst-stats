@@ -1,0 +1,301 @@
+---
+title: "Relationships Between Variables"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+::: {.chapterintro}
+The preceding chapters focused on exploring one variable at a time. But the most interesting statistical questions involve **relationships between variables**. Does higher education lead to higher income? Is a drug more effective for one group than another? This chapter introduces tools for exploring relationships: side-by-side box plots and faceted histograms for comparing a quantitative variable across groups, and scatterplots for examining the association between two quantitative variables. We close with the critical distinction between association and causation.
+:::
+
+
+## Comparing groups {#sec-cat-num}
+
+Some of the most interesting investigations involve comparing a quantitative variable across groups defined by a categorical variable.
+
+### Side-by-side box plots
+
+**Side-by-side box plots** place a box plot for each group on the same scale, making it easy to compare centers, spreads, and shapes.
+
+Consider comparing median household income for US counties, grouped by whether the county experienced population growth from 2010 to 2017:
+
+```{r}
+#| label: fig-boxplot-income-popgain
+#| fig-cap: "Side-by-side box plots of median household income by population change status (gain vs. no gain). Counties with population gain have a higher median income. [Open in StatLens]({{< var tool-url >}}/explore/grouped/?dataset=county){.open-in-statlens target='_blank' aria-label='Compare county income by population change status in StatLens'}"
+#| fig-alt: "Two horizontal box plots on the same scale. The gain group has a higher median (about 45,000 dollars) and slightly larger IQR than the no-gain group (median about 40,000 dollars). Both groups have several high-income outlier points."
+
+library(ggplot2)
+
+county_clean <- usdata::county[!is.na(usdata::county$pop_change) &
+                                    !is.na(usdata::county$median_hh_income), ]
+county_clean$pop_gain <- ifelse(county_clean$pop_change > 0, "Gain", "No Gain")
+
+ggplot(county_clean, aes(x = median_hh_income, y = pop_gain, fill = pop_gain)) +
+  geom_boxplot(outlier.color = COL_RED, outlier.size = 1.5, show.legend = FALSE) +
+  scale_fill_manual(values = c("Gain" = COL_BLUE, "No Gain" = COL_PINK)) +
+  labs(x = "Median Household Income ($)", y = NULL) +
+  theme_minimal(base_size = 14)
+```
+
+::: {.guidedpractice}
+Using the box plots, compare the income distributions for the two groups. What do you notice about the centers, spreads, and shapes?
+
+<details>
+<summary>Show answer</summary>
+Counties with population gains tend to have higher income (median about \$45,000) compared to counties without gains (median about \$40,000). The variability is also slightly larger for the gain group, as seen in the wider IQR. Both distributions show slight to moderate right skew, with outliers on the high end.
+</details>
+:::
+
+::: {.workedexample}
+When are side-by-side box plots particularly useful? When might histograms be better?
+
+---
+
+Side-by-side box plots are excellent for comparing centers (medians) and spreads (IQRs) across groups in a compact display. However, they cannot reveal details about shape such as bimodality. Histograms or density plots are better when you want to see the full shape of each distribution, including the number of modes and the exact nature of the skew.
+:::
+
+### Faceted histograms
+
+**Faceting** splits a graphical display into panels based on the levels of a categorical variable. Each panel shows the distribution for one group, using the same scale for easy comparison.
+
+```{r}
+#| label: fig-faceted-histogram-income
+#| fig-cap: "Faceted histograms of median household income, separated into panels for counties with population gain and those with no gain. [Open in StatLens]({{< var tool-url >}}/explore/grouped/?dataset=county&chart=histogram){.open-in-statlens target='_blank' aria-label='Explore faceted county income histograms in StatLens'}"
+#| fig-alt: "Two histograms arranged vertically, sharing the same horizontal axis (median household income). The top panel shows counties with population gain; the bottom panel shows counties with no gain. Both distributions are right skewed and unimodal, with the gain group shifted slightly to the right."
+
+county_clean <- usdata::county[!is.na(usdata::county$pop_change) &
+                                    !is.na(usdata::county$median_hh_income), ]
+county_clean$pop_gain <- ifelse(county_clean$pop_change > 0, "Gain", "No Gain")
+
+ggplot(county_clean, aes(x = median_hh_income)) +
+  geom_histogram(binwidth = 5000, fill = COL_BLUE, color = "white") +
+  facet_wrap(~pop_gain, ncol = 1) +
+  labs(x = "Median Household Income ($)", y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+Faceting extends naturally to multiple categorical variables. For example, we could split the income data by both population change *and* whether the county is in a metropolitan area, creating a 2-by-2 grid of histograms.
+
+::: {.workedexample}
+What are the advantages of faceted histograms compared to side-by-side box plots?
+
+---
+
+Faceted histograms reveal the full shape of each distribution, including modality (unimodal vs. bimodal), the exact nature of any skewness, and gaps or clusters. Box plots, on the other hand, are more compact and make it easier to compare medians and IQRs at a glance, but they cannot show features like bimodality. The two displays complement each other well.
+:::
+
+### Ridge plots
+
+::: {.original}
+A **ridge plot** (also called a joy plot) is a set of overlapping density plots, one for each group, drawn on the same horizontal scale but offset vertically. Ridge plots are useful for comparing the shapes of many distributions at once while maintaining a compact display.
+
+```{r}
+#| label: fig-ridge-income
+#| fig-cap: "A ridge plot comparing median household income for counties with and without population gain. Each group gets its own smoothed density curve. [Open in StatLens]({{< var tool-url >}}/explore/grouped/?dataset=county&chart=density){.open-in-statlens target='_blank' aria-label='Compare county income density curves in StatLens'}"
+#| fig-alt: "Two overlapping density curves. The curve for counties with population gain is shifted slightly to the right compared to the curve for counties with no gain, indicating higher median incomes in the gain group."
+
+county_clean <- usdata::county[!is.na(usdata::county$pop_change) &
+                                    !is.na(usdata::county$median_hh_income), ]
+county_clean$pop_gain <- ifelse(county_clean$pop_change > 0, "Gain", "No Gain")
+
+ggplot(county_clean, aes(x = median_hh_income, fill = pop_gain, color = pop_gain, linetype = pop_gain)) +
+  geom_density(alpha = 0.4, linewidth = 0.8) +
+  scale_fill_manual(values = c("Gain" = COL_BLUE, "No Gain" = COL_PINK)) +
+  scale_color_manual(values = c("Gain" = COL_BLUE, "No Gain" = COL_PINK)) +
+  scale_linetype_manual(values = c("Gain" = "solid", "No Gain" = "dashed")) +
+  labs(x = "Median Household Income ($)", y = "Density",
+       fill = "Population Change", color = "Population Change", linetype = "Population Change") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```
+:::
+
+::: {.guidedpractice}
+What does a ridge plot reveal that side-by-side box plots do not?
+
+<details>
+<summary>Show answer</summary>
+Ridge plots show the full shape of each distribution, including modality and skewness, similar to histograms. Box plots compress all of this shape information into a five-number summary. Ridge plots are especially useful when you want to compare shapes across many groups in a compact space.
+</details>
+:::
+
+::: {.statlens}
+**See it in action.** Open the [Comparing Distributions Across Groups]({{< var tool-url >}}/explore/grouped/?dataset=births14_smoke&activity=comparing-groups.json){target="_blank"} activity to walk through side-by-side box plots, histograms, and density overlays on birth weight grouped by maternal smoking status.
+:::
+
+## Scatterplots {#sec-scatterplots-intro}
+
+### Visualizing two quantitative variables
+
+A **scatterplot** displays the relationship between two quantitative variables. Each observation is represented as a point, with one variable on the horizontal axis and the other on the vertical axis.
+
+::: {.definition}
+A **scatterplot** provides a case-by-case view of data for two quantitative variables. Each point represents one observation. The horizontal axis shows the values of one variable and the vertical axis shows the values of the other.
+:::
+
+Consider a dataset of 50 loans, where we plot total income on the horizontal axis and loan amount on the vertical axis:
+
+```{r}
+#| label: fig-scatter-loan-income
+#| fig-cap: "A scatterplot of loan amount versus total income for 50 loans. There is a moderate positive association. [Open in StatLens]({{< var tool-url >}}/explore/multi/?dataset=loan50){.open-in-statlens target='_blank' aria-label='Explore loan amount vs income on loan50 in StatLens'}"
+#| fig-alt: "A scatterplot with total income on the horizontal axis (ranging from about 0 to 350,000 dollars) and loan amount on the vertical axis (ranging from about 3,000 to 40,000 dollars). Points show a general upward trend — borrowers with higher incomes tend to take out larger loans — but with considerable scatter."
+
+ggplot(openintro::loan50, aes(x = total_income, y = loan_amount)) +
+  geom_point(color = COL_BLUE, size = 2, alpha = 0.8) +
+  labs(x = "Total Income ($)", y = "Loan Amount ($)") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.guidedpractice}
+What do scatterplots reveal about the data, and how are they useful?
+
+<details>
+<summary>Show answer</summary>
+Scatterplots are helpful for quickly spotting associations between two quantitative variables — whether they tend to increase together, decrease together, or show no pattern. They can also reveal whether the relationship is linear or curved, how strong the association is, and whether there are any unusual points.
+</details>
+:::
+
+### Describing associations
+
+When examining a scatterplot, we describe the association using four characteristics:
+
+::: {.important}
+**Describing the association between two quantitative variables:**
+
+1. **Direction**: Is the association **positive** (both variables tend to increase together) or **negative** (one increases as the other decreases)?
+
+2. **Form**: Is the relationship approximately **linear** (following a straight-line pattern) or **nonlinear** (curved)?
+
+3. **Strength**: Is the association **strong** (points closely follow a pattern), **moderate**, or **weak** (points are loosely scattered)?
+
+4. **Unusual observations**: Are there any **outliers** — points that deviate markedly from the overall pattern?
+:::
+
+::: {.workedexample}
+A scatterplot shows the poverty rate vs. median household income for over 3,000 US counties. How would you describe the association?
+
+---
+
+The association is **negative** (as poverty rate increases, median household income tends to decrease), **nonlinear** (the relationship curves, with income decreasing more steeply at lower poverty rates and leveling off at higher poverty rates), and **moderately strong** (the points follow the curving pattern fairly closely, though there is noticeable scatter). There do not appear to be any extreme outliers, though counties with very high poverty rates or very high incomes stand out somewhat.
+:::
+
+```{r}
+#| label: fig-scatter-income-poverty
+#| fig-cap: "A scatterplot of median household income versus poverty rate for US counties, with a curved trend line. The relationship is negative and nonlinear. [Open in StatLens]({{< var tool-url >}}/explore/multi/?dataset=county){.open-in-statlens target='_blank' aria-label='Explore county income vs poverty rate in StatLens'}"
+#| fig-alt: "A scatterplot with poverty rate on the horizontal axis (ranging from about 0% to 50%) and median household income on the vertical axis (ranging from about 20,000 to over 120,000 dollars). The points show a clear negative, curved relationship. A dashed trend line curves downward from left to right."
+
+county_sub <- usdata::county[!is.na(usdata::county$poverty) &
+                                  !is.na(usdata::county$median_hh_income), ]
+
+ggplot(county_sub, aes(x = poverty, y = median_hh_income)) +
+  geom_point(color = COL_BLUE, alpha = 0.3, size = 1) +
+  geom_smooth(method = "loess", color = COL_RED, linetype = "dashed",
+              se = FALSE, linewidth = 1) +
+  labs(x = "Poverty Rate (%)", y = "Median Household Income ($)") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.guidedpractice}
+Describe two variables that would have a horseshoe-shaped ($\cap$) association in a scatterplot.
+
+<details>
+<summary>Show answer</summary>
+Consider a situation where the vertical axis represents something "good" and the horizontal axis represents something that is good only in moderation. For example, health and water consumption: we need some water to survive, but consuming too much becomes dangerous. Athletic performance and practice time is another example — some practice improves performance, but overtraining leads to injury and decline.
+</details>
+:::
+
+::: {.workedexample}
+For the 50-loan dataset, the scatterplot of total income versus loan amount shows that borrowers with higher incomes tend to take out larger loans. Describe this association.
+
+---
+
+The association is **positive** (higher income is associated with higher loan amounts), approximately **linear** (the general trend follows a straight line, though the pattern is loose), and **weak to moderate** (there is considerable scatter — many borrowers with similar incomes take out very different loan amounts). There are a few borrowers with income above \$250,000 who stand out on the right side of the plot.
+:::
+
+::: {.statlens}
+**See it in action.** Open the [Describing Associations in Scatterplots]({{< var tool-url >}}/explore/regression/?dataset=possum_regression&activity=scatterplot-associations.json){target="_blank"} activity to practice identifying direction, form, strength, and unusual observations on possum body measurements.
+:::
+
+### Scatterplots with a third variable
+
+We can add a third variable to a scatterplot by using color, shape, or size to represent a categorical or quantitative variable. For example, in a scatterplot of income vs. poverty rate, we could color the points by whether the county is in a metropolitan area. This technique helps reveal whether the relationship between two quantitative variables differs across groups.
+
+## Association vs. causation {#sec-assoc-cause}
+
+::: {.original}
+Throughout this chapter, we have explored associations between variables. But association is not the same as causation.
+:::
+
+::: {.important}
+**Association does not imply causation.**
+
+When two variables are associated (correlated), it means they tend to vary together — but that does not necessarily mean one *causes* the other. There may be a **confounding variable** (a third variable) that is related to both, creating the illusion of a direct relationship.
+:::
+
+::: {.workedexample}
+A study finds a strong positive association between ice cream sales and drowning deaths. Does eating ice cream cause drowning?
+
+---
+
+Of course not. The association exists because both ice cream sales and drowning are related to a confounding variable: **temperature** (or season). In hot weather, people buy more ice cream *and* more people go swimming, which increases the risk of drowning. Temperature is the lurking variable that drives both.
+:::
+
+::: {.definition}
+A **confounding variable** (also called a **lurking variable**) is a variable that is related to both the explanatory and response variables. Confounding variables can create misleading associations between two variables that have no direct causal relationship.
+:::
+
+::: {.guidedpractice}
+A study finds that students who eat breakfast tend to have higher GPAs than students who skip breakfast. Can we conclude that eating breakfast causes higher GPAs?
+
+<details>
+<summary>Show answer</summary>
+Not from this information alone. This is likely an observational study, and there could be confounding variables. For example, students who eat breakfast may come from more supportive home environments, may have better time management skills, or may generally take better care of their health — all of which could independently contribute to higher GPAs. To establish a causal connection, we would need a randomized experiment.
+</details>
+:::
+
+::: {.original}
+### When can we infer causation?
+
+Establishing a causal relationship between two variables generally requires:
+
+1. **A randomized experiment**: Randomly assigning subjects to treatment and control groups helps eliminate confounding variables. If a difference is observed between groups, we can more confidently attribute it to the treatment.
+
+2. **Temporal precedence**: The cause must precede the effect in time.
+
+3. **Ruling out confounders**: We must be able to argue that no lurking variables explain the observed association.
+
+In observational studies (where we observe but do not control the variables), we can identify associations but generally cannot draw causal conclusions. This is one of the most important distinctions in statistics.
+:::
+
+::: {.caution}
+Be especially skeptical of causal claims from observational data. Media reports often say "X causes Y" when the underlying study only found an association. Always ask: Was this a randomized experiment? Could there be confounding variables?
+:::
+
+## Chapter review {#sec-relationships-review}
+
+### Summary
+
+This chapter introduced tools for exploring relationships between variables. For **comparing a quantitative variable across groups** defined by a categorical variable, side-by-side box plots provide a compact comparison of centers and spreads, faceted histograms reveal full distributional shapes, and ridge plots overlay density curves for compact multi-group comparison. For **two quantitative variables**, scatterplots reveal the direction, form, strength, and unusual features of an association. We closed with the fundamental principle that **association does not imply causation** — confounding variables can create misleading associations, and establishing causation generally requires a randomized experiment.
+
+### Key terms
+
+- Side-by-side box plot, faceted plot, ridge plot
+- Scatterplot
+- Positive association, negative association
+- Linear, nonlinear
+- Direction, form, strength (of an association)
+- Confounding variable (lurking variable)
+- Association vs. causation
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-relationships) at the back of the book.
+
+{{< include ../exercises/_relationships-exercises.qmd >}}
+
+{{< include ../exercises/_relationships-statlens-exercises.qmd >}}

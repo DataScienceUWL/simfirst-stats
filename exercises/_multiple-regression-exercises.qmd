@@ -1,0 +1,53 @@
+<!-- Standard textbook exercises for ch 23 multiple-regression (IMS-remix) -->
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd) at the back of the book.
+
+*Note.* Exercises 3 (VIF interpretation) and 6 (adjusted $R^2$) draw on the **Extended Content** callouts in the chapter. Skip them if you are following the base track.
+
+1.  **Reading the loans coefficient table.** Recall the loans model from the chapter, predicting interest rate from debt-to-income, loan term (in months), and credit checks in the past 12 months:
+
+    $$\widehat{\texttt{interest\_rate}} = 4.31 + 0.041 \cdot \texttt{debt\_to\_income} + 0.16 \cdot \texttt{term} + 0.25 \cdot \texttt{credit\_checks}.$$
+
+    (a) Predict the interest rate for a borrower with debt-to-income 15, a 36-month loan, and 2 credit checks in the last year.
+    (b) Interpret the coefficient on `credit_checks` in context. Include the phrase "holding the other predictors constant."
+    (c) The individual $t$-test on `credit_checks` has a very small p-value. State the null hypothesis this test evaluates, in symbols *and* in words, including the "given other predictors are in the model" qualifier.
+
+2.  **Simple vs. multiple regression slope.** Suppose the *simple* regression of interest rate on `credit_checks` alone gives a slope of 0.60 --- larger than the multi-predictor slope of 0.25.
+
+    (a) Why is the simple-regression slope larger?
+    (b) Which slope answers the question "for two borrowers with the same debt-to-income and same loan term, how much does one extra credit check cost the borrower with more inquiries?"
+    (c) Which slope answers the question "for two random borrowers differing only in credit-check count (with all their other characteristics also differing on average), how different are their expected interest rates?"
+
+3.  **VIF interpretation (Extended Content).** A multiple regression on employee salary reports the following VIFs:
+
+    | Predictor | VIF |
+    |---|---:|
+    | Age | 1.4 |
+    | Years of experience | 8.7 |
+    | Years at company | 9.1 |
+    | Job level | 1.2 |
+
+    (a) Which two predictors are causing concern about multicollinearity, and why?
+    (b) Explain in one sentence why high VIF makes it hard to interpret those two coefficients individually.
+    (c) Name two possible responses to the high VIFs.
+
+4.  **The coin-dish story.** Recall the coin-dish example from the chapter. The two simple regressions give slopes of 0.13 (on total number of coins) and 0.02 (on number of low coins). The multiple regression with both predictors gives slopes of 0.21 (coins) and $-0.16$ (low coins).
+
+    (a) In the multi-predictor model, the slope on `number_of_low_coins` is *negative*. Explain in one sentence why this makes sense in context, using the "holding the other predictor fixed" framing.
+    (b) A student says: "The simple regression shows low coins have a *positive* effect on total amount, but the multiple regression flips it to negative. One of them must be wrong." Push back on this.
+    (c) When two predictors are strongly related to each other, the "same predictor" can appear to have a positive marginal effect and a negative conditional effect. What does this tell you about the danger of interpreting single-predictor slopes as if they were "the effect" of the predictor?
+
+5.  **When to add a predictor.** A researcher must choose whether to add a fifth predictor to a four-predictor model of house prices. The new predictor's individual $t$-test has p-value 0.28, and a scatterplot shows a moderately strong linear relationship between the new predictor and one of the four already in the model.
+
+    (a) Should the researcher add the predictor purely based on the statistical evidence?
+    (b) Suppose the researcher has a strong subject-matter reason to include the predictor even though its p-value is large. Is that a valid reason to include it?
+    (c) The residual standard error (root MSE) after adding the predictor is essentially unchanged. What does this tell you about the predictor's contribution?
+
+6.  **Adjusted $R^2$ vs. $R^2$ (Extended Content).** Two candidate models are fit to the same data ($n = 60$):
+
+    - Model A (3 predictors): $R^2 = 0.62$, adjusted $R^2 = 0.60$.
+    - Model B (5 predictors): $R^2 = 0.65$, adjusted $R^2 = 0.59$.
+
+    (a) Which model has more explained variability by raw $R^2$?
+    (b) Which model is preferred by adjusted $R^2$? Why do they disagree?
+    (c) Argue in one sentence why adjusted $R^2$ is the more honest comparison when the models have different numbers of predictors.

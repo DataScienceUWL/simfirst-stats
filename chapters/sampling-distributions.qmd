@@ -1,0 +1,394 @@
+---
+title: "Sampling Distributions via Simulation"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+In the randomization tests and bootstrap confidence intervals chapters, we used simulation to answer two fundamental questions of inference: *Is there an effect?* (randomization tests) and *How big is the parameter?* (bootstrap confidence intervals). Both methods relied on the computer to generate distributions --- randomization distributions and bootstrap distributions --- that helped us quantify uncertainty. In this chapter, we step back to see the bigger picture. We examine the shape, center, and spread of these simulated distributions and discover a remarkable pattern: under certain conditions, they all look approximately **normal** (bell-shaped). This observation, formalized as the **Central Limit Theorem**, is the bridge from the simulation-based methods of Unit 2 to the formula-based methods of Unit 3.
+:::
+
+## From simulation to theory {#sec-simulation-to-theory}
+
+In the randomization tests and bootstrap confidence intervals chapters, we encountered several case studies:
+
+- **Sex discrimination** (the randomization tests chapter): We shuffled promotion decisions and computed the difference in promotion rates 10,000 times.
+- **Opportunity cost** (the randomization tests chapter): We shuffled buying decisions and computed the difference in proportions 1,000 times.
+- **Medical consultant** (the bootstrap confidence intervals chapter): We bootstrapped the complication rate from 62 surgeries 10,000 times.
+- **Tappers and listeners** (the bootstrap confidence intervals chapter): We bootstrapped the proportion of correct guesses from 120 listeners 10,000 times.
+
+Each of these simulations produced a distribution of a sample statistic. While they differed in their settings, outcomes, and the simulation technique used, they all shared something in common: the general shape of the distribution.
+
+::: {.guidedpractice}
+Think back to the randomization and bootstrap distributions you have seen. What shape did most of them have? Were they skewed, uniform, or something else?
+
+<details>
+<summary>Show answer</summary>
+In general, the distributions were approximately symmetric and bell-shaped. The medical consultant example was the only one with noticeable skew (skewed right), which makes sense because the proportion was very close to zero.
+</details>
+:::
+
+::: {.original}
+This is no coincidence. The bell shape keeps appearing because of a deep mathematical result that underlies most of statistics. Whether we shuffle labels, resample with replacement, or imagine taking repeated samples from a population, the distribution of the resulting statistic tends to look the same --- symmetric, unimodal, and bell-shaped.
+
+In the simulation chapters, we let the computer show us this pattern directly. Now, we formalize it.
+:::
+
+## The Central Limit Theorem {#sec-clt}
+
+::: {.definition}
+The **Central Limit Theorem (CLT)** states that when we take sufficiently large random samples from a population, the sampling distribution of many common statistics (such as $\hat{p}$ or $\bar{x}$) is approximately **normal** (bell-shaped), regardless of the shape of the underlying population distribution.
+:::
+
+This is a stunning result. Even if the population distribution is skewed, bimodal, or has some other non-normal shape, the distribution of the *sample statistic* will be approximately normal --- provided the sample is large enough.
+
+::: {.important}
+**Central Limit Theorem: the key ideas.**
+
+1. The sampling distribution of a sample statistic is approximately normal when the sample size is large enough.
+2. The center of the sampling distribution is at the population parameter.
+3. The spread of the sampling distribution (the standard error) decreases as sample size increases.
+
+These three facts together mean: with a large enough sample, the sample statistic will be close to the population parameter, and we can use the normal distribution to describe *how* close.
+:::
+
+### Conditions for the CLT
+
+The normal approximation does not apply in all situations. Two conditions must hold:
+
+1. **Independent observations.** The observations in the sample must be independent of each other. This is typically guaranteed by random sampling from a population, or by random assignment in an experiment.
+
+2. **Large enough sample.** The sample size cannot be too small. What counts as "large enough" depends on the context:
+   - For proportions: we generally need at least 10 expected successes and 10 expected failures.
+   - For means: the rule of thumb depends on how skewed the population is. For roughly symmetric populations, $n \geq 30$ is often sufficient. For highly skewed populations, larger samples may be needed.
+
+::: {.caution}
+When these conditions are not met, the normal approximation may be poor and simulation-based methods (randomization tests, bootstrap CIs) are the better choice. This is one of the great advantages of simulation: it works even when mathematical conditions are not satisfied.
+:::
+
+### Visualizing the CLT
+
+::: {.original}
+Imagine a population that is distinctly non-normal --- say, a right-skewed distribution like household income. If we take a single random sample of $n = 5$ people and compute the mean income, that mean might be quite far from the population mean $\mu$. But if we do this thousands of times (each time taking a new sample of 5 and computing the mean), the distribution of those thousands of sample means will already start to look somewhat bell-shaped, even though the underlying population is skewed.
+
+Now increase the sample size to $n = 30$. The distribution of sample means looks even more bell-shaped. At $n = 100$, it is nearly indistinguishable from a perfect normal curve.
+
+This progression --- from skewed population, to somewhat normal at small $n$, to very normal at larger $n$ --- is the Central Limit Theorem in action.
+
+| Sample size | Shape of sampling distribution |
+|:---:|:---|
+| $n = 5$ | Retains some skew from the population |
+| $n = 30$ | Approximately normal for most populations |
+| $n = 100$ | Very close to normal for virtually all populations |
+
+The speed at which the sampling distribution approaches normality depends on how non-normal the population is. Symmetric populations converge quickly; highly skewed populations take longer.
+:::
+
+::: {.statlens}
+**Predict → Do → Explain.** Open the [Sampling Distribution Lab]({{< var tool-url >}}/conceptual/sampling-lab/?activity=sampling-distribution-mean.json){target="_blank"} to watch the CLT emerge from a strongly right-skewed population. The gated activity opens with a **Predict** step (commit to at which sample size the distribution of $\bar{x}$ will *look* normal, and how center and spread will change as $n$ grows), walks you through $n = 5 \to 30 \to 100$ with each picture frozen so you can compare on a shared axis, and closes with an **Explain** step where you state the Central Limit Theorem in your own words --- naming which feature of the sampling distribution depends on $n$ and which does not. Your predictions and explanation save locally in the tool, so you can return to your work on the same device.
+:::
+
+## Comparing randomization, bootstrap, and mathematical approaches {#sec-comparing-approaches}
+
+We now have three tools for statistical inference, each grounded in the same core ideas but using different mechanisms:
+
+| | Randomization | Bootstrap | Mathematical model |
+|:---|:---|:---|:---|
+| **Question answered** | Is there an effect? (hypothesis test) | How big is the parameter? (confidence interval) | Both |
+| **How variability is generated** | Shuffle labels to simulate $H_0$ | Resample with replacement from sample | Use formulas based on the normal distribution |
+| **What it models** | Variability due to random assignment | Variability due to random sampling | Variability predicted by mathematical theory |
+| **Center of distribution** | Null hypothesis value | Sample statistic | Depends on context ($H_0$ for tests, $\hat{p}$ for CIs) |
+| **Conditions required** | Minimal | Minimal | Independence + large sample |
+| **Computational cost** | Moderate (need many simulations) | Moderate (need many resamples) | Low (just plug into formula) |
+
+::: {.important}
+**Key insight.** All three methods answer the same fundamental question: *How much does the statistic vary?* They just measure that variability in different ways.
+
+- **Randomization** asks: "How much would the statistic vary if the null hypothesis were true?"
+- **Bootstrap** asks: "How much would the statistic vary across different samples from this population?"
+- **Mathematical models** ask: "How much does theory predict the statistic would vary?"
+
+When conditions are met, all three give similar answers. The mathematical approach is faster and requires no simulation, which is why it is widely used. But the simulation approaches are more flexible and work even when conditions for the mathematical model are not met.
+:::
+
+::: {.original}
+### Which method should I use?
+
+Here is a practical guide:
+
+1. **When conditions for the mathematical model are clearly met** (independent observations, large sample, not too skewed), the formula-based approach is convenient and widely accepted. This will be our primary tool in Unit 3.
+
+2. **When conditions are questionable** (small sample, very skewed data, unusual statistic), simulation-based methods are safer. The bootstrap and randomization test make fewer assumptions.
+
+3. **When you want to build intuition**, simulation is invaluable. Seeing 10,000 shuffles or resamples gives you a concrete feel for what "random variability" looks like --- something a formula alone cannot provide.
+
+4. **In practice**, many statisticians use simulation to check their formula-based results. If the two approaches agree, confidence in the conclusion is strengthened.
+:::
+
+## When is the normal approximation good enough? {#sec-normal-approximation}
+
+The mathematical approach to inference (which we will develop in Unit 3) replaces simulation with the normal distribution. Instead of generating thousands of shuffles or resamples, we use a formula to compute the standard error and then rely on the bell curve to find p-values or construct confidence intervals.
+
+But when can we trust this shortcut?
+
+### The success-failure condition for proportions
+
+For a sample proportion $\hat{p}$, the sampling distribution is approximately normal when:
+
+$$np \geq 10 \quad \text{and} \quad n(1 - p) \geq 10$$
+
+where $n$ is the sample size and $p$ is the proportion of interest. In practice, since $p$ is unknown, we use $\hat{p}$ as a stand-in:
+
+$$n\hat{p} \geq 10 \quad \text{and} \quad n(1 - \hat{p}) \geq 10$$
+
+This is called the **success-failure condition**.
+
+::: {.workedexample}
+In the medical consultant example, $n = 62$ and $\hat{p} = 3/62 = 0.048$. Check the success-failure condition.
+
+---
+
+- Expected successes: $n\hat{p} = 62 \times 0.048 = 3$ (less than 10)
+- Expected failures: $n(1 - \hat{p}) = 62 \times 0.952 = 59$ (at least 10)
+
+The success-failure condition is **not met** because there are fewer than 10 expected successes. The normal approximation would be unreliable here. This is exactly the kind of situation where the bootstrap (as used in the bootstrap confidence intervals chapter) is the better approach.
+:::
+
+::: {.guidedpractice}
+In the tappers and listeners study, $n = 120$ and $\hat{p} = 3/120 = 0.025$. Check the success-failure condition. Should we use the normal approximation?
+
+<details>
+<summary>Show answer</summary>
+Expected successes: $120 \times 0.025 = 3$ (less than 10). Expected failures: $120 \times 0.975 = 117$ (at least 10). The condition is not met because there are too few successes. The normal approximation would not be appropriate. Bootstrap methods are preferred.
+</details>
+:::
+
+::: {.workedexample}
+A poll of $n = 1{,}000$ voters finds that $\hat{p} = 0.52$ support a policy. Check the success-failure condition.
+
+---
+
+- Expected successes: $n\hat{p} = 1{,}000 \times 0.52 = 520$ (well above 10)
+- Expected failures: $n(1 - \hat{p}) = 1{,}000 \times 0.48 = 480$ (well above 10)
+
+The success-failure condition is comfortably met. The normal approximation is reliable here.
+:::
+
+### The sample size condition for means
+
+::: {.original}
+For a sample mean $\bar{x}$, the CLT tells us the sampling distribution is approximately normal when:
+
+- The sample size is "large enough," and
+- The observations are independent.
+
+A common guideline is $n \geq 30$, but this is only a rough rule of thumb. If the population distribution is nearly symmetric, the normal approximation can work well even for smaller samples. If the population is highly skewed or has extreme outliers, a larger sample may be needed.
+
+| Population shape | Minimum $n$ for normal approximation |
+|:---|:---:|
+| Symmetric, no outliers | $n \geq 15$ or even smaller |
+| Slightly skewed | $n \geq 30$ |
+| Highly skewed or heavy-tailed | $n \geq 60$ or more |
+
+When in doubt, use simulation (bootstrap) to check whether the normal approximation is reasonable.
+:::
+
+### Simulation as a check on theory
+
+::: {.original}
+One of the most powerful uses of simulation is as a **reality check** on mathematical results. Here is the workflow:
+
+1. Compute a confidence interval or p-value using the formula-based (normal) approach.
+2. Compute the same quantity using simulation (bootstrap CI or randomization test).
+3. Compare. If the two results are similar, you can be confident in the mathematical approach. If they differ substantially, the conditions for the normal approximation may not be met, and you should rely on the simulation result.
+
+This "trust but verify" approach is standard practice among professional statisticians and data scientists.
+:::
+
+## The normal distribution: a preview {#sec-normal-preview}
+
+Since the normal distribution will be our primary tool in Unit 3, let us briefly introduce its key features here.
+
+### The 68-95-99.7 rule
+
+The normal distribution has a very useful property: the percentage of observations falling within 1, 2, and 3 standard deviations of the mean is always approximately the same.
+
+```{r}
+#| label: fig-68-95-997
+#| fig-cap: "The 68-95-99.7 rule for normal distributions. Approximately 68% of values fall within 1 standard deviation of the mean, 95% within 2, and 99.7% within 3. [↗ Try this live](https://learnlens.org/statlens/conceptual/normal-distribution/) — drag the cutlines to see the 68-95-99.7 boundaries live."
+#| fig-alt: "A normal curve with the areas within one, two, and three standard deviations of the mean labeled as 68 percent, 95 percent, and 99.7 percent respectively."
+#| fig-width: 7
+#| fig-height: 4.5
+#| echo: false
+
+library(ggplot2)
+
+IMSCOL_blue <- COL_BLUE
+IMSCOL_pink <- COL_PINK
+IMSCOL_red  <- COL_RED
+
+par(mar = c(3.5, 0.5, 0.5, 0.5))
+x <- seq(-4, 4, length.out = 500)
+y <- dnorm(x)
+plot(x, y, type = "l", lwd = 2, col = "gray30",
+     xlab = "", ylab = "", axes = FALSE, ylim = c(-0.06, 0.42))
+
+# Shade regions: 3 SD
+x3 <- seq(-3, 3, length.out = 300)
+polygon(c(-3, x3, 3), c(0, dnorm(x3), 0), col = adjustcolor(IMSCOL_blue, 0.15), border = NA)
+# 2 SD
+x2 <- seq(-2, 2, length.out = 200)
+polygon(c(-2, x2, 2), c(0, dnorm(x2), 0), col = adjustcolor(IMSCOL_blue, 0.25), border = NA)
+# 1 SD
+x1 <- seq(-1, 1, length.out = 100)
+polygon(c(-1, x1, 1), c(0, dnorm(x1), 0), col = adjustcolor(IMSCOL_blue, 0.40), border = NA)
+
+# Redraw curve on top
+lines(x, y, lwd = 2, col = "gray30")
+
+# Axis
+axis(1, at = -3:3,
+     labels = expression(mu - 3*sigma, mu - 2*sigma, mu - sigma,
+                         mu, mu + sigma, mu + 2*sigma, mu + 3*sigma),
+     cex.axis = 0.9, padj = 0.3)
+
+# Bracket labels
+# 68%
+arrows(-1, 0.25, 1, 0.25, code = 3, angle = 90, length = 0.05, lwd = 1.5, col = "gray30")
+text(0, 0.27, "68%", cex = 1.1, font = 2, col = "gray30")
+
+# 95%
+arrows(-2, 0.32, 2, 0.32, code = 3, angle = 90, length = 0.05, lwd = 1.5, col = "gray30")
+text(0, 0.34, "95%", cex = 1.1, font = 2, col = "gray30")
+
+# 99.7%
+arrows(-3, 0.39, 3, 0.39, code = 3, angle = 90, length = 0.05, lwd = 1.5, col = "gray30")
+text(0, 0.41, "99.7%", cex = 1.1, font = 2, col = "gray30")
+```
+
+::: {.important}
+**The 68-95-99.7 rule.**
+
+For any normal distribution:
+
+- About **68%** of values fall within 1 standard deviation of the mean: $\mu \pm \sigma$
+- About **95%** of values fall within 2 standard deviations of the mean: $\mu \pm 2\sigma$
+- About **99.7%** of values fall within 3 standard deviations of the mean: $\mu \pm 3\sigma$
+:::
+
+This rule has an immediate connection to confidence intervals. In the bootstrap confidence intervals chapter, we found that a 95% bootstrap confidence interval captures the middle 95% of the bootstrap distribution. If the bootstrap distribution is approximately normal, then the middle 95% corresponds to approximately $\pm 2$ standard errors. This gives us the quick approximation:
+
+$$\text{95\% CI} \approx \text{statistic} \pm 2 \times SE$$
+
+::: {.workedexample}
+A poll of $n = 1{,}000$ voters finds $\hat{p} = 0.52$ with a standard error of $SE = 0.016$. Use the quick approximation to construct a 95% confidence interval.
+
+---
+
+$$\hat{p} \pm 2 \times SE = 0.52 \pm 2(0.016) = 0.52 \pm 0.032 = (0.488, 0.552)$$
+
+We are 95% confident that the true proportion of voters who support the policy is between 48.8% and 55.2%.
+:::
+
+::: {.guidedpractice}
+Why is it "approximately 2" standard errors rather than exactly 2? What is the more precise multiplier for a 95% confidence interval based on the normal distribution?
+
+<details>
+<summary>Show answer</summary>
+The more precise multiplier is 1.96, not 2. The value 1.96 is the Z-score that puts exactly 2.5% in each tail of the standard normal distribution, leaving 95% in the middle. The approximation of 2 is close enough for quick mental calculations.
+</details>
+:::
+
+### Z scores
+
+A **Z score** measures how many standard deviations an observation is above or below the mean:
+
+$$Z = \frac{x - \mu}{\sigma}$$
+
+In the context of sampling distributions, we can compute a Z score for an observed statistic:
+
+$$Z = \frac{\text{statistic} - \text{parameter}}{SE}$$
+
+This Z score tells us how unusual the observed statistic is, measured in standard-error units. In Unit 3, we will use Z scores (and their cousins, t-scores) extensively to compute p-values and confidence intervals without simulation.
+
+::: {.workedexample}
+In the sex discrimination study, the observed difference in promotion rates was 0.292. Suppose the standard error of the difference (computed under the null hypothesis) is 0.12. Compute the Z score.
+
+---
+
+Under $H_0$, the parameter (the true difference) is 0. So:
+
+$$Z = \frac{0.292 - 0}{0.12} = 2.43$$
+
+The observed difference is 2.43 standard errors above the null value of 0. Since values beyond 2 standard deviations are unusual for a normal distribution (the 95% rule), this is strong evidence against the null hypothesis --- consistent with our earlier simulation result.
+:::
+
+## Recap: connecting the three approaches {#sec-recap-three-approaches}
+
+::: {.important}
+**Types of distributions (a reference guide).**
+
+You have now encountered several types of distributions in this course. Understanding the differences among them is essential:
+
+- A **data distribution** (or sample distribution) describes the shape, center, and variability of the observed data.
+- A **population distribution** describes the entire population --- almost always unknown.
+- A **sampling distribution** describes how a *sample statistic* varies from sample to sample. The CLT tells us this is approximately normal under certain conditions.
+- A **randomization distribution** describes how a test statistic varies under random shuffling of the treatment variable. It is centered at the null hypothesis value.
+- A **bootstrap distribution** describes how a statistic varies under resampling from the observed data. It is centered at the observed statistic.
+:::
+
+::: {.original}
+### The big picture of Unit 2
+
+Unit 2 has built your intuition for statistical inference using simulation:
+
+| Chapter | Method | Question | How variability is generated |
+|:---|:---|:---|:---|
+| 6 | Sampling variability | How much do statistics vary? | Conceptual + simulation |
+| 7 | Randomization test | Is there an effect? | Shuffle labels |
+| 8 | Decision errors | How can a test go wrong? | Simulated Type I / Type II rates |
+| 9 | Bootstrap CI | How big is the parameter? | Resample with replacement |
+| 10 | CLT and normal model | Can we skip the simulation? | Mathematical formula |
+
+The key takeaway: **the simulation methods and the mathematical methods are answering the same questions**. The CLT tells us *when* the mathematical shortcuts are valid. When they are, we can replace thousands of computer simulations with a single formula.
+
+In Unit 3, we will develop these formula-based methods for specific settings: one proportion, one mean, two proportions, two means, and more. But you now have the conceptual foundation to understand *why* those formulas work: they are mathematical descriptions of the same sampling variability that you observed through simulation.
+:::
+
+## Chapter review {#sec-sampling-distributions-review}
+
+### Summary
+
+- Randomization distributions, bootstrap distributions, and theoretical sampling distributions all tend to be approximately **bell-shaped** (normal) under common conditions. This is the **Central Limit Theorem** (CLT).
+- The CLT states that for sufficiently large samples with independent observations, the sampling distribution of many common statistics is approximately normal, regardless of the shape of the population.
+- The **success-failure condition** ($n\hat{p} \geq 10$ and $n(1-\hat{p}) \geq 10$) is the practical check for whether the normal approximation is appropriate for proportions.
+- The **68-95-99.7 rule** describes the area under a normal curve within 1, 2, and 3 standard deviations of the mean.
+- A **Z score** measures how many standard deviations (or standard errors) an observation or statistic falls from the mean: $Z = (x - \mu)/\sigma$.
+- The three inference approaches --- randomization, bootstrap, and mathematical models --- answer the same fundamental questions. When conditions are met, they produce similar results. Mathematical models are faster; simulation methods are more flexible.
+- This chapter bridges Unit 2 (simulation-based inference) and Unit 3 (formula-based inference). The CLT is the theoretical justification for the formulas we will use in Unit 3.
+
+### Key terms
+
+| Term | Definition |
+|:-----|:-----------|
+| Central Limit Theorem (CLT) | The sampling distribution of a statistic is approximately normal for large samples |
+| Normal distribution | A symmetric, bell-shaped distribution described by its mean and standard deviation |
+| Success-failure condition | For proportions: need $n\hat{p} \geq 10$ and $n(1-\hat{p}) \geq 10$ |
+| 68-95-99.7 rule | About 68%, 95%, 99.7% of normal values fall within 1, 2, 3 SDs of the mean |
+| Z score | Number of standard deviations an observation falls from the mean: $Z = (x-\mu)/\sigma$ |
+| Null distribution | The sampling distribution of the test statistic under $H_0$ |
+| Sampling distribution | Distribution of a statistic over all possible samples of a given size |
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-sampling-distributions) at the back of the book.
+
+{{< include ../exercises/_sampling-distributions-exercises.qmd >}}
+
+{{< include ../exercises/_sampling-distributions-statlens-exercises.qmd >}}

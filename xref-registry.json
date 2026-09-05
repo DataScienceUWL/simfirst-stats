@@ -1,0 +1,1231 @@
+{
+  "generated_from": "textbook/_quarto.yml",
+  "base_url": "https://datascienceuwl.github.io/STAT145/",
+  "chapters": {
+    "intro-to-data": {
+      "type": "chapter",
+      "number": 1,
+      "label": "Chapter 1",
+      "part": "Unit 1: Explore",
+      "title": "Introduction to Data",
+      "tier": "core",
+      "url": "chapters/intro-to-data.html",
+      "sections": {
+        "sec-case-stents": {
+          "title": "Case study: Using stents to prevent strokes"
+        },
+        "sec-data-basics": {
+          "title": "Data basics"
+        },
+        "sec-observations-variables": {
+          "title": "Observations, variables, and data matrices"
+        },
+        "sec-variable-types": {
+          "title": "Types of variables"
+        },
+        "sec-variable-relationships": {
+          "title": "Relationships between variables"
+        },
+        "sec-explanatory-response": {
+          "title": "Explanatory and response variables"
+        },
+        "sec-obs-vs-exp": {
+          "title": "Observational studies and experiments"
+        },
+        "sec-intro-to-data-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "study-design": {
+      "type": "chapter",
+      "number": 2,
+      "label": "Chapter 2",
+      "part": "Unit 1: Explore",
+      "title": "Data Collection and Study Design",
+      "tier": "core",
+      "url": "chapters/study-design.html",
+      "sections": {
+        "sec-populations-samples": {
+          "title": "Populations and samples"
+        },
+        "sec-sampling-from-population": {
+          "title": "Sampling from a population"
+        },
+        "sec-sampling-methods": {
+          "title": "Sampling methods"
+        },
+        "sec-experiments": {
+          "title": "Experiments"
+        },
+        "sec-principles-experimental-design": {
+          "title": "Principles of experimental design"
+        },
+        "sec-reducing-bias": {
+          "title": "Reducing bias in human experiments"
+        },
+        "sec-observational-studies": {
+          "title": "Observational studies"
+        },
+        "sec-confounding": {
+          "title": "Confounding variables"
+        },
+        "sec-random-assignment-causation": {
+          "title": "Random assignment and causation"
+        },
+        "sec-scope-of-inference": {
+          "title": "Scope of inference"
+        },
+        "sec-study-design-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "data-visualization": {
+      "type": "chapter",
+      "number": 3,
+      "label": "Chapter 3",
+      "part": "Unit 1: Explore",
+      "title": "Exploring Categorical Data",
+      "tier": "core",
+      "url": "chapters/data-visualization.html",
+      "sections": {
+        "sec-viz-categorical": {
+          "title": "Visualizing one categorical variable"
+        },
+        "sec-two-categorical": {
+          "title": "Two categorical variables"
+        },
+        "sec-bar-two-vars": {
+          "title": "Bar charts for two categorical variables"
+        },
+        "sec-effective-viz": {
+          "title": "Effective data visualization"
+        },
+        "sec-data-visualization-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "describing-distributions": {
+      "type": "chapter",
+      "number": 4,
+      "label": "Chapter 4",
+      "part": "Unit 1: Explore",
+      "title": "Exploring Quantitative Data",
+      "tier": "core",
+      "url": "chapters/describing-distributions.html",
+      "sections": {
+        "sec-distribution-shape": {
+          "title": "Visualizing quantitative data"
+        },
+        "sec-histograms": {
+          "title": "Histograms"
+        },
+        "sec-data-transformation": {
+          "title": "Transforming skewed data (optional)"
+        },
+        "sec-measures-center": {
+          "title": "Measures of center"
+        },
+        "sec-describing-shape": {
+          "title": "How skewness affects the mean and median"
+        },
+        "sec-measures-spread": {
+          "title": "Measures of spread"
+        },
+        "sec-variance-sd": {
+          "title": "Variance and standard deviation"
+        },
+        "sec-outliers-robust": {
+          "title": "Outliers and robust statistics"
+        },
+        "sec-boxplots": {
+          "title": "Box plots"
+        },
+        "sec-describing-distribution": {
+          "title": "Describing a distribution"
+        },
+        "sec-empirical-rule": {
+          "title": "The empirical rule and Chebyshev's theorem"
+        },
+        "sec-describing-distributions-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "relationships": {
+      "type": "chapter",
+      "number": 5,
+      "label": "Chapter 5",
+      "part": "Unit 1: Explore",
+      "title": "Relationships Between Variables",
+      "tier": "core",
+      "url": "chapters/relationships.html",
+      "sections": {
+        "sec-cat-num": {
+          "title": "Comparing groups"
+        },
+        "sec-scatterplots-intro": {
+          "title": "Scatterplots"
+        },
+        "sec-assoc-cause": {
+          "title": "Association vs. causation"
+        },
+        "sec-relationships-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "review-explore": {
+      "type": "review",
+      "number": null,
+      "label": "Explore — Unit Review",
+      "part": "Unit 1: Explore",
+      "title": "Explore — Unit Review",
+      "tier": "core",
+      "url": "reviews/review-explore.html",
+      "sections": {
+        "sec-review-explore-bigpicture": {
+          "title": "The big picture"
+        },
+        "sec-review-explore-compare": {
+          "title": "Which display and which summary?"
+        },
+        "sec-review-explore-decision": {
+          "title": "A quick decision guide"
+        },
+        "sec-review-explore-vocab": {
+          "title": "Key ideas to carry forward"
+        },
+        "sec-review-explore-pitfalls": {
+          "title": "Common pitfalls"
+        },
+        "sec-review-explore-exercises": {
+          "title": "Exercises"
+        }
+      }
+    },
+    "project-eda": {
+      "type": "project",
+      "number": 1,
+      "label": "Project 1",
+      "part": "Unit 1: Explore",
+      "title": "Project: Exploring a Distribution",
+      "tier": "core",
+      "url": "projects/project-eda.html",
+      "sections": {
+        "sec-project-eda-question": {
+          "title": "The question"
+        },
+        "sec-project-eda-data": {
+          "title": "The data"
+        },
+        "sec-project-eda-plan": {
+          "title": "Plan it first"
+        },
+        "sec-project-eda-do": {
+          "title": "Do the analysis"
+        },
+        "sec-project-eda-deliverable": {
+          "title": "Your deliverable"
+        }
+      }
+    },
+    "sampling-variability": {
+      "type": "chapter",
+      "number": 6,
+      "label": "Chapter 6",
+      "part": "Unit 2: Simulate",
+      "title": "Sampling Variability",
+      "tier": "core",
+      "url": "chapters/sampling-variability.html",
+      "sections": {
+        "sec-parameters-vs-statistics": {
+          "title": "Parameters vs. statistics"
+        },
+        "sec-sampling-distributions": {
+          "title": "Sampling distributions"
+        },
+        "sec-variability-statistics": {
+          "title": "Variability of sample statistics"
+        },
+        "sec-standard-error": {
+          "title": "Standard error"
+        },
+        "sec-sampling-variability-looking-ahead": {
+          "title": "Looking ahead"
+        },
+        "sec-sampling-variability-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "randomization-tests": {
+      "type": "chapter",
+      "number": 7,
+      "label": "Chapter 7",
+      "part": "Unit 2: Simulate",
+      "title": "Randomization Tests",
+      "tier": "core",
+      "url": "chapters/randomization-tests.html",
+      "sections": {
+        "sec-hypothesis-framework": {
+          "title": "The hypothesis testing framework"
+        },
+        "sec-null-alternative": {
+          "title": "Null and alternative hypotheses"
+        },
+        "sec-sex-discrimination": {
+          "title": "Case study: sex discrimination"
+        },
+        "sec-randomization-distribution": {
+          "title": "Building a randomization distribution"
+        },
+        "sec-opportunity-cost": {
+          "title": "Case study: opportunity cost"
+        },
+        "sec-p-values": {
+          "title": "P-values"
+        },
+        "sec-statistical-significance": {
+          "title": "Statistical discernibility"
+        },
+        "sec-two-sided-tests": {
+          "title": "Two-sided tests"
+        },
+        "sec-randomization-summary": {
+          "title": "The randomization test procedure: a summary"
+        },
+        "sec-randomization-tests-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "decision-errors": {
+      "type": "chapter",
+      "number": 8,
+      "label": "Chapter 8",
+      "part": "Unit 2: Simulate",
+      "title": "Decision Errors",
+      "tier": "core",
+      "url": "chapters/decision-errors.html",
+      "sections": {
+        "sec-type-i-error": {
+          "title": "Type I error"
+        },
+        "sec-type-ii-error": {
+          "title": "Type II error: missing a real effect"
+        },
+        "sec-decision-table": {
+          "title": "The decision table"
+        },
+        "sec-error-rates": {
+          "title": "Error rates: $\\alpha$ and $\\beta$"
+        },
+        "sec-tradeoff": {
+          "title": "The tradeoff between $\\alpha$ and $\\beta$"
+        },
+        "sec-choosing-alpha": {
+          "title": "Choosing a discernibility level"
+        },
+        "sec-decision-errors-power": {
+          "title": "Looking ahead: the probability of a Type II error"
+        },
+        "sec-decision-errors-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "bootstrap-ci": {
+      "type": "chapter",
+      "number": 9,
+      "label": "Chapter 9",
+      "part": "Unit 2: Simulate",
+      "title": "Bootstrap Confidence Intervals",
+      "tier": "core",
+      "url": "chapters/bootstrap-ci.html",
+      "sections": {
+        "sec-bootstrap-idea": {
+          "title": "The big idea: resampling"
+        },
+        "sec-bootstrap-action": {
+          "title": "Bootstrapping a sample mean"
+        },
+        "sec-ci-interpretation": {
+          "title": "Interpreting a confidence interval"
+        },
+        "sec-percentile-method": {
+          "title": "The percentile method"
+        },
+        "sec-se-method": {
+          "title": "The standard error method"
+        },
+        "sec-medical-consultant": {
+          "title": "Medical consultant case study"
+        },
+        "sec-tappers-listeners": {
+          "title": "Tappers and listeners case study"
+        },
+        "sec-ci-width": {
+          "title": "What affects the width of a CI?"
+        },
+        "sec-bootstrap-conditions": {
+          "title": "When does bootstrapping work?"
+        },
+        "sec-bootstrap-other": {
+          "title": "Bootstrap CI for other statistics"
+        },
+        "sec-bootstrap-ci-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "sampling-distributions": {
+      "type": "chapter",
+      "number": 10,
+      "label": "Chapter 10",
+      "part": "Unit 2: Simulate",
+      "title": "Sampling Distributions via Simulation",
+      "tier": "core",
+      "url": "chapters/sampling-distributions.html",
+      "sections": {
+        "sec-simulation-to-theory": {
+          "title": "From simulation to theory"
+        },
+        "sec-clt": {
+          "title": "The Central Limit Theorem"
+        },
+        "sec-comparing-approaches": {
+          "title": "Comparing randomization, bootstrap, and mathematical approaches"
+        },
+        "sec-normal-approximation": {
+          "title": "When is the normal approximation good enough?"
+        },
+        "sec-normal-preview": {
+          "title": "The normal distribution: a preview"
+        },
+        "sec-recap-three-approaches": {
+          "title": "Recap: connecting the three approaches"
+        },
+        "sec-sampling-distributions-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "review-simulate": {
+      "type": "review",
+      "number": null,
+      "label": "Simulate — Unit Review",
+      "part": "Unit 2: Simulate",
+      "title": "Simulate — Unit Review",
+      "tier": "core",
+      "url": "reviews/review-simulate.html",
+      "sections": {
+        "sec-review-simulate-bigpicture": {
+          "title": "The big picture"
+        },
+        "sec-review-simulate-compare": {
+          "title": "Two engines, one idea: randomization vs. bootstrap"
+        },
+        "sec-review-simulate-decision": {
+          "title": "Which simulation do I run?"
+        },
+        "sec-review-simulate-vocab": {
+          "title": "Key ideas to carry forward"
+        },
+        "sec-review-simulate-pitfalls": {
+          "title": "Common pitfalls"
+        },
+        "sec-review-simulate-exercises": {
+          "title": "Exercises"
+        }
+      }
+    },
+    "normal-approximation": {
+      "type": "chapter",
+      "number": 11,
+      "label": "Chapter 11",
+      "part": "Unit 3: Calculate",
+      "title": "Normal Approximation",
+      "tier": "core",
+      "url": "chapters/normal-approximation.html",
+      "sections": {
+        "sec-normal-dist": {
+          "title": "The normal distribution"
+        },
+        "sec-68-95-997": {
+          "title": "The 68-95-99.7 rule"
+        },
+        "sec-z-scores": {
+          "title": "Z-scores and standardizing"
+        },
+        "sec-normal-probs": {
+          "title": "Finding probabilities from the normal distribution"
+        },
+        "sec-normal-approx-sampling": {
+          "title": "The normal approximation to sampling distributions"
+        },
+        "sec-normal-when": {
+          "title": "When does the normal model apply -- and when doesn't it?"
+        },
+        "sec-normal-approximation-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "inference-proportions": {
+      "type": "chapter",
+      "number": 12,
+      "label": "Chapter 12",
+      "part": "Unit 3: Calculate",
+      "title": "Inference for Proportions",
+      "tier": "core",
+      "url": "chapters/inference-proportions.html",
+      "sections": {
+        "sec-normal-approx-prop": {
+          "title": "Normal approximation for proportions"
+        },
+        "sec-ci-one-prop": {
+          "title": "Confidence interval for a single proportion"
+        },
+        "sec-ht-one-prop": {
+          "title": "Hypothesis test for a single proportion"
+        },
+        "sec-diff-two-props": {
+          "title": "Difference of two proportions"
+        },
+        "sec-sim-vs-normal-prop": {
+          "title": "Comparing simulation-based and normal-based methods"
+        },
+        "sec-inference-proportions-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "ci-for-means": {
+      "type": "chapter",
+      "number": 13,
+      "label": "Chapter 13",
+      "part": "Unit 3: Calculate",
+      "title": "Confidence Intervals for Means",
+      "tier": "core",
+      "url": "chapters/ci-for-means.html",
+      "sections": {
+        "sec-t-dist": {
+          "title": "The $t$-distribution"
+        },
+        "sec-one-sample-t-ci": {
+          "title": "One-sample $t$ confidence interval"
+        },
+        "sec-two-sample-t-ci": {
+          "title": "Two-sample $t$ confidence interval"
+        },
+        "sec-paired-ci": {
+          "title": "Paired data confidence interval"
+        },
+        "sec-t-vs-bootstrap": {
+          "title": "Connecting $t$-based and bootstrap confidence intervals"
+        },
+        "sec-ci-for-means-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "hypothesis-tests-means": {
+      "type": "chapter",
+      "number": 14,
+      "label": "Chapter 14",
+      "part": "Unit 3: Calculate",
+      "title": "Hypothesis Tests for Means",
+      "tier": "core",
+      "url": "chapters/hypothesis-tests-means.html",
+      "sections": {
+        "sec-t-test-framework": {
+          "title": "The $t$-test framework"
+        },
+        "sec-one-sample-t-test": {
+          "title": "One-sample $t$-test"
+        },
+        "sec-two-sample-t-test": {
+          "title": "Two-sample $t$-test"
+        },
+        "sec-paired-t-test": {
+          "title": "Paired $t$-test"
+        },
+        "sec-sim-vs-t": {
+          "title": "Connecting simulation-based and $t$-based tests"
+        },
+        "sec-practical-significance": {
+          "title": "Practical vs. statistical discernibility"
+        },
+        "sec-hypothesis-tests-means-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "review-calculate": {
+      "type": "review",
+      "number": null,
+      "label": "Calculate — Unit Review",
+      "part": "Unit 3: Calculate",
+      "title": "Calculate — Unit Review",
+      "tier": "core",
+      "url": "reviews/review-calculate.html",
+      "sections": {
+        "sec-review-calculate-bigpicture": {
+          "title": "The big picture"
+        },
+        "sec-review-calculate-compare": {
+          "title": "Which z- or t-procedure?"
+        },
+        "sec-review-calculate-decision": {
+          "title": "Simulation or formula?"
+        },
+        "sec-review-calculate-vocab": {
+          "title": "Key ideas to carry forward"
+        },
+        "sec-review-calculate-pitfalls": {
+          "title": "Common pitfalls"
+        },
+        "sec-review-calculate-exercises": {
+          "title": "Exercises"
+        }
+      }
+    },
+    "project-proportions": {
+      "type": "project",
+      "number": 2,
+      "label": "Project 2",
+      "part": "Unit 3: Calculate",
+      "title": "Project: Inference for Proportions",
+      "tier": "core",
+      "url": "projects/project-proportions.html",
+      "sections": {
+        "sec-project-proportions-question": {
+          "title": "The question"
+        },
+        "sec-project-proportions-data": {
+          "title": "The data"
+        },
+        "sec-project-proportions-plan": {
+          "title": "Plan it first"
+        },
+        "sec-project-proportions-do": {
+          "title": "Do the analysis"
+        },
+        "sec-project-proportions-deliverable": {
+          "title": "Your deliverable"
+        }
+      }
+    },
+    "project-means": {
+      "type": "project",
+      "number": 3,
+      "label": "Project 3",
+      "part": "Unit 3: Calculate",
+      "title": "Project: Comparing Two Means",
+      "tier": "core",
+      "url": "projects/project-means.html",
+      "sections": {
+        "sec-project-means-question": {
+          "title": "The question"
+        },
+        "sec-project-means-data": {
+          "title": "The data"
+        },
+        "sec-project-means-plan": {
+          "title": "Plan it first"
+        },
+        "sec-project-means-do": {
+          "title": "Do the analysis"
+        },
+        "sec-project-means-deliverable": {
+          "title": "Your deliverable"
+        }
+      }
+    },
+    "chisq-gof": {
+      "type": "chapter",
+      "number": 15,
+      "label": "Chapter 15",
+      "part": "Unit 4: Apply",
+      "title": "Chi-Square Goodness of Fit",
+      "tier": "core",
+      "url": "chapters/chisq-gof.html",
+      "sections": {
+        "sec-chisq-gof-statistic": {
+          "title": "The chi-square statistic"
+        },
+        "sec-chisq-distribution": {
+          "title": "The chi-square distribution"
+        },
+        "sec-chisq-gof-pvalue": {
+          "title": "Finding a p-value"
+        },
+        "sec-chisq-gof-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "chisq-independence": {
+      "type": "chapter",
+      "number": 16,
+      "label": "Chapter 16",
+      "part": "Unit 4: Apply",
+      "title": "Chi-Square Test of Independence",
+      "tier": "core",
+      "url": "chapters/chisq-independence.html",
+      "sections": {
+        "sec-rand-chisq-indep": {
+          "title": "Randomization test of independence"
+        },
+        "sec-math-chisq-indep": {
+          "title": "Mathematical model for test of independence"
+        },
+        "sec-chisq-independence-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "anova": {
+      "type": "chapter",
+      "number": 17,
+      "label": "Chapter 17",
+      "part": "Unit 4: Apply",
+      "title": "Analysis of Variance",
+      "tier": "core",
+      "url": "chapters/anova.html",
+      "sections": {
+        "sec-mlb-batting": {
+          "title": "Case study: MLB batting"
+        },
+        "sec-rand-anova": {
+          "title": "Randomization test for comparing many means"
+        },
+        "sec-math-anova": {
+          "title": "Mathematical model for ANOVA"
+        },
+        "sec-anova-conditions": {
+          "title": "Conditions for ANOVA"
+        },
+        "sec-anova-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "multiple-comparisons": {
+      "type": "chapter",
+      "number": 18,
+      "label": "Chapter 18",
+      "part": "Unit 4: Apply",
+      "title": "Multiple Comparisons",
+      "tier": "core",
+      "url": "chapters/multiple-comparisons.html",
+      "sections": {
+        "sec-multiple-testing": {
+          "title": "The multiple testing problem"
+        },
+        "sec-bonferroni": {
+          "title": "The Bonferroni correction"
+        },
+        "sec-tukey-hsd": {
+          "title": "Tukey's Honest Significant Difference"
+        },
+        "sec-posthoc-interpretation": {
+          "title": "Interpreting post-hoc results"
+        },
+        "sec-multiple-comparisons-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "correlation": {
+      "type": "chapter",
+      "number": 19,
+      "label": "Chapter 19",
+      "part": "Unit 4: Apply",
+      "title": "Correlation",
+      "tier": "core",
+      "url": "chapters/correlation.html",
+      "sections": {
+        "sec-scatterplots": {
+          "title": "Scatterplots"
+        },
+        "sec-correlation-coefficient": {
+          "title": "The correlation coefficient"
+        },
+        "sec-correlation-causation": {
+          "title": "Correlation and causation"
+        },
+        "sec-sampling-var-correlation": {
+          "title": "Sampling variability of correlation"
+        },
+        "sec-correlation-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "linear-regression": {
+      "type": "chapter",
+      "number": 20,
+      "label": "Chapter 20",
+      "part": "Unit 4: Apply",
+      "title": "Linear Regression",
+      "tier": "core",
+      "url": "chapters/linear-regression.html",
+      "sections": {
+        "sec-fitting-line": {
+          "title": "Fitting a line to data"
+        },
+        "sec-residuals": {
+          "title": "Residuals"
+        },
+        "sec-least-squares": {
+          "title": "Least squares regression"
+        },
+        "sec-r-squared": {
+          "title": "R-squared"
+        },
+        "sec-inference-slope": {
+          "title": "Inference for the slope"
+        },
+        "sec-conditions-regression": {
+          "title": "Conditions for linear regression"
+        },
+        "sec-linear-regression-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "prediction-model-fit": {
+      "type": "chapter",
+      "number": 21,
+      "label": "Chapter 21",
+      "part": "Unit 4: Apply",
+      "title": "Prediction and Model Fit",
+      "tier": "core",
+      "url": "chapters/prediction-model-fit.html",
+      "sections": {
+        "sec-making-predictions": {
+          "title": "Making predictions"
+        },
+        "sec-extrapolation": {
+          "title": "Extrapolation"
+        },
+        "sec-residual-diagnostics": {
+          "title": "Residual diagnostics"
+        },
+        "sec-leverage-influential": {
+          "title": "Leverage and influential points"
+        },
+        "sec-ci-pi": {
+          "title": "Confidence and prediction intervals"
+        },
+        "sec-prediction-model-fit-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "review-apply": {
+      "type": "review",
+      "number": null,
+      "label": "Apply — Unit Review",
+      "part": "Unit 4: Apply",
+      "title": "Apply — Unit Review",
+      "tier": "core",
+      "url": "reviews/review-apply.html",
+      "sections": {
+        "sec-review-apply-bigpicture": {
+          "title": "The big picture"
+        },
+        "sec-review-apply-compare": {
+          "title": "Which method?"
+        },
+        "sec-review-apply-decision": {
+          "title": "A quick decision guide"
+        },
+        "sec-review-apply-vocab": {
+          "title": "Key ideas to carry forward"
+        },
+        "sec-review-apply-pitfalls": {
+          "title": "Common pitfalls"
+        },
+        "sec-review-apply-exercises": {
+          "title": "Exercises"
+        }
+      }
+    },
+    "project-anova": {
+      "type": "project",
+      "number": 4,
+      "label": "Project 4",
+      "part": "Unit 4: Apply",
+      "title": "Project: Comparing Several Means (ANOVA)",
+      "tier": "core",
+      "url": "projects/project-anova.html",
+      "sections": {
+        "sec-project-anova-question": {
+          "title": "The question"
+        },
+        "sec-project-anova-data": {
+          "title": "The data"
+        },
+        "sec-project-anova-plan": {
+          "title": "Plan it first"
+        },
+        "sec-project-anova-do": {
+          "title": "Do the analysis"
+        },
+        "sec-project-anova-deliverable": {
+          "title": "Your deliverable"
+        }
+      }
+    },
+    "project-chisq": {
+      "type": "project",
+      "number": 5,
+      "label": "Project 5",
+      "part": "Unit 4: Apply",
+      "title": "Project: Association Between Two Categorical Variables",
+      "tier": "core",
+      "url": "projects/project-chisq.html",
+      "sections": {
+        "sec-project-chisq-question": {
+          "title": "The question"
+        },
+        "sec-project-chisq-data": {
+          "title": "The data"
+        },
+        "sec-project-chisq-plan": {
+          "title": "Plan it first"
+        },
+        "sec-project-chisq-do": {
+          "title": "Do the analysis"
+        },
+        "sec-project-chisq-deliverable": {
+          "title": "Your deliverable"
+        }
+      }
+    },
+    "project-chisq-ai": {
+      "type": "project",
+      "number": 6,
+      "label": "Project 6",
+      "part": "Unit 4: Apply",
+      "title": "Project: Association Between Two Categorical Variables (AI version)",
+      "tier": "core",
+      "url": "projects/project-chisq-ai.html",
+      "sections": {
+        "sec-project-chisq-ai-question": {
+          "title": "The question"
+        },
+        "sec-project-chisq-ai-data": {
+          "title": "The data"
+        },
+        "sec-project-chisq-ai-plan": {
+          "title": "Plan it first"
+        },
+        "sec-project-chisq-ai-do": {
+          "title": "Do the analysis"
+        },
+        "sec-project-chisq-ai-deliverable": {
+          "title": "Your deliverable"
+        }
+      }
+    },
+    "project-regression": {
+      "type": "project",
+      "number": 7,
+      "label": "Project 7",
+      "part": "Unit 4: Apply",
+      "title": "Project: Fitting and Testing a Regression Line",
+      "tier": "core",
+      "url": "projects/project-regression.html",
+      "sections": {
+        "sec-project-regression-question": {
+          "title": "The question"
+        },
+        "sec-project-regression-data": {
+          "title": "The data"
+        },
+        "sec-project-regression-plan": {
+          "title": "Plan it first"
+        },
+        "sec-project-regression-do": {
+          "title": "Do the analysis"
+        },
+        "sec-project-regression-deliverable": {
+          "title": "Your deliverable"
+        }
+      }
+    },
+    "probability-rules": {
+      "type": "chapter",
+      "number": 22,
+      "label": "Chapter 22",
+      "part": "Unit 5: Foundations",
+      "title": "Probability Rules",
+      "tier": "core",
+      "url": "chapters/probability-rules.html",
+      "sections": {
+        "sec-defining-probability": {
+          "title": "Defining probability"
+        },
+        "sec-sample-spaces": {
+          "title": "Sample spaces and events"
+        },
+        "sec-complement": {
+          "title": "The complement rule"
+        },
+        "sec-addition-rule": {
+          "title": "The addition rule"
+        },
+        "sec-conditional-probability": {
+          "title": "Conditional probability"
+        },
+        "sec-multiplication-rule": {
+          "title": "The multiplication rule"
+        },
+        "sec-independence": {
+          "title": "Independence"
+        },
+        "sec-bayes-theorem": {
+          "title": "Bayes' theorem (optional)"
+        },
+        "sec-probability-rules-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "random-variables": {
+      "type": "chapter",
+      "number": 23,
+      "label": "Chapter 23",
+      "part": "Unit 5: Foundations",
+      "title": "Random Variables",
+      "tier": "core",
+      "url": "chapters/random-variables.html",
+      "sections": {
+        "sec-random-variables-defined": {
+          "title": "Random variables"
+        },
+        "sec-discrete-rvs": {
+          "title": "Discrete random variables"
+        },
+        "sec-cdf": {
+          "title": "Cumulative distribution functions"
+        },
+        "sec-continuous-rvs": {
+          "title": "Continuous random variables"
+        },
+        "sec-random-variables-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "expected-value": {
+      "type": "chapter",
+      "number": 24,
+      "label": "Chapter 24",
+      "part": "Unit 5: Foundations",
+      "title": "Expected Value and Variance",
+      "tier": "core",
+      "url": "chapters/expected-value.html",
+      "sections": {
+        "sec-expected-value": {
+          "title": "Expected value of a random variable"
+        },
+        "sec-variance-rv": {
+          "title": "Variance of a random variable"
+        },
+        "sec-ev-properties": {
+          "title": "Properties of expected value"
+        },
+        "sec-var-properties": {
+          "title": "Properties of variance"
+        },
+        "sec-linear-combinations": {
+          "title": "Linear combinations of random variables"
+        },
+        "sec-expected-value-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "binomial": {
+      "type": "chapter",
+      "number": 25,
+      "label": "Chapter 25",
+      "part": "Unit 5: Foundations",
+      "title": "Binomial Distribution",
+      "tier": "core",
+      "url": "chapters/binomial.html",
+      "sections": {
+        "sec-binomial-conditions": {
+          "title": "The binomial setting"
+        },
+        "sec-binomial-formula": {
+          "title": "Computing binomial probabilities"
+        },
+        "sec-binomial-mean-sd": {
+          "title": "Mean and standard deviation"
+        },
+        "sec-normal-approx-binomial": {
+          "title": "Normal approximation to the binomial"
+        },
+        "sec-binomial-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "normal-distribution": {
+      "type": "chapter",
+      "number": 26,
+      "label": "Chapter 26",
+      "part": "Unit 5: Foundations",
+      "title": "Normal Distribution",
+      "tier": "core",
+      "url": "chapters/normal-distribution.html",
+      "sections": {
+        "sec-normal-model": {
+          "title": "The normal distribution as a probability model"
+        },
+        "sec-normal-probabilities": {
+          "title": "Finding probabilities: $P(X < a)$"
+        },
+        "sec-normal-percentiles": {
+          "title": "Finding percentiles (inverse normal)"
+        },
+        "sec-qq-plots": {
+          "title": "QQ plots and checking normality"
+        },
+        "sec-normal-distribution-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "type-ii-error": {
+      "type": "chapter",
+      "number": 27,
+      "label": "Chapter 27",
+      "part": "Unit 5: Foundations",
+      "title": "Type II Error and Power",
+      "tier": "core",
+      "url": "chapters/type-ii-error.html",
+      "sections": {
+        "sec-error-recap": {
+          "title": "Recap: the two error types"
+        },
+        "sec-visualizing-type-ii": {
+          "title": "Visualizing Type II error"
+        },
+        "sec-factors-type-ii": {
+          "title": "Factors that affect the Type II error rate"
+        },
+        "sec-practical-significance-revisited": {
+          "title": "Practical vs. statistical discernibility revisited"
+        },
+        "sec-type-ii-error-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "statistical-power": {
+      "type": "chapter",
+      "number": 28,
+      "label": "Chapter 28",
+      "part": "Unit 5: Foundations",
+      "title": "Statistical Power",
+      "tier": "core",
+      "url": "chapters/statistical-power.html",
+      "sections": {
+        "sec-what-is-power": {
+          "title": "What is power?"
+        },
+        "sec-why-power-matters": {
+          "title": "Why power matters"
+        },
+        "sec-factors-power": {
+          "title": "Factors affecting power"
+        },
+        "sec-simulation-power": {
+          "title": "Simulation-based power estimation"
+        },
+        "sec-power-curves": {
+          "title": "Power curves"
+        },
+        "sec-power-targets": {
+          "title": "Typical power targets"
+        },
+        "sec-computing-power": {
+          "title": "Computing power for a two-sample test"
+        },
+        "sec-statistical-power-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "sample-size": {
+      "type": "chapter",
+      "number": 29,
+      "label": "Chapter 29",
+      "part": "Unit 5: Foundations",
+      "title": "Sample Size Planning",
+      "tier": "core",
+      "url": "chapters/sample-size.html",
+      "sections": {
+        "sec-why-plan": {
+          "title": "Why plan sample size?"
+        },
+        "sec-sample-size-mean": {
+          "title": "Sample size for estimating a mean"
+        },
+        "sec-sample-size-proportion": {
+          "title": "Sample size for estimating a proportion"
+        },
+        "sec-sample-size-two-groups": {
+          "title": "Sample size for comparing two groups"
+        },
+        "sec-practical-considerations": {
+          "title": "Practical considerations"
+        },
+        "sec-formulas-summary": {
+          "title": "Summary of sample size formulas"
+        },
+        "sec-sample-size-review": {
+          "title": "Chapter review"
+        }
+      }
+    },
+    "review-foundations": {
+      "type": "review",
+      "number": null,
+      "label": "Foundations — Unit Review",
+      "part": "Unit 5: Foundations",
+      "title": "Foundations — Unit Review",
+      "tier": "core",
+      "url": "reviews/review-foundations.html",
+      "sections": {
+        "sec-review-foundations-bigpicture": {
+          "title": "The big picture"
+        },
+        "sec-review-foundations-compare": {
+          "title": "Which distribution models this?"
+        },
+        "sec-review-foundations-decision": {
+          "title": "What makes a study powerful?"
+        },
+        "sec-review-foundations-vocab": {
+          "title": "Key ideas to carry forward"
+        },
+        "sec-review-foundations-pitfalls": {
+          "title": "Common pitfalls"
+        },
+        "sec-review-foundations-exercises": {
+          "title": "Exercises"
+        }
+      }
+    }
+  }
+}

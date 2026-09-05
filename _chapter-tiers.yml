@@ -1,0 +1,31 @@
+# Chapter tiers — universal "core vs optional/advanced" classification.
+#
+# Framing: UNIVERSAL (one build for everyone, no UWL-only profile).
+#
+# Definition (Jeff, 2026-06-08): a chapter/section is OPTIONAL if it is
+# completely misaligned with the coursepack. Everything the coursepack draws on
+# is core. So this is DERIVED, not hand-maintained:
+#
+#   source of truth = coursepack/COURSEPACK-TEXTBOOK-MAP.md
+#   any textbook slug NOT referenced by that map  -> optional
+#   any textbook slug the map aligns to           -> core
+#
+# Deriving it (rather than listing it here) means it auto-updates as the
+# coursepack adds/subtracts sections — same durability goal as the xref registry.
+#
+# STATUS: classification PENDING — Jeff to finalize with Maddie. Until then the
+# generator should treat every chapter as `core` (no badges) so nothing is
+# mislabeled. Marking optional sections in the sidebar is a NICE-TO-HAVE, not
+# required for the first build.
+#
+# Consumed by: the xref registry (carries tier alongside number/title/url) and,
+# once classification is settled, the TOC badge styling.
+
+defaults:
+  optional_label: "optional"
+  # Until the Maddie discussion, default everything to core:
+  unclassified_tier: core
+
+# When ready, either (a) let the generator derive tiers from the coursepack map,
+# or (b) list explicit overrides here as `slug: optional`. Leave empty for now.
+overrides: {}

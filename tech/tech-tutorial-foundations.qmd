@@ -1,0 +1,115 @@
+# Tech Tutorial: Foundations {.unnumbered}
+
+::: {.project-meta}
+**Tech Tutorial — Foundations.** This unit works with **probability distributions**
+directly — no data file. You give a distribution its parameters and read off
+probabilities and percentiles. Pick **one** tool and follow its tab.
+
+To keep things concrete we imagine the *population* behind the class survey:
+study hours across all intro-stats students are roughly **Normal, mean 13, SD 4**,
+and a fraction **0.44** of all students live on campus.
+:::
+
+## What you'll do {#sec-tech-found-skills}
+
+1. **Normal** probabilities and percentiles.
+2. **Binomial** probabilities.
+
+---
+
+## 1. Normal distribution {#sec-tech-found-normal}
+
+Take study hours to be $X \sim N(\mu = 13,\ \sigma = 4)$. Find:
+
+- **(a)** the probability a student studies **more than 20 hours**, $P(X > 20)$;
+- **(b)** the **90th percentile** of study hours.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Normal Distribution calculator]({{< var tool-url >}}/distribution/normal/?mu=13&sigma=4){target="_blank"} (mean and SD are pre-filled).
+2.  For **(a)**, set the boundary to **20** and select the **upper tail** — read the shaded probability.
+3.  For **(b)**, switch to **inverse / find-x** mode and enter **0.90** to get the percentile.
+
+### Jamovi
+
+1.  Install the **distrACTION** module (Jamovi library), then **distrACTION → Normal Distribution**.
+2.  Enter **Mean = 13**, **SD = 4**.
+3.  Use **Compute probability** with $x_1 = 20$ and the upper tail for **(a)**;
+    use **Compute quantile** with $p = 0.90$ for **(b)**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-found-normal
+#| echo: true
+
+# (a) P(X > 20) for X ~ N(13, 4)
+pnorm(20, mean = 13, sd = 4, lower.tail = FALSE)
+
+# (b) 90th percentile
+qnorm(0.90, mean = 13, sd = 4)
+```
+
+:::
+
+---
+
+## 2. Binomial distribution {#sec-tech-found-binom}
+
+Suppose **44%** of all students live on campus. In a random sample of $n = 12$
+students, let $X$ be the number living on campus, so $X \sim \text{Binomial}(n = 12,\ p = 0.44)$. Find:
+
+- **(a)** $P(X = 6)$ — exactly six;
+- **(b)** $P(X \ge 6)$ — six or more.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Binomial Distribution calculator]({{< var tool-url >}}/distribution/binomial/){target="_blank"}.
+2.  Set **n = 12** and **p = 0.44**.
+3.  For **(a)** read the bar at **k = 6**; for **(b)** select the **≥ 6** (upper) region.
+
+### Jamovi
+
+1.  **distrACTION → Binomial Distribution** (same module as above).
+2.  Enter **n = 12**, **p = 0.44**.
+3.  **Compute probability** with $x = 6$ for **(a)**, and the **$P(X \ge x)$** option for **(b)**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-found-binom
+#| echo: true
+
+# (a) P(X = 6) for X ~ Binomial(12, 0.44)
+dbinom(6, size = 12, prob = 0.44)
+
+# (b) P(X >= 6) = 1 - P(X <= 5)
+pbinom(5, size = 12, prob = 0.44, lower.tail = FALSE)
+```
+
+:::
+
+---
+
+## Check yourself {#sec-tech-found-check}
+
+- [ ] find a tail probability and a percentile for a normal distribution;
+- [ ] find an exact and a cumulative probability for a binomial distribution;
+- [ ] choose the right distribution: normal for a measured amount, binomial for a count of successes in $n$ trials.
+
+::: {.callout-tip collapse="true"}
+## Going further in R (optional)
+
+The OpenIntro *IMS* and *OpenIntro Statistics* materials cover the probability
+foundations; the R functions above (`pnorm`, `qnorm`, `dbinom`, `pbinom`) are the
+core toolkit. See the [normal](https://openintro.shinyapps.io/ims-05-infer-06/){target="_blank"}
+tutorial for how the normal model underlies later inference.
+:::

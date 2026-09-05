@@ -1,0 +1,341 @@
+---
+title: "Expected Value and Variance"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+:::{.callout-note appearance="simple" icon=false}
+**Extended Content.** This chapter extends beyond UWL's core STAT 145 curriculum. It is included for completeness and for instructors who wish to cover additional topics. Content is in draft form.
+:::
+
+::: {.chapterintro}
+How much revenue should a bookstore expect per student? How much variability should a stock investor anticipate in their portfolio? These questions require us to summarize a random variable's distribution with just two numbers: its **expected value** (center) and **variance** (spread). In this chapter, we define these quantities, develop useful computational properties, and extend them to linear combinations of random variables. These tools will be essential when we study the binomial and normal distributions in the chapters that follow.
+:::
+
+## Expected value of a random variable {#sec-expected-value}
+
+We introduced random variables in the random variables chapter. Now we develop the tools to summarize them numerically, starting with the expected value — the long-run average of a random variable.
+
+::: {.workedexample}
+Two books are assigned for a statistics class: a textbook (\$137) and a study guide (\$33). From past experience, the bookstore knows that 20% of enrolled students buy neither book, 55% buy the textbook only, and 25% buy both books. If there are 100 students enrolled, how many books should the bookstore expect to sell?
+
+About 20 students buy 0 books, 55 buy 1 book (55 books total), and 25 buy 2 books (50 books total). The bookstore should expect to sell about $0 + 55 + 50 = 105$ books.
+:::
+
+::: {.workedexample}
+What is the average revenue per student?
+
+The expected total revenue is $\$0 \times 20 + \$137 \times 55 + \$170 \times 25 = \$11{,}785$, and there are 100 students. The expected revenue per student is $\$11{,}785 / 100 = \$117.85$.
+:::
+
+Notice that the "average revenue per student" was computed by multiplying each outcome by its probability and summing:
+
+$$0 \times 0.20 + 137 \times 0.55 + 170 \times 0.25 = 117.85$$
+
+This is the **expected value** of the random variable $X$.
+
+::: {.definition}
+**Expected value of a discrete random variable.** If $X$ takes outcomes $x_1, x_2, \ldots, x_k$ with probabilities $P(X = x_1), P(X = x_2), \ldots, P(X = x_k)$, the **expected value** of $X$ is:
+
+$$E(X) = x_1 \cdot P(X = x_1) + x_2 \cdot P(X = x_2) + \cdots + x_k \cdot P(X = x_k) = \sum_{i=1}^{k} x_i \, P(X = x_i)$$
+
+The Greek letter $\mu$ may be used in place of $E(X)$.
+:::
+
+The expected value represents the **long-run average** of the random variable. If we were to observe the random process many, many times, the average of all observed values would converge to $E(X)$.
+
+::: {.original}
+### The expected value as a center of gravity
+
+In physics, the expected value corresponds to the **center of gravity** (or balance point) of a distribution. Imagine cutting out the shape of a probability distribution from a piece of cardboard. The expected value is the point where you could balance the cutout on the tip of your finger. This is why we sometimes call $E(X)$ the "mean" — it is exactly analogous to the sample mean $\bar{x}$, but for a probability distribution rather than a data set.
+
+```{r}
+#| label: fig-expected-value-balance
+#| fig-cap: "A weight system representing the bookstore distribution balanced at the mean of $117.85."
+#| fig-alt: "A bar balanced on a fulcrum at the position 117.85, with weights at positions 0, 137, and 170 proportional to the probabilities 0.20, 0.55, and 0.25."
+
+library(ggplot2)
+
+par(mar = c(3, 1, 2, 1))
+plot(NULL, xlim = c(-20, 190), ylim = c(-1.5, 4), axes = FALSE,
+     xlab = "", ylab = "", main = "")
+
+# Beam
+segments(-10, 1, 180, 1, lwd = 4, col = "gray30")
+
+# Fulcrum (triangle) at 117.85
+mu <- 117.85
+polygon(c(mu - 6, mu + 6, mu), c(0, 0, 1), col = COL_RED, border = COL_RED)
+text(mu, -0.7, expression(mu == 117.85), cex = 1.1, font = 2, col = COL_RED)
+
+# Weights at 0, 137, 170
+positions <- c(0, 137, 170)
+probs <- c(0.20, 0.55, 0.25)
+labels <- c("$0", "$137", "$170")
+heights <- probs * 6  # scale for visibility
+
+for (i in seq_along(positions)) {
+  rect(positions[i] - 5, 1, positions[i] + 5, 1 + heights[i],
+       col = COL_BLUE, border = "white")
+  text(positions[i], 1 + heights[i] + 0.4,
+       paste0(labels[i], "\n(", probs[i], ")"),
+       cex = 0.9, font = 2)
+}
+
+# Axis
+axis(1, at = c(0, 50, 100, 117.85, 150), pos = -0.2,
+     labels = c("$0", "$50", "$100", "$117.85", "$150"), cex.axis = 0.9)
+```
+:::
+
+::: {.guidedpractice}
+A campus shuttle arrives every 10 minutes. The number of students boarding follows this distribution:
+
+| $x$ | 0 | 1 | 2 | 3 | 4 |
+|:----|:---:|:---:|:---:|:---:|:---:|
+| $P(X = x)$ | 0.10 | 0.25 | 0.35 | 0.20 | 0.10 |
+
+What is the expected number of students who board?
+
+<details>
+<summary>Show answer</summary>
+$E(X) = 0(0.10) + 1(0.25) + 2(0.35) + 3(0.20) + 4(0.10) = 0 + 0.25 + 0.70 + 0.60 + 0.40 = 1.95$. On average, about 1.95 students board the shuttle at this stop.
+</details>
+:::
+
+::: {.caution}
+The expected value does not have to be a value that the random variable can actually take. In the shuttle example, $E(X) = 1.95$, but you can never have 1.95 students board. The expected value is a long-run average, not a prediction of any single outcome.
+:::
+
+## Variance of a random variable {#sec-variance-rv}
+
+The expected value tells us where the center of a distribution lies, but it says nothing about the *spread*. The bookstore might want to know not just the average revenue per student, but how much that revenue varies from student to student.
+
+::: {.definition}
+**Variance of a discrete random variable.** If $X$ takes outcomes $x_1, \ldots, x_k$ with probabilities $P(X = x_1), \ldots, P(X = x_k)$ and expected value $\mu = E(X)$, then the **variance** of $X$ is:
+
+$$\text{Var}(X) = \sigma^2 = \sum_{i=1}^{k} (x_i - \mu)^2 \, P(X = x_i)$$
+
+The **standard deviation** is $\sigma = \sqrt{\text{Var}(X)}$.
+:::
+
+The variance is the average squared deviation from the mean, weighted by the probabilities. The standard deviation has the same units as $X$, which makes it more interpretable.
+
+::: {.workedexample}
+Compute the variance and standard deviation of the bookstore revenue per student.
+
+We organize the calculation in a table with $\mu = 117.85$:
+
+| | $x_1 = 0$ | $x_2 = 137$ | $x_3 = 170$ | Total |
+|:--|:---:|:---:|:---:|:---:|
+| $P(X = x_i)$ | 0.20 | 0.55 | 0.25 | |
+| $x_i - \mu$ | $-117.85$ | $19.15$ | $52.15$ | |
+| $(x_i - \mu)^2$ | $13{,}888.6$ | $366.7$ | $2{,}719.6$ | |
+| $(x_i - \mu)^2 \cdot P(X = x_i)$ | $2{,}777.7$ | $201.7$ | $679.9$ | $3{,}659.3$ |
+
+The variance is $\sigma^2 = 3{,}659.3$ and the standard deviation is $\sigma = \sqrt{3{,}659.3} = \$60.49$.
+:::
+
+::: {.guidedpractice}
+The bookstore also sells a chemistry textbook (\$159) and supplement (\$41). From past experience, 15% of chemistry students buy neither, 25% buy the textbook only, and 60% buy both. Let $Y$ be the revenue from a single chemistry student. (a) Write out the probability distribution of $Y$. (b) Compute $E(Y)$. (c) Compute $\text{SD}(Y)$.
+
+<details>
+<summary>Show answer</summary>
+(a) $Y$ takes values \$0, \$159, \$200 with probabilities 0.15, 0.25, 0.60. (b) $E(Y) = 0(0.15) + 159(0.25) + 200(0.60) = 0 + 39.75 + 120 = \$159.75$. (c) $\text{Var}(Y) = (0 - 159.75)^2(0.15) + (159 - 159.75)^2(0.25) + (200 - 159.75)^2(0.60) = 3828.0 + 0.1 + 972.0 = 4800.1$, so $\text{SD}(Y) = \sqrt{4800.1} \approx \$69.28$.
+</details>
+:::
+
+## Properties of expected value {#sec-ev-properties}
+
+::: {.original}
+The expected value has several important algebraic properties that make it easy to work with. These properties follow from the definition but are worth stating explicitly because we will use them frequently.
+
+::: {.important}
+**Properties of expected value.** For a random variable $X$ and constants $a$ and $b$:
+
+1. **Adding a constant shifts the mean**: $E(X + b) = E(X) + b$
+2. **Multiplying by a constant scales the mean**: $E(aX) = a \cdot E(X)$
+3. **General linear transformation**: $E(aX + b) = a \cdot E(X) + b$
+:::
+
+**Why these make sense:** If every student's textbook cost increases by \$10 (adding a constant $b = 10$), then the average cost also increases by \$10. If the bookstore marks up all prices by 20% (multiplying by $a = 1.20$), then the average revenue also increases by 20%.
+
+::: {.workedexample}
+Suppose the bookstore offers a 10% discount to students who buy both books. The discounted price is $0.90 \times X$, where $X$ is the original price. What is the expected revenue per student under the discount?
+
+Using the property $E(aX) = aE(X)$:
+
+$$E(0.90X) = 0.90 \times E(X) = 0.90 \times 117.85 = \$106.07$$
+
+The expected revenue per student drops from \$117.85 to \$106.07.
+:::
+
+::: {.guidedpractice}
+The bookstore charges a flat \$5 processing fee in addition to book costs. If $X$ is the cost of books and the total charge is $Y = X + 5$, what is $E(Y)$?
+
+<details>
+<summary>Show answer</summary>
+$E(Y) = E(X + 5) = E(X) + 5 = 117.85 + 5 = \$122.85$.
+</details>
+:::
+:::
+
+## Properties of variance {#sec-var-properties}
+
+::: {.original}
+Variance has different algebraic properties than expected value. The most important distinction: adding a constant does not change the variance.
+
+::: {.important}
+**Properties of variance.** For a random variable $X$ and constants $a$ and $b$:
+
+1. **Adding a constant does not change variance**: $\text{Var}(X + b) = \text{Var}(X)$
+2. **Multiplying by a constant scales variance by the square**: $\text{Var}(aX) = a^2 \cdot \text{Var}(X)$
+3. **General linear transformation**: $\text{Var}(aX + b) = a^2 \cdot \text{Var}(X)$
+
+For standard deviations:
+
+$$\text{SD}(aX + b) = |a| \cdot \text{SD}(X)$$
+:::
+
+**Why adding a constant does not change variance:** If every student pays \$5 more, the *spread* of payments does not change — everyone's payment shifts by the same amount. The center moves, but the variability stays the same.
+
+**Why multiplying scales by the square:** If every price is doubled ($a = 2$), then deviations from the mean are also doubled, so *squared* deviations are multiplied by $2^2 = 4$.
+
+::: {.workedexample}
+For the bookstore revenue with $\text{Var}(X) = 3{,}659.3$ and $\sigma_X = \$60.49$:
+
+- If a \$5 fee is added: $\text{Var}(X + 5) = \text{Var}(X) = 3{,}659.3$ and $\text{SD}(X+5) = \$60.49$.
+- If a 10% discount is applied: $\text{Var}(0.90X) = 0.90^2 \times 3{,}659.3 = 0.81 \times 3{,}659.3 = 2{,}964.0$ and $\text{SD}(0.90X) = 0.90 \times 60.49 = \$54.44$.
+:::
+
+::: {.guidedpractice}
+Suppose temperatures in Celsius are converted to Fahrenheit using $F = 1.8C + 32$. If the standard deviation of daily high temperatures is $\sigma_C = 5^\circ\text{C}$, what is the standard deviation in Fahrenheit?
+
+<details>
+<summary>Show answer</summary>
+$\text{SD}(1.8C + 32) = 1.8 \times \text{SD}(C) = 1.8 \times 5 = 9^\circ\text{F}$. The additive constant 32 does not affect the spread.
+</details>
+:::
+:::
+
+## Linear combinations of random variables {#sec-linear-combinations}
+
+Sometimes the total outcome is best described as a sum of several random variables. For instance, a person's total weekly commute time is the sum of five daily commute times.
+
+::: {.definition}
+A **linear combination** of random variables $X$ and $Y$ is an expression of the form $aX + bY$, where $a$ and $b$ are fixed constants.
+:::
+
+::: {.workedexample}
+John travels to work five days a week. Let $X_i$ represent his travel time on day $i$. His total weekly commute time is:
+
+$$W = X_1 + X_2 + X_3 + X_4 + X_5$$
+
+If the average daily commute is 18 minutes, the expected weekly total is:
+
+$$E(W) = E(X_1) + E(X_2) + \cdots + E(X_5) = 18 + 18 + 18 + 18 + 18 = 90 \text{ minutes}$$
+:::
+
+### Expected value of a linear combination
+
+::: {.important}
+**Expected value of a linear combination.** For random variables $X$ and $Y$ with constants $a$ and $b$:
+
+$$E(aX + bY) = a \cdot E(X) + b \cdot E(Y)$$
+
+This generalizes to any number of random variables:
+
+$$E(a_1 X_1 + a_2 X_2 + \cdots + a_k X_k) = a_1 E(X_1) + a_2 E(X_2) + \cdots + a_k E(X_k)$$
+
+This property holds whether or not the random variables are independent.
+:::
+
+::: {.guidedpractice}
+Elena is selling a TV at auction (expected profit $X$: \$175) and buying a toaster oven (expected cost $Y$: \$23). Her net gain is $X - Y$. What is her expected net gain?
+
+<details>
+<summary>Show answer</summary>
+$E(X - Y) = E(X) - E(Y) = 175 - 23 = \$152$.
+</details>
+:::
+
+::: {.workedexample}
+Leonard has invested \$6,000 in Caterpillar stock (CAT) and \$2,000 in Exxon Mobil stock (XOM). If $X$ represents CAT's monthly percentage return (in decimal form) and $Y$ represents XOM's return, his portfolio change is $6000X + 2000Y$. If $E(X) = 0.020$ and $E(Y) = 0.002$:
+
+$$E(6000X + 2000Y) = 6000 \times 0.020 + 2000 \times 0.002 = \$124$$
+
+Leonard expects to gain \$124 per month on average.
+:::
+
+### Variance of a linear combination
+
+::: {.important}
+**Variance of a linear combination (independent case).** If $X$ and $Y$ are **independent** random variables, then:
+
+$$\text{Var}(aX + bY) = a^2 \cdot \text{Var}(X) + b^2 \cdot \text{Var}(Y)$$
+
+The standard deviation is: $\text{SD}(aX + bY) = \sqrt{a^2 \text{Var}(X) + b^2 \text{Var}(Y)}$.
+:::
+
+::: {.caution}
+**Independence is required for the variance formula.** The formula $\text{Var}(aX + bY) = a^2\text{Var}(X) + b^2\text{Var}(Y)$ is only valid when $X$ and $Y$ are independent. If the variables are not independent, an additional covariance term is needed.
+
+However, the expected value formula $E(aX + bY) = aE(X) + bE(Y)$ always holds, regardless of independence.
+:::
+
+::: {.workedexample}
+John's daily commute has a standard deviation of 4 minutes, and the commute times for different days are independent. What is the standard deviation of his weekly commute time $W = X_1 + X_2 + X_3 + X_4 + X_5$?
+
+Each coefficient is 1, and $\text{Var}(X_i) = 4^2 = 16$:
+
+$$\text{Var}(W) = 1^2(16) + 1^2(16) + 1^2(16) + 1^2(16) + 1^2(16) = 5 \times 16 = 80$$
+
+$$\text{SD}(W) = \sqrt{80} \approx 8.94 \text{ minutes}$$
+
+Notice that the standard deviation of the sum (8.94 minutes) is *not* five times the daily standard deviation (which would be 20 minutes). Variabilities do not add up as simply as means do — we must add *variances*, not standard deviations.
+:::
+
+::: {.workedexample}
+Leonard's portfolio has $\text{Var}(X) = 0.0057$ and $\text{Var}(Y) = 0.0021$ (where the stocks are approximately independent). What is the standard deviation of his monthly return?
+
+$$\text{Var}(6000X + 2000Y) = 6000^2 \times 0.0057 + 2000^2 \times 0.0021 = 205{,}200 + 8{,}400 = 213{,}600$$
+
+$$\text{SD} = \sqrt{213{,}600} \approx \$462$$
+
+While an average monthly return of \$124 sounds nice, a standard deviation of \$462 means the returns are highly volatile.
+:::
+
+::: {.guidedpractice}
+Elena's TV sale has $\text{SD}(X) = \$25$ and her toaster oven purchase has $\text{SD}(Y) = \$8$. Assuming the auctions are independent, compute the standard deviation of her net gain $X - Y$.
+
+<details>
+<summary>Show answer</summary>
+Note that $X - Y = 1 \cdot X + (-1) \cdot Y$. So $\text{Var}(X - Y) = 1^2 \times 25^2 + (-1)^2 \times 8^2 = 625 + 64 = 689$. Thus $\text{SD}(X - Y) = \sqrt{689} \approx \$26.25$. The negative coefficient is eliminated when we square it — subtracting a random variable introduces *more* variability, not less.
+</details>
+:::
+
+::: {.original}
+### Why variances add even when we subtract
+
+A common source of confusion: the variance of a difference is the *sum* of the variances (not the difference). This makes sense intuitively. If you buy a bag of apples and a bag of oranges, the uncertainty in the total weight is a combination of both uncertainties — regardless of whether you are adding or subtracting the weights. Two sources of randomness always create more total uncertainty.
+:::
+
+## Chapter review {#sec-expected-value-review}
+
+### Summary
+
+- The **expected value** $E(X) = \sum x_i P(X = x_i)$ is the long-run average of a random variable.
+- The **variance** $\text{Var}(X) = \sum (x_i - \mu)^2 P(X = x_i)$ measures spread; the **standard deviation** is $\sigma = \sqrt{\text{Var}(X)}$.
+- **Expected value properties**: $E(aX + b) = aE(X) + b$ (always holds).
+- **Variance properties**: $\text{Var}(aX + b) = a^2 \text{Var}(X)$ (adding a constant does not change variance).
+- **Linear combinations**: $E(aX + bY) = aE(X) + bE(Y)$ (always). $\text{Var}(aX + bY) = a^2\text{Var}(X) + b^2\text{Var}(Y)$ (requires independence).
+- Variances always add, even when random variables are subtracted.
+
+## Exercises {.exercises}
+
+{{< include ../exercises/_expected-value-exercises.qmd >}}

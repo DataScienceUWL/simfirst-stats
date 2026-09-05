@@ -1,0 +1,59 @@
+<!-- StatLens Interactive Exercises — Prediction and Model Fit -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: residuals, R², leverage, extra- -->
+<!-- polation, and the conceptual distinction between CI for the mean response-->
+<!-- and prediction intervals (both live on inference/slope and explore/       -->
+<!-- regression as of REQ-027).                                                -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Read residuals.** Open a regression dataset in the [Regression Explorer]({{< var tool-url >}}/explore/regression/){target="_blank"} and inspect the residual plot.
+
+    a.  What does a "good" residual plot look like? Sketch three features in words.
+    b.  Identify three *bad* patterns and name what each one tells you about the model.
+    c.  A student says: "If the residuals are small, the model is good." Why is the *size* of residuals not the main thing to look at?
+    d.  Suppose you see a fan-shaped residual plot (spread grows with $x$). Which regression assumption has failed? What does this do to the trust you can place in the reported $t$-test for the slope and its CI?
+
+
+2.  **R² in plain English.** A regression of campus weekly food spending on monthly income reports $R^2 = 0.41$.
+
+    a.  Translate "$R^2 = 0.41$" into one plain-English sentence about what fraction of variability in food spending is explained.
+    b.  Does $R^2 = 0.41$ mean the regression is "weak" or "strong"? Why is this judgment context-dependent?
+    c.  Adding a second predictor (e.g., number of dining-out trips) raises $R^2$ to 0.55. Is this *always* a sign that the new predictor matters? What does adding a *random* variable do to $R^2$?
+    d.  A student concludes: "$R^2 = 0.41$ means 41% of food spending is *caused* by income." What's wrong with this?
+
+
+3.  **Extrapolation: don't trust the line outside the data.** A regression of city temperature on month of year (1--12) gives a fitted line over the year.
+
+    a.  Why is using the line to predict the temperature *at month 25* not just unreliable, but conceptually wrong?
+    b.  In a regression of test score on hours studied (in a sample where hours range 0--10), would you trust a prediction at 15 hours? At 5 hours? At $-2$ hours? Rank the trust.
+    c.  Open any regression dataset in the [Regression Explorer]({{< var tool-url >}}/explore/regression/){target="_blank"} and note the range of $x$ values. What would extrapolating the fitted line beyond that range tell you about the prediction --- and what would it *not* tell you?
+    d.  A real-estate analyst predicts the price of a 50000-square-foot mansion using a regression fit to homes 500--3500 sqft. Why is even a "narrow" prediction interval at $x = 50000$ deeply misleading?
+
+
+4.  **CI for the mean response vs. prediction interval for a new $y$.** These two intervals answer different questions at the same $x_0$.
+
+    a.  In words, what does a **CI for the mean response at $x_0$** estimate? Use a real-estate example to make it concrete.
+    b.  In words, what does a **prediction interval for a new $y$ at $x_0$** estimate? Same example.
+    c.  Which interval is **wider**, and why? (Hint: the prediction interval has two sources of uncertainty; the mean-response CI has only one.)
+    d.  An analyst quotes the *mean-response CI* but speaks as if it were a *prediction interval* (e.g., "we're 95% sure the next house at 2000 sqft sells for between \$280k and \$320k"). What's wrong, and what is the right way to state each interval?
+
+
+5.  **Leverage and influential observations.** Open the [Regression by Eye lab]({{< var tool-url >}}/explore/regression-by-eye/){target="_blank"} and generate a scatter with $n = 20$ near a moderate slope. Then mentally add a single extra point with very large $x$.
+
+    a.  Define **leverage**. Why does an observation at extreme $x$ have high leverage even before you look at its $y$?
+    b.  Suppose your extra extreme-$x$ point sits **on the fitted line** (it's high-leverage but consistent). Does removing it change the slope much? What does that tell you about high leverage in isolation?
+    c.  Suppose instead the extra point sits **far off** the line --- high leverage *and* high residual. Now does removing it change the slope? What's the buzzword for this kind of point?
+    d.  In the [Regression Explorer]({{< var tool-url >}}/explore/regression/){target="_blank"}, find a real dataset and identify any potential high-leverage points by eye. What two questions should you ask before deciding whether to keep or remove them?
+
+
+6.  **Apply-unit capstone --- write conclusions across every procedure in the book.** You have now met every inferential procedure this course covers: the one- and two-proportion $z$, the one-sample / two-sample / paired $t$, the chi-square goodness-of-fit and independence tests, one-way ANOVA, and slope inference. This capstone exercises the writing skill across all of them.
+
+    Open [Conclusion Practice --- Apply scope]({{< var tool-url >}}/practice/conclusions/?scope=apply){target="_blank"}. The pool now includes chi-square scenarios in addition to the Calculate-unit scenarios you saw at the end of Ch 13. *(As of this printing, the practice tool does not yet include ANOVA or slope scenarios --- see contract REQ-035 for planned additions. When those land, the same link picks them up automatically.)*
+
+    a.  Play at least **8 rounds** across a mix of procedures. Track which procedures give you the most trouble and which come naturally.
+    b.  For at least one round where you scored *poorly*, re-read the scenario and identify the specific misinterpretation. Was it a p-value trap, a CI trap, a causation-vs-association slip, or a scope-of-inference issue?
+    c.  Compare your performance now to the ch 13 Calculate-scope capstone (if you did that one). Have you internalized the reasoning skills better, or did the added chi-square scenarios trip you up? What does that tell you about your understanding of "one framework, many procedures"?
+    d.  Finally: in one paragraph, write your own summary of the *inference framework* that unifies every procedure you learned this term. What are the four moves that appear in **every** test, regardless of the specific tool?
+

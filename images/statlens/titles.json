@@ -1,0 +1,51 @@
+{
+  "ch08-bootstrap-ci": {
+    "title": "Bootstrap CI: One Sample \u2014 Penny Ages (n=648) | StatLens",
+    "result": "",
+    "file": "ch08-bootstrap-ci.png",
+    "url": "http://localhost:8088/simulate/bootstrap-mean/?dataset=penny_ages&seed=ch8fig3&ci=95&embed=true&static=true",
+    "caption": "Bootstrap distribution of 1,000 resampled means from the penny ages data. The middle 95% is shaded to show the confidence interval."
+  },
+  "ch08-med-consultant-boot": {
+    "title": "Bootstrap CI: One Proportion | StatLens",
+    "result": "",
+    "file": "ch08-med-consultant-boot.png",
+    "url": "http://localhost:8088/simulate/bootstrap-prop/?dataset=medical_consultant&seed=ch8fig5&ci=95&embed=true&static=true",
+    "caption": "Bootstrap distribution of 1,000 resampled complication rates for the medical consultant data."
+  },
+  "ch08-ci-concept": {
+    "title": "CI Coverage | StatLens",
+    "result": "",
+    "file": "ch08-ci-concept.png",
+    "url": "http://localhost:8088/conceptual/ci-coverage/?seed=ch8fig4&embed=true&static=true",
+    "caption": "Twenty-five confidence intervals from 25 different samples. Intervals that captured the true mean are shown in blue; those that missed are shown in red."
+  },
+  "ch07-randomization-null": {
+    "title": "Randomization Test: Diff in Proportions \u2014 Sex Discrimination (n=48) | StatLens",
+    "result": "",
+    "file": "ch07-randomization-null.png",
+    "url": "http://localhost:8088/simulate/randomization-diff-props/?dataset=sex_discrimination&seed=ch7fig1&direction=greater&embed=true&static=true",
+    "caption": "Null distribution of the difference in promotion rates from 1,000 randomization resamples."
+  },
+  "ch10-normal-left-tail": {
+    "title": "Normal Distribution Calculator \u2014 Mean (\u03bc)=0, SD (\u03c3)=1 | StatLens",
+    "result": "P(x \u2264 1.9600) = 0.9750",
+    "file": "ch10-normal-left-tail.png",
+    "url": "http://localhost:8088/distribution/normal/?mu=0&sigma=1&tail=left&embed=true&static=true",
+    "caption": "Standard normal distribution with left tail shaded."
+  },
+  "ch10-normal-right-tail": {
+    "title": "Normal Distribution Calculator \u2014 Mean (\u03bc)=0, SD (\u03c3)=1 | StatLens",
+    "result": "P(x \u2265 1.9600) = 0.0250",
+    "file": "ch10-normal-right-tail.png",
+    "url": "http://localhost:8088/distribution/normal/?mu=0&sigma=1&tail=right&embed=true&static=true",
+    "caption": "Standard normal distribution with right tail shaded."
+  },
+  "ch10-normal-between": {
+    "title": "Normal Distribution Calculator \u2014 Mean (\u03bc)=0, SD (\u03c3)=1 | StatLens",
+    "result": "P(x \u2264 1.9600) = 0.9750",
+    "file": "ch10-normal-between.png",
+    "url": "http://localhost:8088/distribution/normal/?mu=0&sigma=1&tail=middle&embed=true&static=true",
+    "caption": "Standard normal distribution with middle area shaded."
+  }
+}

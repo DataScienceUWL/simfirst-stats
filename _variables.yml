@@ -1,0 +1,23 @@
+# Textbook variables — used via {{< var name >}} shortcodes in .qmd files
+#
+# tool-name: Display name for the interactive statistics tool
+# tool-url:  Base URL for StatLens (NO trailing slash)
+#
+# IMPORTANT: This should ALWAYS point to the production URL for commits
+# and deployments. Only switch to localhost for local preview sessions,
+# and switch back before committing or deploying.
+#
+# Production (default — use this):
+#   https://learnlens.org/statlens
+#
+# Local dev (temporary, never commit this):
+#   http://localhost:8088
+
+tool-name: "StatLens"
+tool-url: "https://learnlens.org/statlens"
+
+# Public base URL where bundled datasets deploy. Used by labs/tech tutorials.
+# NOTE: after the StatLens host migration to jbaggett.github.io, this is no longer
+# same-origin with StatLens, so the ?csv= loading in the Tech Tutorials needs
+# revisiting (CORS) — tracked as StatLens-side follow-up.
+data-url: "https://datascienceuwl.github.io/STAT145/textbook/datasets"

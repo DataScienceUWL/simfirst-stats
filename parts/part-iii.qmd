@@ -1,0 +1,5 @@
+---
+title: "Unit 3: Compute"
+---
+
+You've built sampling distributions and computed confidence intervals through simulation. Now we introduce the mathematical tools — the normal distribution, the $t$-distribution — that approximate what simulation does. These theoretical methods are faster to compute and appear in published research, but they rest on the same logic you already understand.

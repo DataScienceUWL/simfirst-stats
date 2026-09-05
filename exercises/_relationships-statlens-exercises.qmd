@@ -1,0 +1,41 @@
+<!-- StatLens Interactive Exercises — Chapter 5 -->
+<!-- These exercises use StatLens tools for hands-on exploration. -->
+
+### StatLens Exercises {.unnumbered}
+
+The following exercises use [StatLens]({{< var tool-url >}}){target="_blank"}, an interactive statistics tool. Each exercise includes a link that opens a pre-loaded dataset — explore, interact, and answer the questions.
+
+\vfill
+
+1.  **Fuel efficiency by transmission type.**
+    Open the [EPA fuel economy data]({{< var tool-url >}}/explore/grouped/?dataset=epa2021_mpg){.open-in-statlens target="_blank" aria-label="Explore EPA fuel economy data in StatLens"} in StatLens. This dataset contains city miles per gallon (MPG) for 201 vehicles from the 2021 EPA fuel economy guide, grouped by transmission type (automatic vs. manual).
+
+    a.  Start with the **box plots**. Compare the two groups: which transmission type has the higher median city MPG? Which group has more variability (larger IQR)?
+
+    b.  Switch to **Histogram** view. Describe the shape of each group's distribution. Are they symmetric or skewed? Unimodal or bimodal?
+
+    c.  Switch to **Density** overlay. Where do the two curves overlap the most? Based on this overlap, would you say the difference between transmission types is large relative to the variability within each group?
+
+    d.  Using the summary statistics table, write a complete comparison of the two groups that includes shape, center, spread, and any unusual features.
+
+
+\vfill
+\clearpage
+
+\vfill
+
+2. **Starbucks nutrition: calories and protein.**
+    Open the [Starbucks nutrition data]({{< var tool-url >}}/explore/regression/?dataset=starbucks){.open-in-statlens target="_blank" aria-label="Explore Starbucks data in StatLens"} in StatLens. This dataset contains calorie and protein information for Starbucks food menu items.
+
+    a.  Describe the **direction** of the association between calories and protein. Is it positive, negative, or neither?
+
+    b.  Describe the **form**. Does the relationship appear to be linear or nonlinear?
+
+    c.  Describe the **strength**. Are the points tightly clustered around a trend, or widely scattered?
+
+    d.  Are there any **unusual observations** — menu items that have much more (or less) protein than you would expect for their calorie count? Identify approximately where they fall on the plot.
+
+    e.  Write a one-sentence summary that describes the association using all four characteristics (direction, form, strength, unusual observations).
+
+
+\vfill

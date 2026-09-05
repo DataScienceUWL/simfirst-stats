@@ -1,0 +1,225 @@
+---
+title: "Decision Errors"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+::: {.chapterintro}
+In the previous chapter we built the logic of a hypothesis test: state a null and an alternative, measure the evidence with a p-value, and reject $H_0$ when the p-value falls below the discernibility level $\alpha$. But a decision based on data can be **wrong** in two different ways. This chapter names those two mistakes --- the **Type I error** and the **Type II error** --- organizes them in a decision table, gives each one an error rate ($\alpha$ and $\beta$), and examines the tradeoff between them. Naming these errors is what lets us choose a discernibility level deliberately rather than out of habit.
+:::
+
+::: {.statlens}
+**StatLens: Decision Errors simulator.** Open the [Decision Errors simulator]({{< var tool-url >}}/conceptual/decision-errors/?activity=decision-errors.json){target="_blank"} (or the [open sandbox]({{< var tool-url >}}/conceptual/decision-errors/){target="_blank"}). It uses a plain one-proportion framing --- $H_0$: $p = 0.50$ vs $H_A$: $p > 0.50$ --- and lets you decide whether the alternative is *actually* true (and at what success rate), pick $n$ and $\alpha$, then run many studies. Each study is one dot: green if the test detected a real effect, gray if it missed (Type II), red if it false-alarmed under a true $H_0$ (Type I). The hit/miss/false-alarm strip is the picture this chapter is about. *(Power gets a fuller treatment in Chapters 29--31; the analytical [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/){target="_blank"} is there if you want a quick preview.)*
+:::
+
+## Type I error {#sec-type-i-error}
+
+Recall the structure of a hypothesis test. We weigh two competing claims:
+
+- $H_0$ (the **null hypothesis**): there is no effect, no difference, or no relationship.
+- $H_A$ (the **alternative hypothesis**): there *is* an effect, difference, or relationship.
+
+We collect data, compute a test statistic, and find a p-value --- the probability of observing results at least as extreme as ours if $H_0$ were true. If the p-value is below our chosen discernibility level $\alpha$, we reject $H_0$.
+
+But rejecting $H_0$ when it is actually true is a mistake, and that mistake has a name.
+
+::: {.definition}
+A **Type I error** occurs when we reject the null hypothesis $H_0$ even though $H_0$ is actually true. In other words, we conclude there is an effect when in reality there is none.
+:::
+
+The probability of a Type I error is controlled by the discernibility level $\alpha$. When we set $\alpha = 0.05$, we are accepting a 5% chance of making this kind of mistake --- declaring a "discovery" that is really just noise. In the sex discrimination study of the previous chapter, a Type I error would mean concluding that the managers' decisions depended on the candidate's sex when, in truth, they did not.
+
+## Type II error: missing a real effect {#sec-type-ii-error}
+
+::: {.original}
+Suppose a new medication truly does lower blood pressure compared to a placebo. A clinical trial is conducted, data are collected, and the researchers perform a hypothesis test. But the p-value comes back at 0.14 — not small enough to reject $H_0$ at the $\alpha = 0.05$ level. The researchers conclude: "We did not find sufficient evidence that the medication works."
+
+But the medication *does* work. The study simply failed to detect the real effect. This is a **Type II error**.
+:::
+
+::: {.definition}
+A **Type II error** occurs when we fail to reject the null hypothesis $H_0$ even though the alternative hypothesis $H_A$ is actually true. In other words, there is a real effect, but our test misses it.
+:::
+
+::: {.original}
+Type II errors are sometimes called "false negatives" — the test comes back negative (fail to reject $H_0$) when the truth is positive (the effect exists). In medical screening, this is analogous to a test that says "no disease" when the patient actually has the disease. In a court system, it is analogous to acquitting a guilty person.
+:::
+
+## The decision table {#sec-decision-table}
+
+Every hypothesis test ends with one of two decisions: reject $H_0$ or fail to reject $H_0$. And the truth is one of two realities: $H_0$ is true or $H_A$ is true. Combining these gives four scenarios:
+
+|                               | $H_0$ is true        | $H_A$ is true        |
+|:------------------------------|:---------------------:|:---------------------:|
+| **Reject** $H_0$             | Type I error          | Correct decision      |
+| **Fail to reject** $H_0$     | Correct decision      | Type II error         |
+
+: Four possible outcomes of a hypothesis test. {#tbl-decision-table}
+
+Two of the four outcomes are correct decisions:
+
+- Rejecting $H_0$ when $H_A$ is true — we correctly detected the real effect.
+- Failing to reject $H_0$ when $H_0$ is true — we correctly avoided a false alarm.
+
+The other two outcomes are errors:
+
+- **Type I error** (upper-left): We rejected $H_0$ but it was actually true. False alarm.
+- **Type II error** (lower-right): We failed to reject $H_0$ but $H_A$ was actually true. Missed detection.
+
+::: {.workedexample}
+In a US court, the defendant is either innocent ($H_0$) or guilty ($H_A$). What does a Type I error represent in this context? What does a Type II error represent? @tbl-decision-table may be useful.
+
+---
+
+If the court makes a Type I error, this means the defendant is innocent ($H_0$ true) but wrongly convicted. A Type II error means the court failed to reject $H_0$ (i.e., failed to convict the person) when they were in fact guilty ($H_A$ true).
+:::
+
+::: {.guidedpractice}
+A pharmaceutical company tests whether a new drug reduces cholesterol more than a placebo. They set up $H_0$: the drug has no effect, and $H_A$: the drug reduces cholesterol. Describe what a Type I error and a Type II error would mean in this context.
+
+<details>
+<summary>Show answer</summary>
+A Type I error would mean concluding the drug reduces cholesterol when it actually does not — the company might invest millions in producing an ineffective drug. A Type II error would mean failing to detect a real cholesterol-lowering effect — the company might shelve a drug that actually works.
+</details>
+:::
+
+::: {.original}
+::: {.guidedpractice}
+A quality control inspector tests whether a batch of light bulbs has a defect rate above 2%. She sets up $H_0$: defect rate $\leq 0.02$ and $H_A$: defect rate $> 0.02$. Which error is worse in this context: Type I or Type II? Why?
+
+<details>
+<summary>Show answer</summary>
+A Type II error is arguably worse here: the inspector would fail to detect that the defect rate is too high, and defective bulbs would be shipped to customers. A Type I error means rejecting a good batch, which wastes product but doesn't harm customers. The relative costs depend on the specific situation, but in quality control, missing a real problem (Type II) often has more serious consequences.
+</details>
+:::
+:::
+
+## Error rates: $\alpha$ and $\beta$ {#sec-error-rates}
+
+::: {.original}
+We give the probabilities of the two error types their own Greek-letter names:
+
+::: {.definition}
+The **Type I error rate**, denoted $\alpha$, is the probability of rejecting $H_0$ when $H_0$ is true:
+
+$$\alpha = P(\text{reject } H_0 \mid H_0 \text{ is true})$$
+
+The **Type II error rate**, denoted $\beta$, is the probability of failing to reject $H_0$ when $H_A$ is true:
+
+$$\beta = P(\text{fail to reject } H_0 \mid H_A \text{ is true})$$
+:::
+
+The discernibility level $\alpha$ is something we choose before the test — it is under our direct control. Common choices are $\alpha = 0.05$, $\alpha = 0.01$, and $\alpha = 0.10$.
+
+The Type II error rate $\beta$, on the other hand, is **not** something we directly choose. It depends on several factors that we will explore shortly: the true effect size, the sample size, the variability in the data, and the chosen discernibility level $\alpha$. Unlike $\alpha$, $\beta$ is usually unknown because we don't know the true state of the world — if we knew $H_A$ were true and knew the exact effect size, we wouldn't need to run the test.
+
+This asymmetry between $\alpha$ and $\beta$ is a fundamental feature of the hypothesis testing framework. We control one error rate directly ($\alpha$) and try to manage the other ($\beta$) through careful study design.
+:::
+
+## The tradeoff between $\alpha$ and $\beta$ {#sec-tradeoff}
+
+::: {.workedexample}
+How could we reduce the Type I error rate in US courts? What influence would this have on the Type II error rate?
+
+---
+
+To lower the Type I error rate, we might raise our standard for conviction from "beyond a reasonable doubt" to "beyond a conceivable doubt" so fewer people would be wrongly convicted. However, this would also make it more difficult to convict the people who are actually guilty, so we would make more Type II errors.
+:::
+
+::: {.guidedpractice}
+How could we reduce the Type II error rate in US courts? What influence would this have on the Type I error rate?
+
+<details>
+<summary>Show answer</summary>
+To lower the Type II error rate, we want to convict more guilty people. We could lower the standards for conviction from "beyond a reasonable doubt" to "beyond a little doubt". Lowering the bar for guilt will also result in more wrongful convictions, raising the Type I error rate.
+</details>
+:::
+
+The example and guided practice above provide an important lesson: if we reduce how often we make one type of error, we generally make more of the other type.
+
+::: {.original}
+This tradeoff is not just a courtroom analogy — it is baked into the mathematics of hypothesis testing. Here is the core intuition:
+
+- **Lowering $\alpha$** means we require stronger evidence (a smaller p-value) before rejecting $H_0$. This makes us less likely to reject $H_0$ when it is true (good), but also less likely to reject $H_0$ when it is false (bad). So $\beta$ increases.
+- **Raising $\alpha$** means we accept weaker evidence for rejecting $H_0$. This makes us more likely to detect real effects ($\beta$ decreases), but also more likely to make false discoveries ($\alpha$ increases).
+
+::: {.important}
+**The $\alpha$-$\beta$ tradeoff.** For a fixed sample size and effect size, decreasing $\alpha$ increases $\beta$, and vice versa. You cannot reduce both error rates simultaneously without changing something else — typically the sample size.
+:::
+
+To see why this makes sense, imagine a number line representing all possible values of a test statistic. Under $H_0$, the test statistic is centered at some null value. The rejection region is the set of values far enough from the null to trigger rejection. Making $\alpha$ smaller means shrinking the rejection region — fewer values lead to rejection. But if $H_A$ is true, the test statistic is centered somewhere else. A smaller rejection region means less of the alternative distribution falls inside it, so we are less likely to reject — $\beta$ goes up.
+
+The only way to reduce *both* $\alpha$ and $\beta$ at the same time is to collect more data. More data makes the test statistic more precise (smaller standard error), which makes it easier to distinguish between $H_0$ and $H_A$ — allowing us to keep $\alpha$ small while also keeping $\beta$ small. This is why sample size planning (the sample size planning chapter) is so important.
+:::
+
+::: {.statlens}
+**Predict → Do → Explain.** Open the [Decision Errors simulator]({{< var tool-url >}}/conceptual/decision-errors/?activity=decision-errors.json){target="_blank"} --- the gated activity opens with a **Predict** step (commit to what you expect the hit / miss / false-alarm dots to show under $H_0$ vs. $H_A$, at different $n$ and $\alpha$), walks you through both scenarios one step at a time, and closes with an **Explain** step where you articulate the $\alpha$--$\beta$ tradeoff in your own words. Each dot in the tool is one study: **green** = detected the effect (correct rejection), **gray** = missed the effect (Type II), **red** = false alarm under a true $H_0$ (Type I). Your predictions and explanation save locally in the tool, so you can leave the activity and return to your work on the same device.
+:::
+
+## Choosing a discernibility level {#sec-choosing-alpha}
+
+The **discernibility level** (traditionally called the **significance level**) provides the cutoff for the p-value which will lead to a decision of "reject the null hypothesis." The traditional level is 0.05. However, it is sometimes helpful to adjust the discernibility level based on the application. We may select a level that is smaller or larger than 0.05 depending on the consequences of any conclusions reached from the test.
+
+If making a Type I error is dangerous or especially costly, we should choose a small discernibility level (e.g., 0.01 or 0.001). If we want to be very cautious about rejecting the null hypothesis, we demand very strong evidence favoring the alternative $H_A$ before we would reject $H_0$.
+
+If a Type II error is relatively more dangerous or much more costly than a Type I error, then we should choose a higher discernibility level (e.g., 0.10). Here we want to be cautious about failing to reject $H_0$ when the null is actually false.
+
+::: {.important}
+**Discernibility levels should reflect consequences of errors.** The discernibility level selected for a test should reflect the real-world consequences associated with making a Type I or Type II error.
+:::
+
+::: {.original}
+::: {.workedexample}
+A city water department tests whether the lead content in drinking water exceeds the safe limit. They set $H_0$: lead level $\leq$ safe limit, and $H_A$: lead level $>$ safe limit. Should they use $\alpha = 0.01$ or $\alpha = 0.10$?
+
+---
+
+A Type II error here — failing to detect dangerous lead levels — could have serious public health consequences. A Type I error — declaring the water unsafe when it is actually fine — would cause inconvenience and expense but is far less harmful than allowing people to drink contaminated water. Therefore, the water department should use a larger $\alpha$ (like 0.10) to make it easier to detect real contamination, accepting a slightly higher chance of false alarms.
+:::
+
+::: {.workedexample}
+A social media company wants to test whether a new recommendation algorithm increases average time spent on the platform. They set $H_0$: no difference, $H_A$: the new algorithm increases engagement. Should they use $\alpha = 0.01$ or $\alpha = 0.10$?
+
+---
+
+The stakes here are relatively low. A Type I error means rolling out an algorithm that doesn't actually help — some wasted development effort. A Type II error means keeping the old algorithm when the new one would have been slightly better — a missed opportunity but not a disaster. A standard $\alpha = 0.05$ or even a conservative $\alpha = 0.01$ is reasonable, since the company can easily run another test with more data.
+:::
+:::
+
+## Looking ahead: the probability of a Type II error {#sec-decision-errors-power}
+
+We can choose $\alpha$ directly, but $\beta$ --- the Type II error rate --- depends on things we do not control: the size of the real effect, the sample size, and the variability in the data. Quantifying $\beta$, and its complement the **power** of a test, is the subject of an optional later chapter on Type II error and power. There we use simulation to *see* how often a real effect slips past a test, and how planning the sample size brings the Type II error rate under control.
+
+## Chapter review {#sec-decision-errors-review}
+
+### Summary
+
+- Every hypothesis test ends in one of four outcomes, organized by the **decision table**: two correct decisions and two errors.
+- A **Type I error** rejects a true $H_0$ (a false alarm); its probability is the discernibility level $\alpha$, which we choose.
+- A **Type II error** fails to reject $H_0$ when $H_A$ is true (a missed detection); its probability is $\beta$, which we do not directly control.
+- For a fixed sample size and effect size, lowering $\alpha$ raises $\beta$ and vice versa --- the $\alpha$--$\beta$ tradeoff. Collecting more data is the way to reduce both.
+- The discernibility level should be chosen to reflect the real-world consequences of each kind of error.
+
+### Key terms
+
+| Term | Definition |
+|:-----|:-----------|
+| Type I error | Rejecting $H_0$ when it is true (false positive) |
+| Type II error | Failing to reject $H_0$ when $H_A$ is true (false negative) |
+| Discernibility level ($\alpha$) | The probability of a Type I error; chosen before the test |
+| Type II error rate ($\beta$) | The probability of a Type II error |
+| Decision table | The two-by-two table of test decision versus the truth |
+| $\alpha$--$\beta$ tradeoff | At fixed $n$, lowering one error rate raises the other |
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-decision-errors) at the back of the book.
+
+{{< include ../exercises/_decision-errors-exercises.qmd >}}
+
+{{< include ../exercises/_decision-errors-statlens-exercises.qmd >}}

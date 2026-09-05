@@ -1,0 +1,43 @@
+<!-- StatLens Interactive Exercises — ANOVA for Regression -->
+<!-- HAND-AUTHORED. Focus on the F-vs-t view, reading an ANOVA table, and     -->
+<!-- the bridge to multiple regression.                                       -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Frame the question.** A researcher fits a simple linear regression of a student's final exam score on hours studied.
+
+    a.  Write the null and alternative hypotheses that the **model-level $F$-test** evaluates. Write them again for the **slope $t$-test**.
+    b.  Why are these the *same* hypothesis in a simple regression? What would need to be true for them to differ?
+    c.  Suppose the $F$-statistic comes out to 12.25 with 1 and 48 degrees of freedom. What $t$-statistic on 48 df would give the same p-value?
+
+
+2.  **Open the ANOVA panel.** Open the [Slope tool with ANOVA panel]({{< var tool-url >}}/inference/slope/?dataset=possum_regression&anova=true){target="_blank"} for the possum head-length regression.
+
+    a.  Report the sums of squares $SSR$, $SSE$, $SST$ and verify that $SSR + SSE = SST$.
+    b.  Report the degrees of freedom for each row. Explain why $df_{\text{regression}} = 1$ and $df_{\text{residual}} = n - 2$.
+    c.  Report the $F$-statistic and the $t$-statistic for the slope, and confirm $F = t^2$.
+    d.  Report $R^2$. Verify from the ANOVA table that $R^2 = SSR / SST$.
+
+
+3.  **Read $R^2$ correctly.** A fitted regression reports $R^2 = 0.72$.
+
+    a.  Complete this sentence: "About ____ % of the variability in the response is explained by ____." Which value goes in each blank?
+    b.  A student concludes: "$R^2 = 0.72$ means my model is 72% accurate." Why is this wrong, and what's the correct statement?
+    c.  What does $R^2 = 0.72$ *not* tell you about the model? Give three specific things.
+
+
+4.  **When $F$ rejects and $t$ agrees.** Open [`inference/slope/?anova=true`]({{< var tool-url >}}/inference/slope/?anova=true){target="_blank"} on any regression dataset with a clear linear trend.
+
+    a.  Report $F$, its degrees of freedom, and the p-value.
+    b.  Now switch datasets to one you expect to have *no* linear relationship. Report $F$ and the p-value. Is $F$ close to 1?
+    c.  Explain in one sentence why "$F$ close to 1" is the "no linear signal" case.
+
+
+5.  **The multiple-regression preview.** In simple regression, the model-level $F$-test and the slope $t$-test *must* agree. In multiple regression, they can diverge.
+
+    a.  Imagine a multiple regression with 3 predictors where the overall $F$-test rejects at $\alpha = 0.05$ but *no* individual predictor's $t$-test does. What could explain this? (Hint: think about *joint* vs. *individual* contributions.)
+    b.  Imagine the reverse: no individual $t$-test rejects, and the $F$-test doesn't either. What does this suggest about the model?
+    c.  Imagine one predictor's $t$-test rejects while the model-level $F$-test does not. Which conclusion should you trust?
+

@@ -1,0 +1,103 @@
+# Project: Association Between Two Categorical Variables {#sec-project-chisq .unnumbered}
+
+::: {.project-meta}
+**Project — Chi-Square Test of Independence.** Carry out the analysis in **Jamovi** (or **R**) and **communicate** the result. The graded skills are framing the association question, checking the expected-count condition, and interpreting the test in context.
+:::
+
+## The question {#sec-project-chisq-question}
+
+Few airplane debates are as heated as whether it's acceptable to **recline your seat**. FiveThirtyEight ran a national survey on flying etiquette, asking travelers whether reclining is rude — and recording each respondent's age.
+
+> **Is a flyer's opinion on reclining associated with their age?**
+
+## The data {#sec-project-chisq-data}
+
+`flying_etiquette.csv` holds the survey responses (about 1,040 people; ~843 answered both questions here). You'll use two categorical variables: `recline_rude` (`No`, `Somewhat`, `Very` — how rude is it to recline?) and `age` (`18-29`, `30-44`, `45-60`, `> 60`). Source: FiveThirtyEight, *"Hey, You Should Stop Reclining Your Airplane Seat."*
+
+## Plan it first {#sec-project-chisq-plan}
+
+a.  **Variables.** Confirm both variables are categorical and give the size of the table (rows × columns).
+b.  **Hypotheses.** State $H_0$ and $H_A$ for a test of **independence** in words (opinion on reclining and age are independent vs. associated).
+c.  **Eyeball it.** Look at the row percentages (the opinion mix within each age group). Can you tell *for sure* whether opinion depends on age, or could the differences be chance? This is the judgment the test makes rigorous.
+d.  **Procedure & condition.** Two categorical variables, "are they associated?" → **chi-square test of independence**. It needs **expected counts** that aren't too small (a common rule: each ≥ 5) — what will you check?
+
+## Do the analysis {#sec-project-chisq-do}
+
+::: {.panel-tabset}
+
+### Jamovi
+
+1.  Open `flying_etiquette.csv`.
+2.  **Frequencies → Independent Samples (χ² test of association).** Rows: `age`; Columns: `recline_rude`.
+3.  Request the **χ² test**, **expected counts**, and **row percentages**.
+4.  Read off the table, confirm expected counts are large enough, and record χ² and the p-value.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: project-chisq-r
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-cap: "Opinion on reclining by age group. Younger flyers are the most likely to call reclining rude — but is the difference real or noise?"
+#| fig-alt: "Stacked bar chart of recline-is-rude opinions for four age groups; the 18-29 group has the largest 'somewhat/very rude' share."
+
+library(infer)
+library(dplyr)
+library(readr)
+library(ggplot2)
+
+flying <- read_csv("../datasets/flying_etiquette.csv")
+
+# Keep respondents who answered both questions; order the categories
+fly <- flying |>
+  filter(!is.na(recline_rude), !is.na(age)) |>
+  mutate(age          = factor(age, levels = c("18-29", "30-44", "45-60", "> 60")),
+         recline_rude = factor(recline_rude, levels = c("No", "Somewhat", "Very")))
+
+# Contingency table
+tab <- table(fly$age, fly$recline_rude)
+tab
+
+# Row percentages: the opinion mix within each age group (try to eyeball it)
+round(100 * prop.table(tab, 1), 0)
+
+# Chi-square test of independence (infer)
+fly |> chisq_test(recline_rude ~ age)
+
+# Condition check: smallest expected count (rule of thumb: each >= 5)
+cat("Smallest expected count:", round(min(chisq.test(tab)$expected), 1), "\n")
+
+ggplot(fly, aes(age, fill = recline_rude)) +
+  geom_bar(position = "fill") +
+  labs(x = "Age group", y = "Proportion", fill = "Reclining is rude?") +
+  theme_minimal(base_size = 13)
+```
+
+:::
+
+## Your deliverable {#sec-project-chisq-deliverable}
+
+Submit a short report containing **all** of:
+
+a.  **Graphic** — a labeled stacked (or side-by-side) bar chart showing the opinion mix by age group.
+b.  **Numerical result** — the contingency table, the **χ² statistic**, the degrees of freedom, and the p-value.
+c.  **Conditions** — one sentence confirming the expected counts are large enough for the chi-square approximation.
+d.  **Conclusion in context** — 3–4 sentences: is there **discernible** evidence that opinion on reclining is associated with age? Describe the pattern (who finds it rudest?), note how the test settled what the percentages alone left uncertain, and stress that association is **not** causation.
+e.  **One limitation** — e.g., this is a single online survey; opinions may shift over time or differ by who chose to respond.
+
+### How it's graded
+
+| Criterion | What we look for |
+|---|---|
+| Appropriate, labeled graphic | opinion mix by group, axes/legend labeled |
+| Procedure & conditions | chi-square independence identified; expected counts checked |
+| Correct numerical result | table, χ², df, p-value reported correctly |
+| Conclusion **in context** | discernibility + the age pattern + association ≠ causation |
+| Communication | clear, correct interpretation |
+
+::: {.statlens}
+**Warm up first.** Explore expected counts and the χ² statistic in the [Chi-Square tool]({{< var tool-url >}}/inference/chisq/){target="_blank"} before writing your report.
+:::

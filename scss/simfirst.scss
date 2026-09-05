@@ -1,0 +1,515 @@
+/*-- scss:defaults --*/
+
+/* Fonts: Atkinson Hyperlegible for accessibility (designed for low vision) */
+@import 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap';
+@import 'https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap';
+
+$font-family-sans-serif: "Atkinson Hyperlegible", sans-serif;
+$font-family-monospace: "Source Code Pro", monospace;
+
+/* IMSCOL palette — accessible color contrast verified */
+$primary:    #569BBD;  /* IMSCOL blue  — headings, links, primary actions */
+$pink:       #E97583;  /* IMSCOL pink  — important callouts, warnings */
+$green:      #114B5F;  /* IMSCOL green — definitions, key terms */
+$red:        #F05133;  /* IMSCOL red   — caution, errors */
+$gray-light: #D9D9D9;  /* IMSCOL gray  — borders, subtle elements */
+$gray-dark:  #6C6C6C;  /* IMSCOL gray  — secondary text */
+
+/* Ensure link contrast meets WCAG AA (4.5:1 on white) */
+$link-color: #2a7aab;  /* Slightly darker than $primary for contrast */
+
+/* Base font size — 18px for readability */
+$font-size-root: 18px;
+
+/* Line height — 1.6 for readability (WCAG recommends >= 1.5) */
+$line-height-base: 1.6;
+
+/* Paragraph spacing — at least 1.5x font size (WCAG 1.4.12) */
+$paragraph-margin-bottom: 1.5rem;
+
+/*-- scss:rules --*/
+
+/* ================================================================
+   ACCESSIBILITY FOUNDATIONS
+   WCAG 2.1 AA compliance built into base styles
+   ================================================================ */
+
+/* Focus indicators — visible, high contrast (WCAG 2.4.7) */
+:focus-visible {
+  outline: 3px solid $primary;
+  outline-offset: 2px;
+}
+
+/* Skip link (hidden until focused) */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: $primary;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 0 0 4px 4px;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Alt text check — uncomment during authoring to highlight missing alt text
+img:not([alt]),
+img[alt=""] {
+  outline: 3px dashed $red;
+}
+*/
+
+/* ================================================================
+   HEADINGS
+   ================================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+  color: $primary;
+  line-height: 1.3;
+}
+
+h1 {
+  border-bottom: 3px solid $primary;
+  border-top: 3px solid $primary;
+  padding: 0.3em 0;
+}
+
+h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  border-bottom: 3px solid $pink;
+  border-top: 3px solid $pink;
+  padding: 0.2em 0;
+}
+
+h3 {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  border-top: 1px solid $gray-light;
+  padding-top: 0.3em;
+}
+
+h4 { margin-top: 1.5em; font-size: 1.1rem; }
+h5 { margin-top: 1.5em; font-size: 1rem; }
+
+.header-section-number {
+  padding-right: 0.3em;
+  font-weight: 500;
+}
+
+/* ================================================================
+   SIDEBAR
+   ================================================================ */
+
+.sidebar-title {
+  color: $primary;
+}
+
+div.sidebar-item-container .active {
+  font-weight: bold;
+}
+
+.sidebar nav[role=doc-toc] ul > li > a.active,
+.sidebar nav[role=doc-toc] ul > li > ul > li > a.active {
+  font-weight: bold;
+}
+
+/* ================================================================
+   CUSTOM ENVIRONMENTS (adapted from IMS)
+   ================================================================ */
+
+/* Chapter introduction */
+.chapterintro {
+  padding: 1.2em 1.5em;
+  margin-bottom: 1.5rem;
+  background: lighten($primary, 38%);
+  border-top: 3px solid $primary;
+  border-bottom: 3px solid $primary;
+  border-radius: 4px;
+}
+
+/* Guided practice — interactive exercises with answers */
+.guidedpractice {
+  padding: 1.2em 1.5em;
+  margin: 2rem 0;
+  background: #f8f8f8;
+  border-top: 2px solid $primary;
+  border-bottom: 2px solid $primary;
+  border-radius: 4px;
+}
+.guidedpractice::before {
+  content: "Guided Practice";
+  display: block;
+  font-weight: bold;
+  font-variant: small-caps;
+  color: $primary;
+  margin-bottom: 0.5em;
+}
+
+/* Guided practice — reveal answer toggle */
+.guidedpractice details {
+  margin-top: 1em;
+  border-top: 1px dashed $gray-light;
+  padding-top: 0.5em;
+}
+.guidedpractice details summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: $primary;
+  font-size: 0.95em;
+  padding: 0.3em 0;
+}
+.guidedpractice details summary:hover {
+  color: darken($primary, 15%);
+}
+.guidedpractice details[open] summary {
+  margin-bottom: 0.5em;
+}
+.guidedpractice details p {
+  margin: 0.3em 0;
+  padding-left: 0.5em;
+  border-left: 2px solid lighten($primary, 25%);
+}
+
+/* Worked example */
+.workedexample {
+  padding: 1.2em 1.5em;
+  margin: 2rem 0;
+  background: #f8f8f8;
+  border-top: 2px solid $primary;
+  border-bottom: 2px solid $primary;
+  border-radius: 4px;
+}
+.workedexample::before {
+  content: "Example";
+  display: block;
+  font-weight: bold;
+  font-variant: small-caps;
+  color: $primary;
+  margin-bottom: 0.5em;
+}
+
+/* Key term / definition */
+.definition {
+  padding: 1.2em 1.5em;
+  margin: 2rem 0;
+  background: lighten($green, 65%);
+  border-left: 4px solid $green;
+  border-radius: 4px;
+}
+.definition::before {
+  content: "Definition";
+  display: block;
+  font-weight: bold;
+  font-variant: small-caps;
+  color: $green;
+  margin-bottom: 0.5em;
+}
+
+/* Important concept */
+.important {
+  padding: 1.2em 1.5em;
+  margin: 2rem 0;
+  background: #fdf0f0;
+  border-top: 2px solid $pink;
+  border-bottom: 2px solid $pink;
+  border-radius: 4px;
+}
+.important strong {
+  color: darken($pink, 10%);
+}
+
+/* Caution / common mistake */
+.caution {
+  padding: 1.2em 1.5em;
+  margin: 2rem 0;
+  background: #fff3f0;
+  border-left: 4px solid $red;
+  border-radius: 4px;
+}
+.caution::before {
+  content: "Caution";
+  display: block;
+  font-weight: bold;
+  color: $red;
+  margin-bottom: 0.5em;
+}
+
+/* Tip */
+.tip {
+  padding: 1.2em 1.5em;
+  margin: 1rem 0;
+  background: #f5f5f5;
+  border-left: 4px solid $gray-light;
+  border-radius: 4px;
+}
+
+/* StatLens activity — uses StatLens favicon (white bell curve on #569BBD blue).
+   Single canonical class for every "go do this in StatLens" moment. Keystone
+   activities use the Predict → Do → Explain body structure with nested
+   ::: {.workspace} write-in slots; quick pointers use "See it in action." + a
+   link with no scaffolding. The .statlens-activity class is retired (2026-07-20). */
+.statlens {
+  padding: 1.2em 1.5em;
+  margin: 2rem 0;
+  background: #edf4f8;
+  border: 2px solid $primary;
+  border-left: 5px solid $primary;
+  border-radius: 8px;
+}
+.statlens::before {
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='22' height='22'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23569BBD'/%3E%3Cpath d='M4 24 C4 24,8 23,10 20 C12 17,13 8,16 8 C19 8,20 17,22 20 C24 23,28 24,28 24' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") " StatLens Activity";
+  display: block;
+  font-weight: bold;
+  color: $primary;
+  margin-bottom: 0.5em;
+  font-size: 1.05em;
+}
+/* Predict / Do / Explain sub-headings inside .statlens boxes render as
+   accented primary-color labels. Applies to h4 and h5 nested in .statlens. */
+.statlens h4,
+.statlens h5 {
+  margin-top: 1em;
+  margin-bottom: 0.3em;
+  color: $primary;
+  font-size: 1.05em;
+}
+
+/* Original writing — distinguishes new content from OER remix
+   Use ::: {.original} to wrap content written by Claude/Jeff
+   that is NOT adapted from IMS or OpenIntro sources.
+   Remove this styling before final publication. */
+.original {
+  border-left: 4px solid #9b59b6;
+  padding-left: 1em;
+  color: #4a235a;
+  font-family: "Georgia", serif;
+}
+.original::before {
+  content: "[Original]";
+  display: block;
+  font-size: 0.75em;
+  font-weight: bold;
+  color: #9b59b6;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3em;
+}
+
+/* Under construction — remove before publication */
+.underconstruction {
+  padding: 1.2em 1.5em;
+  margin: 1rem 0;
+  background: #fff3cd;
+  border: 2px dashed #ffc107;
+  border-radius: 4px;
+  font-weight: bold;
+}
+.underconstruction::before {
+  content: "Under Construction";
+  display: block;
+  color: #856404;
+  margin-bottom: 0.5em;
+}
+
+/* ================================================================
+   STATLENS IFRAME EMBED
+   ================================================================ */
+
+.statlens-embed {
+  width: 100%;
+  min-height: 500px;
+  border: 1px solid $gray-light;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+/* Subtle "Open in StatLens" link for figure captions and inline use.
+   Uses the StatLens favicon inline at 16×16. Visually quiet — doesn't
+   compete with the figure itself. */
+.open-in-statlens {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.85em;
+  color: $primary;
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+.open-in-statlens:hover,
+.open-in-statlens:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+}
+.open-in-statlens::before {
+  content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='16' height='16'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23569BBD'/%3E%3Cpath d='M4 24 C4 24,8 23,10 20 C12 17,13 8,16 8 C19 8,20 17,22 20 C24 23,28 24,28 24' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Student-writing block — blank lined-paper feel.
+   Used inside .statlens (Predict / Explain slots), or stand-alone in a
+   worked example. .statlens-activity is retired (2026-07-20) — its
+   styling has been merged into .statlens above. */
+.workspace {
+  min-height: 5em;
+  margin: 0.6em 0 1.2em 0;
+  padding: 0.6em 0.8em;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 1.6em,
+      lighten($gray-light, 8%) 1.6em,
+      lighten($gray-light, 8%) calc(1.6em + 1px)
+    ),
+    #fffdf7;
+  border: 1px dashed lighten($gray-light, 5%);
+  border-radius: 4px;
+  font-style: italic;
+  color: $gray-dark;
+}
+.workspace::before {
+  content: "Your notes:";
+  display: block;
+  font-size: 0.8em;
+  font-style: normal;
+  font-weight: bold;
+  color: $gray-dark;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.3em;
+  text-transform: uppercase;
+}
+
+/* ================================================================
+   FIGURES — smaller inline, click (lightbox) to enlarge
+   ================================================================ */
+
+/* Cap figure width — lightbox handles full-size viewing */
+.quarto-figure img,
+.cell-output-display img {
+  max-width: 85%;
+  height: auto;
+  cursor: zoom-in;
+}
+
+/* Side-by-side figures (patchwork, gridExtra) can go wider */
+.quarto-layout-panel img {
+  max-width: 100%;
+}
+
+/* ================================================================
+   TABLES — accessible and readable
+   ================================================================ */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+th {
+  background-color: lighten($primary, 38%);
+  font-weight: bold;
+  text-align: left;
+  padding: 0.6em 0.8em;
+  border-bottom: 2px solid $primary;
+}
+
+td {
+  padding: 0.5em 0.8em;
+  border-bottom: 1px solid $gray-light;
+}
+
+caption {
+  caption-side: top;
+  font-weight: bold;
+  color: $gray-dark;
+  padding-bottom: 0.5em;
+}
+
+/* ================================================================
+   EXERCISES
+   ================================================================ */
+
+.exercises ol ol {
+  list-style-type: lower-alpha;
+}
+.exercises ol ol ol {
+  list-style-type: lower-roman;
+}
+.exercises strong {
+  color: $primary;
+}
+.exercises .cell-output-display,
+.exercises .quarto-figure {
+  text-align: center;
+}
+
+/* Odd-numbered exercise solutions.
+   Each solution item is authored with its true exercise number as the markdown
+   list marker (`1.`, `3.`, `5.`, ...). Pandoc renders each item as its own
+   <ol start="N">, so we just style them consistently and let the default
+   decimal marker show the number. */
+.exercises-solution > ol {
+  padding-left: 2.5em;
+}
+.exercises-solution > ol > li {
+  margin-bottom: 0.75em;
+}
+.exercises-solution > ol > li::marker {
+  font-weight: 600;
+  color: $primary;
+}
+/* Nested (a), (b), (c) parts inside a solution stay lower-alpha. */
+.exercises-solution ol ol {
+  list-style-type: lower-alpha;
+}
+.exercises-solution ol ol ol {
+  list-style-type: lower-roman;
+}
+
+/* ================================================================
+   PRINT STYLES
+   ================================================================ */
+
+@media print {
+  :root {
+    font-size: 11pt;
+  }
+  #quarto-sidebar, #TOC, .nav-page {
+    display: none;
+  }
+  .page-columns .content {
+    grid-column-start: page-start;
+  }
+  .fixed-top {
+    position: relative;
+  }
+  .panel-caption, .figure-caption, figcaption {
+    color: #666;
+  }
+  /* Don't print under-construction notices */
+  .underconstruction {
+    display: none;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+@media (max-width: 768px) {
+  .statlens-embed {
+    min-height: 400px;
+  }
+}

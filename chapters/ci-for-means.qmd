@@ -1,0 +1,377 @@
+---
+title: "Confidence Intervals for Means"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+In the bootstrap confidence intervals chapter, we used bootstrapping to construct confidence intervals -- a flexible, simulation-based approach that works well in many settings. In the normal approximation chapter, we saw that sampling distributions are often well approximated by the normal distribution. For means, however, we encounter a complication: the population standard deviation $\sigma$ is almost never known, and estimating it with the sample standard deviation $s$ introduces extra uncertainty. To account for this, we use a slightly different bell-shaped distribution called the **$t$-distribution**. In this chapter, we develop $t$-based confidence intervals for one mean, the difference between two independent means, and the mean of paired differences.
+:::
+
+
+## The $t$-distribution {#sec-t-dist}
+
+### Why not the normal distribution?
+
+Earlier we used the normal distribution to model sampling distributions, and in the previous chapter we applied it to proportions, where the standard error formula $SE = \sqrt{\hat{p}(1 - \hat{p})/n}$ depends only on the sample proportion and the sample size -- both of which are known. For means, the standard error is $SE = \sigma / \sqrt{n}$, which depends on $\sigma$, the population standard deviation. Since we rarely know $\sigma$, we estimate it using the sample standard deviation $s$:
+
+$$SE \approx \frac{s}{\sqrt{n}}$$
+
+This substitution introduces additional uncertainty, especially in small samples. When $n$ is small, $s$ can be a poor estimate of $\sigma$, and the normal model underestimates how variable the statistic really is. The $t$-distribution corrects for this.
+
+### Properties of the $t$-distribution
+
+::: {.definition}
+The **$t$-distribution** is a bell-shaped, symmetric distribution that is similar to the normal distribution but has **heavier tails** (more probability in the extremes). The exact shape of the $t$-distribution depends on a parameter called the **degrees of freedom (df)**.
+
+- When $df$ is small, the $t$-distribution has noticeably heavier tails than the normal -- extreme values are more likely.
+- As $df$ increases, the $t$-distribution approaches the standard normal distribution.
+- For $df \geq 30$, the $t$-distribution is nearly indistinguishable from the normal.
+:::
+
+```{r}
+#| label: fig-t-vs-normal
+#| fig-cap: "Three distributions plotted on the same axes: the standard normal distribution N(0,1), a t-distribution with df = 5, and a t-distribution with df = 15. All are centered at 0 and bell-shaped, but the t-distributions have heavier tails, especially when df is small. [↗ Try this live](https://learnlens.org/statlens/conceptual/t-distribution/) — drive the df slider yourself and watch the tails shrink as df grows."
+#| fig-alt: "Three overlapping bell-shaped curves centered at zero. The standard normal curve is the tallest and has the thinnest tails. The t-distribution with 15 degrees of freedom is slightly shorter with slightly heavier tails. The t-distribution with 5 degrees of freedom is the shortest with the heaviest tails."
+
+library(ggplot2)
+
+x <- seq(-4.5, 4.5, length.out = 500)
+
+df <- data.frame(
+  x = rep(x, 3),
+  y = c(dnorm(x), dt(x, df = 5), dt(x, df = 15)),
+  Distribution = rep(c("N(0, 1)", "t (df = 5)", "t (df = 15)"), each = 500)
+)
+df$Distribution <- factor(df$Distribution, levels = c("N(0, 1)", "t (df = 15)", "t (df = 5)"))
+
+ggplot(df, aes(x = x, y = y, color = Distribution, linetype = Distribution)) +
+  geom_line(linewidth = 1) +
+  scale_color_manual(values = c("N(0, 1)" = COL_BLUE, "t (df = 15)" = COL_PINK, "t (df = 5)" = COL_RED)) +
+  scale_linetype_manual(values = c("N(0, 1)" = "solid", "t (df = 15)" = "dashed", "t (df = 5)" = "dotted")) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "top")
+```
+
+::: {.important}
+**Why heavier tails matter.** Heavier tails mean that extreme values (large $t$-scores) are more probable under the $t$-distribution than under the normal distribution. In practice, this leads to **wider confidence intervals** when sample sizes are small -- exactly the extra caution we need when $\sigma$ is estimated by $s$.
+:::
+
+::: {.guidedpractice}
+How does the $t$-distribution compare to the normal distribution when $df = 2$? When $df = 100$?
+
+<details>
+<summary>Show answer</summary>
+When $df = 2$, the $t$-distribution has very heavy tails -- values far from 0 are much more likely than under the normal curve. When $df = 100$, the $t$-distribution is nearly identical to the standard normal. In general, the $t$-distribution becomes more like the normal as degrees of freedom increase.
+</details>
+:::
+
+::: {.statlens}
+**See the $t$-distribution come alive.** Open the [t Distribution Explorer]({{< var tool-url >}}/distribution/t/){target="_blank"} and drag the degrees of freedom slider. Start at $df = 2$ and watch the heavy tails — values far from zero are surprisingly common. Now slowly increase toward $df = 30$, then $df = 100$. The $t$-distribution gradually becomes indistinguishable from the normal curve. This is much harder to appreciate from a static figure — try it yourself.
+:::
+
+### Critical values from the $t$-distribution
+
+Just as we use $z^*$ for the normal distribution, we use $t^*_{df}$ for the $t$-distribution. Because the $t$-distribution has heavier tails, $t^*$ values are larger than the corresponding $z^*$ values (especially for small $df$).
+
+**Selected critical values for 95% confidence intervals:**
+
+| $df$ | $t^*_{df}$ (95% CI) | $z^*$ (for comparison) |
+|------|---------------------|----------------------|
+| 5 | 2.571 | 1.960 |
+| 10 | 2.228 | 1.960 |
+| 20 | 2.086 | 1.960 |
+| 30 | 2.042 | 1.960 |
+| 50 | 2.009 | 1.960 |
+| 100 | 1.984 | 1.960 |
+| $\infty$ | 1.960 | 1.960 |
+
+: Critical values $t^*_{df}$ for a 95% confidence interval. As $df$ increases, $t^*$ approaches $z^* = 1.96$. {.striped}
+
+::: {.guidedpractice}
+Why is the critical value $t^*_5 = 2.571$ so much larger than $z^* = 1.96$?
+
+<details>
+<summary>Show answer</summary>
+With only $df = 5$, there is substantial uncertainty in estimating $\sigma$ with $s$. The $t$-distribution accounts for this by having heavier tails, which pushes the critical values further from zero. This results in a wider confidence interval, reflecting the greater uncertainty.
+</details>
+:::
+
+## One-sample $t$ confidence interval {#sec-one-sample-t-ci}
+
+### The setup
+
+We want to estimate the population mean $\mu$ based on a single sample. The point estimate is the sample mean $\bar{x}$, and the standard error is $SE = s / \sqrt{n}$.
+
+::: {.important}
+**One-sample $t$ confidence interval for $\mu$.**
+
+$$\bar{x} \pm t^*_{df} \times \frac{s}{\sqrt{n}}$$
+
+where $df = n - 1$.
+
+**Conditions:**
+
+1. **Independence.** The observations are independent (e.g., from a random sample).
+2. **Normality / sample size.** Either the population distribution is approximately normal, or the sample size is large enough ($n \geq 30$). For smaller samples, check for strong skewness or extreme outliers.
+:::
+
+### Checking conditions
+
+The normality condition is about the shape of the **population**, not the sample. In practice:
+
+- If $n < 30$: Check a histogram or dotplot of the sample data. If there is no strong skewness and no extreme outliers, the $t$-methods are reasonable.
+- If $n \geq 30$: The Central Limit Theorem ensures that $\bar{x}$ is approximately normal, even if the population is moderately skewed. However, be cautious with extreme outliers, which can distort $\bar{x}$ and $s$.
+
+::: {.caution}
+**Outliers and the $t$-test.** The sample mean $\bar{x}$ and sample standard deviation $s$ are sensitive to outliers. A single extreme observation can substantially shift $\bar{x}$ and inflate $s$, leading to misleading confidence intervals. When outliers are present, consider whether they represent data errors. If the outliers are genuine, a bootstrap confidence interval (the bootstrap confidence intervals chapter) may be more reliable.
+:::
+
+::: {.caution}
+**When neither $t$ nor the plain bootstrap is enough.** The $t$-interval assumes a moderately-behaved population (or a large sample); the percentile bootstrap fills in when normality is doubtful and $n$ is at least moderate. But if your sample is **both small and strongly skewed**, or if extreme outliers dominate, *neither* tool is fully trustworthy. In that situation:
+
+- **Increase the sample size** if you can --- by far the best fix.
+- **Use a rank-based method** (Wilcoxon signed-rank, sign test) that does not require estimating a mean.
+- **Reach for the BCa bootstrap** --- an accuracy-corrected CI that handles skew and small samples better than the plain percentile method. Available in StatLens under **expert mode** and in R via `boot::boot.ci(..., type = "bca")`.
+- **Or consult a statistician.** Small-and-skewed is exactly the case where general-purpose tools fail and specific expertise helps.
+
+Reporting a $t$-interval or a plain percentile CI in this situation without flagging the concern would overstate your confidence. See Hesterberg (2015), [*"What Teachers Should Know About the Bootstrap"*](https://arxiv.org/abs/1411.5279), for the full accounting.
+:::
+
+### Worked example: Mercury levels in Risso's dolphins
+
+::: {.workedexample}
+Researchers measured mercury concentrations (in $\mu$g/g) in the muscle tissue of 19 Risso's dolphins from the Adriatic Sea. The sample mean was $\bar{x} = 4.4$ $\mu$g/g and the sample standard deviation was $s = 2.3$ $\mu$g/g. Construct a 95% confidence interval for the mean mercury level in the population of Risso's dolphins.
+
+---
+
+**Check conditions.**
+
+1. *Independence.* The dolphins were sampled from different locations, so it is reasonable to treat the measurements as independent.
+2. *Normality.* With $n = 19$, we need to check for strong skewness or outliers. Suppose a histogram of the data shows a roughly symmetric distribution with no extreme outliers. The condition is satisfied.
+
+**Compute the interval.** With $df = 19 - 1 = 18$, the critical value for a 95% CI is $t^*_{18} = 2.101$.
+
+$$SE = \frac{s}{\sqrt{n}} = \frac{2.3}{\sqrt{19}} = \frac{2.3}{4.359} = 0.528$$
+
+$$\bar{x} \pm t^*_{18} \times SE = 4.4 \pm 2.101 \times 0.528 = 4.4 \pm 1.109 = (3.29, 5.51)$$
+
+We are 95% confident that the mean mercury concentration in Risso's dolphins is between 3.29 and 5.51 $\mu$g/g.
+:::
+
+::: {.guidedpractice}
+A sample of 35 UW-La Crosse students reported their weekly study hours. The sample mean is $\bar{x} = 15.2$ hours and $s = 6.8$ hours. Construct a 90% confidence interval for the mean weekly study hours of all UW-La Crosse students. (Use $t^*_{34} = 1.691$ for a 90% CI.)
+
+<details>
+<summary>Show answer</summary>
+First check conditions: the sample is a random sample (independence), and $n = 35 \geq 30$ (normality via CLT). Then $SE = 6.8/\sqrt{35} = 1.149$. The 90% CI is $15.2 \pm 1.691 \times 1.149 = 15.2 \pm 1.943 = (13.26, 17.14)$. We are 90% confident the mean weekly study hours for all UW-La Crosse students is between 13.26 and 17.14 hours.
+</details>
+:::
+
+## Two-sample $t$ confidence interval {#sec-two-sample-t-ci}
+
+### The setup
+
+When comparing the means of two independent groups, we estimate the difference $\mu_1 - \mu_2$ using $\bar{x}_1 - \bar{x}_2$.
+
+::: {.important}
+**Two-sample $t$ confidence interval for $\mu_1 - \mu_2$.**
+
+$$(\bar{x}_1 - \bar{x}_2) \pm t^*_{df} \times \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}$$
+
+**Degrees of freedom:** The exact formula for $df$ is complex and typically computed by software. A conservative (safe) approximation is:
+
+$$df = \min(n_1 - 1,\ n_2 - 1)$$
+
+**Conditions:**
+
+1. **Independence (extended).** Observations are independent within each group *and* between groups (e.g., from two independent random samples or a randomized experiment).
+2. **Normality / sample size.** Each group's data should be approximately normal or have $n \geq 30$. Check each group separately for strong skewness or extreme outliers.
+:::
+
+### Worked example: Embryonic stem cells and heart function
+
+::: {.workedexample}
+Researchers studied whether embryonic stem cell (ESC) treatment improves heart function in sheep after a heart attack. Nine sheep received the ESC treatment and nine were in the control group. The change in pumping capacity was measured:
+
+| Group | $n$ | $\bar{x}$ | $s$ |
+|-------|-----|-----------|-----|
+| ESC | 9 | 3.50 | 5.17 |
+| Control | 9 | $-4.33$ | 2.76 |
+
+: Summary statistics for the stem cell study. {.striped}
+
+Construct a 95% confidence interval for the difference in mean change in pumping capacity, $\mu_{ESC} - \mu_{Control}$.
+
+---
+
+**Check conditions.**
+
+1. *Independence.* The sheep were randomly assigned to groups, so independence within and between groups is satisfied.
+2. *Normality.* With $n = 9$ per group (small samples), we check histograms. Suppose they show no extreme outliers in either group. The condition is reasonably met.
+
+**Compute the interval.**
+
+$$SE = \sqrt{\frac{5.17^2}{9} + \frac{2.76^2}{9}} = \sqrt{\frac{26.73}{9} + \frac{7.62}{9}} = \sqrt{2.970 + 0.847} = \sqrt{3.817} = 1.954$$
+
+Using $df = \min(9-1, 9-1) = 8$, the critical value for a 95% CI is $t^*_8 = 2.306$.
+
+$$\text{Point estimate} = 3.50 - (-4.33) = 7.83$$
+
+$$7.83 \pm 2.306 \times 1.954 = 7.83 \pm 4.506 = (3.32, 12.34)$$
+
+We are 95% confident that the ESC treatment increases heart pumping capacity by between 3.32% and 12.34% compared to the control. Because the interval is entirely above zero, we have evidence that the ESC treatment improves heart function. Since this was a randomized experiment, we can attribute the improvement to the treatment.
+:::
+
+::: {.guidedpractice}
+Researchers collected birth weight data from a random sample of 1,000 US births. Nonsmoker mothers ($n = 867$) had babies with $\bar{x}_n = 7.27$ lbs ($s_n = 1.23$), and smoker mothers ($n = 114$) had babies with $\bar{x}_s = 6.68$ lbs ($s_s = 1.60$). Is there evidence that babies born to nonsmoker mothers weigh more on average? Compute a 95% confidence interval for the difference $\mu_n - \mu_s$.
+
+<details>
+<summary>Show answer</summary>
+The point estimate is $7.27 - 6.68 = 0.59$ lbs. The SE is $\sqrt{1.23^2/867 + 1.60^2/114} = \sqrt{0.001745 + 0.02246} = \sqrt{0.02420} = 0.156$. Using $df = \min(866, 113) = 113$ and $t^*_{113} \approx 1.981$, the CI is $0.59 \pm 1.981 \times 0.156 = 0.59 \pm 0.309 = (0.28, 0.90)$. We are 95% confident that babies born to nonsmoker mothers weigh between 0.28 and 0.90 lbs more on average than babies born to smoker mothers.
+</details>
+:::
+
+## Paired data confidence interval {#sec-paired-ci}
+
+### What makes data "paired"?
+
+Sometimes two measurements are made on the same individual (e.g., before and after a treatment) or on naturally matched pairs (e.g., the same textbook priced at two stores). In these cases, the two groups are **not independent** -- they are **paired**.
+
+::: {.definition}
+**Paired data.** Two sets of observations are **paired** if each observation in one set has a special correspondence or connection with exactly one observation in the other set. Common examples include:
+
+- Before/after measurements on the same individual
+- Two treatments applied to the same subject (e.g., tires on the same car)
+- Matched pairs in an experiment (e.g., twins assigned to different treatments)
+- The same item measured under two conditions (e.g., textbook prices at two stores)
+:::
+
+| Observational unit | Comparison groups | Measurement | Value of interest |
+|---|---|---|---|
+| Car | Smooth Turn vs. Quick Spin | Tire tread after 1,000 miles | Difference in tread |
+| Textbook | UCLA Bookstore vs. Amazon | Price of new textbook | Difference in price |
+| Individual | Pre-course vs. Post-course | Exam score | Difference in score |
+
+: Examples of paired designs. {.striped}
+
+### The key idea: analyze the differences
+
+The key to working with paired data is simple: **compute the difference for each pair, then analyze those differences as a single sample.** This converts a two-sample problem into a one-sample problem.
+
+::: {.important}
+**Paired $t$ confidence interval for $\mu_{diff}$.**
+
+For paired data, compute the difference $d_i = x_{1,i} - x_{2,i}$ for each pair. Then the confidence interval for the mean difference $\mu_{diff}$ is:
+
+$$\bar{x}_{diff} \pm t^*_{df} \times \frac{s_{diff}}{\sqrt{n_{diff}}}$$
+
+where $\bar{x}_{diff}$ is the sample mean of the differences, $s_{diff}$ is the sample standard deviation of the differences, $n_{diff}$ is the number of pairs, and $df = n_{diff} - 1$.
+
+**Conditions:**
+
+1. **Independence of pairs.** The pairs themselves are independent (e.g., different cars, different textbooks).
+2. **Normality of differences.** The distribution of the *differences* should be approximately normal, or the number of pairs should be large ($n_{diff} \geq 30$). Check for extreme outliers.
+:::
+
+### Worked example: Textbook prices
+
+::: {.workedexample}
+Researchers sampled 68 UCLA courses and compared textbook prices at the UCLA Bookstore to prices on Amazon. Summary statistics for the price differences (UCLA $-$ Amazon) are:
+
+| $n_{diff}$ | $\bar{x}_{diff}$ | $s_{diff}$ |
+|------------|-------------------|-------------|
+| 68 | \$3.58 | \$13.42 |
+
+: Summary statistics for the 68 price differences. {.striped}
+
+Construct a 95% confidence interval for the mean price difference.
+
+---
+
+**Check conditions.**
+
+1. *Independence of pairs.* The textbooks were randomly sampled, so the pairs are independent.
+2. *Normality of differences.* With $n_{diff} = 68$, the CLT ensures the sampling distribution of $\bar{x}_{diff}$ is approximately normal. Though the distribution of individual differences is right-skewed, the large sample size and absence of extreme outliers make the $t$-methods reasonable.
+
+**Compute the interval.**
+
+$$SE = \frac{s_{diff}}{\sqrt{n_{diff}}} = \frac{13.42}{\sqrt{68}} = \frac{13.42}{8.246} = 1.628$$
+
+With $df = 68 - 1 = 67$, the critical value for a 95% CI is $t^*_{67} \approx 2.00$.
+
+$$3.58 \pm 2.00 \times 1.628 = 3.58 \pm 3.256 = (0.32, 6.84)$$
+
+We are 95% confident that UCLA Bookstore prices are, on average, between \$0.32 and \$6.84 higher than Amazon prices for UCLA course books.
+
+[Try this in StatLens →]({{< var tool-url >}}/inference/paired/?dataset=textbooks){.open-in-statlens target='_blank' aria-label='Compute the paired-t interval on the textbooks dataset in StatLens'}
+:::
+
+::: {.guidedpractice}
+A fitness program enrolled 25 participants and measured their resting heart rates before and after 8 weeks of training. The mean difference (before $-$ after) was $\bar{x}_{diff} = 4.2$ beats per minute with $s_{diff} = 6.1$ bpm. Construct a 90% confidence interval for the mean decrease in resting heart rate. (Use $t^*_{24} = 1.711$.)
+
+<details>
+<summary>Show answer</summary>
+First check conditions: pairs (individuals) were randomly selected (independence), and with $n = 25$ and no extreme outliers reported, the normality condition is reasonable. Then $SE = 6.1/\sqrt{25} = 6.1/5 = 1.22$. The 90% CI is $4.2 \pm 1.711 \times 1.22 = 4.2 \pm 2.09 = (2.11, 6.29)$. We are 90% confident the training program reduces resting heart rate by between 2.11 and 6.29 bpm on average.
+</details>
+:::
+
+### Why not use a two-sample $t$ interval for paired data?
+
+::: {.caution}
+**Never use a two-sample procedure for paired data.** A two-sample $t$ interval treats the two groups as independent, which they are not. Ignoring the pairing throws away valuable information about the within-pair relationship and typically produces a wider (less precise) confidence interval. Always compute the differences first and then use the one-sample (paired) $t$ procedure.
+:::
+
+## Connecting $t$-based and bootstrap confidence intervals {#sec-t-vs-bootstrap}
+
+::: {.original}
+The $t$-based confidence intervals in this chapter and the bootstrap confidence intervals from the bootstrap confidence intervals chapter are answering the same question: "What is a plausible range for the population parameter?" When conditions are met, they give similar results.
+
+**When do they agree?**
+
+- Large samples with no extreme outliers: the $t$-interval and bootstrap interval will be nearly identical.
+- Moderate samples from approximately normal populations: close agreement.
+
+**When might they differ?**
+
+- Small samples from skewed populations: the bootstrap can capture asymmetry in the sampling distribution, while the $t$-interval is always symmetric around $\bar{x}$.
+- Presence of outliers: the bootstrap is somewhat more robust because it does not rely on $s$ being a good estimate of $\sigma$.
+
+**Which should you use?**
+
+- If conditions are met, the $t$-interval is simpler to compute and has well-understood properties.
+- If conditions are questionable (small sample, skewness, outliers), prefer the bootstrap.
+- In practice, reporting both and noting any discrepancies is informative.
+:::
+
+## Chapter review {#sec-ci-for-means-review}
+
+### Summary
+
+This chapter developed formula-based confidence intervals for means using the $t$-distribution.
+
+- The **$t$-distribution** accounts for the extra uncertainty from estimating $\sigma$ with $s$. It has heavier tails than the normal distribution, especially for small degrees of freedom.
+- **One-sample $t$ CI**: $\bar{x} \pm t^*_{n-1} \times \frac{s}{\sqrt{n}}$. Requires independent observations and approximate normality (or large $n$).
+- **Two-sample $t$ CI**: $(\bar{x}_1 - \bar{x}_2) \pm t^*_{df} \times \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}$. Requires independence within and between groups, and approximate normality or large samples in each group.
+- **Paired $t$ CI**: Compute differences for each pair, then apply the one-sample $t$ CI to the differences: $\bar{x}_{diff} \pm t^*_{n_{diff}-1} \times \frac{s_{diff}}{\sqrt{n_{diff}}}$.
+- Always check conditions before using $t$-methods: independence, normality/sample size, and absence of extreme outliers.
+- When conditions are met, $t$-based and bootstrap confidence intervals give similar results. When conditions are questionable, the bootstrap may be more reliable.
+
+### Key terms
+
+$t$-distribution, degrees of freedom ($df$), critical value ($t^*$), one-sample $t$ confidence interval, two-sample $t$ confidence interval, paired data, paired $t$ confidence interval, standard error of the mean, independence condition, normality condition.
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-ci-for-means) at the back of the book.
+
+{{< include ../exercises/_ci-for-means-exercises.qmd >}}
+
+{{< include ../exercises/_ci-for-means-statlens-exercises.qmd >}}

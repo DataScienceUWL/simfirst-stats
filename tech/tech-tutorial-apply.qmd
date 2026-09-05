@@ -1,0 +1,157 @@
+# Tech Tutorial: Apply {.unnumbered}
+
+::: {.project-meta}
+**Tech Tutorial — Apply.** This unit extends inference to more than two groups and
+to relationships between variables: **chi-square**, **ANOVA**, and **regression**.
+Pick **one** tool and follow its tab.
+
+We reuse [`class_survey.csv`]({{< var data-url >}}/class_survey.csv){download="class_survey.csv"}.
+:::
+
+## What you'll do {#sec-tech-apply-skills}
+
+1. A **chi-square test of independence** — are `year` and `housing` associated?
+2. A **one-way ANOVA** — does mean `sleep_hours` differ across class `year`?
+3. A **simple linear regression** — does `study_hours` predict `sleep_hours`?
+
+---
+
+## 1. Chi-square test of independence {#sec-tech-apply-chisq}
+
+Both variables are categorical, so we cross-tabulate `year` × `housing` and test
+whether the two are independent.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Chi-Square Independence tool]({{< var tool-url >}}/inference/chisq/?csv={{< var data-url >}}/class_survey.csv&group=year&response=housing){target="_blank"}.
+2.  Confirm the two variables are `year` and `housing`.
+3.  Read the **contingency table, expected counts, χ² statistic, df, and p-value**.
+
+### Jamovi
+
+1.  Open `class_survey.csv`.
+2.  **Frequencies → Independent Samples (χ² test of association).** Rows: `year`; Columns: `housing`.
+3.  Under **Statistics**, read **χ²** and **p**; under **Cells**, request **Expected counts**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-apply-chisq
+#| echo: true
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(infer)
+
+survey <- read_csv("../datasets/class_survey.csv")
+
+survey |> chisq_test(housing ~ year)
+```
+
+:::
+
+::: {.callout-warning}
+## Check the conditions
+
+With only 50 students split across a 4×2 table, some **expected counts fall below
+5** — the chi-square approximation is shaky here. In practice you'd report that
+caveat (and could fall back to the *randomization* chi-square from the Simulate
+unit). For this tutorial the point is the mechanics.
+:::
+
+---
+
+## 2. One-way ANOVA {#sec-tech-apply-anova}
+
+ANOVA compares the mean of a numerical variable (`sleep_hours`) across 3+ groups
+(the four class years) with a single *F*-test.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [One-Way ANOVA tool]({{< var tool-url >}}/inference/anova/?csv={{< var data-url >}}/class_survey.csv&group=year&response=sleep_hours){target="_blank"}.
+2.  Confirm **response** `sleep_hours`, **grouping** `year`.
+3.  Read the group means, the **F statistic**, df, and **p-value**.
+
+### Jamovi
+
+1.  **ANOVA → One-Way ANOVA.** Dependent: `sleep_hours`; Grouping: `year`.
+2.  Read the **F**, **df**, and **p**. (Use **Descriptives plots** to see the group means.)
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-apply-anova
+#| echo: true
+#| message: false
+#| warning: false
+
+aov(sleep_hours ~ year, data = survey) |> summary()
+```
+
+:::
+
+---
+
+## 3. Simple linear regression {#sec-tech-apply-reg}
+
+Both variables are numerical. We fit a line predicting `sleep_hours` from
+`study_hours` and test whether the slope differs from zero. (In the Explore unit
+the scatter of these two looked flat — regression now tests that formally.)
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Regression Slope tool]({{< var tool-url >}}/inference/slope/?csv={{< var data-url >}}/class_survey.csv){target="_blank"}.
+2.  Set **x** to `study_hours` and **y** to `sleep_hours`.
+3.  Read the fitted **slope**, its **p-value**, and **R²**.
+
+### Jamovi
+
+1.  **Regression → Linear Regression.** Dependent: `sleep_hours`; Covariate: `study_hours`.
+2.  Read the **slope** (the `study_hours` coefficient), its **p**, and the **R²** (Model Fit).
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-apply-reg
+#| echo: true
+#| message: false
+#| warning: false
+
+lm(sleep_hours ~ study_hours, data = survey) |> summary()
+```
+
+:::
+
+---
+
+## Check yourself {#sec-tech-apply-check}
+
+- [ ] run a chi-square test of independence and check its expected counts;
+- [ ] run a one-way ANOVA and report F, df, and p;
+- [ ] fit a simple regression and report the slope, its p-value, and R²;
+- [ ] match each procedure to the data shape that calls for it.
+
+::: {.callout-tip collapse="true"}
+## Going further in R (optional)
+
+OpenIntro *IMS* interactive tutorials for this unit:
+
+- [Chi-squared test of independence](https://openintro.shinyapps.io/ims-05-infer-03/){target="_blank"}
+- [Comparing many means (ANOVA)](https://openintro.shinyapps.io/ims-05-infer-08/){target="_blank"}
+- [Simple linear regression](https://openintro.shinyapps.io/ims-03-model-03/){target="_blank"}
+- [Inference for regression (t-test for slope)](https://openintro.shinyapps.io/ims-06-model-infer-03/){target="_blank"}
+:::

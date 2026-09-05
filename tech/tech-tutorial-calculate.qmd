@@ -1,0 +1,121 @@
+# Tech Tutorial: Compute {.unnumbered}
+
+::: {.project-meta}
+**Tech Tutorial — Compute.** This unit uses **formulas and theoretical
+distributions** (the *t* and the normal) instead of resampling. Pick **one** tool
+and follow its tab — all three handle this unit well.
+
+We reuse [`class_survey.csv`]({{< var data-url >}}/class_survey.csv){download="class_survey.csv"}.
+:::
+
+## What you'll do {#sec-tech-calc-skills}
+
+1. A **two-sample *t*-test** — do On- and Off-campus students differ in mean `sleep_hours`?
+2. A **confidence interval for one proportion** — what fraction of students live on campus?
+
+---
+
+## 1. Two-sample *t*-test for a difference in means {#sec-tech-calc-t}
+
+This is the formula-based counterpart to the randomization test from the Simulate
+unit. It assumes roughly normal data (or a large enough sample) and reports a
+*t* statistic, degrees of freedom, and a p-value.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Two-Means Inference tool]({{< var tool-url >}}/inference/two-means/?csv={{< var data-url >}}/class_survey.csv&group=housing&response=sleep_hours){target="_blank"}.
+2.  Confirm the **grouping** variable is `housing` and the **response** is `sleep_hours`.
+3.  Read the **t statistic, df, p-value**, and the confidence interval for the difference.
+
+### Jamovi
+
+1.  Open `class_survey.csv`.
+2.  **T-Tests → Independent Samples T-Test.** Dependent: `sleep_hours`; Grouping: `housing`.
+3.  Tick **Welch's** (unequal variances), **Mean difference**, and **Confidence interval**.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-calc-t
+#| echo: true
+#| message: false
+#| warning: false
+
+library(readr)
+library(dplyr)
+library(infer)
+
+survey <- read_csv("../datasets/class_survey.csv")
+
+# Two-sample t-test (Welch); order sets the sign of the difference
+survey |>
+  t_test(sleep_hours ~ housing,
+         order = c("On-campus", "Off-campus"))
+```
+
+:::
+
+---
+
+## 2. Confidence interval for one proportion {#sec-tech-calc-prop}
+
+Here the variable is categorical: each student lives on campus or not. We estimate
+the population proportion living on campus with a normal-based (Wald/score)
+confidence interval.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [One-Proportion Inference tool]({{< var tool-url >}}/inference/one-prop/?csv={{< var data-url >}}/class_survey.csv){target="_blank"}.
+2.  Choose `housing` and set the **success** category to `On-campus`.
+3.  Read the sample proportion and its **95% confidence interval**.
+
+### Jamovi
+
+1.  **Frequencies → 2 Outcomes (Binomial test).** Variable: `housing`.
+2.  Set the **test value** and read the **proportion** and its **confidence interval**
+    (Jamovi reports the CI for the level you select).
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: tech-calc-prop
+#| echo: true
+#| message: false
+#| warning: false
+
+# Count on-campus students and form a one-proportion z interval
+on <- sum(survey$housing == "On-campus")
+n  <- nrow(survey)
+
+prop.test(on, n)$conf.int        # 95% CI for the proportion on campus
+round(on / n, 3)                 # sample proportion
+```
+
+:::
+
+---
+
+## Check yourself {#sec-tech-calc-check}
+
+- [ ] run a two-sample *t*-test and report t, df, p-value, and the CI for the difference;
+- [ ] build a confidence interval for a single proportion;
+- [ ] state, for each, the condition that makes the theoretical model appropriate.
+
+::: {.callout-tip collapse="true"}
+## Going further in R (optional)
+
+OpenIntro *IMS* interactive tutorials for this unit (same `infer` style):
+
+- [Inference for a single proportion](https://openintro.shinyapps.io/ims-05-infer-01/){target="_blank"}
+- [Inference for comparing two proportions](https://openintro.shinyapps.io/ims-05-infer-02/){target="_blank"}
+- [Inference for difference in two means](https://openintro.shinyapps.io/ims-05-infer-07/){target="_blank"}
+- [Introducing the t-distribution](https://openintro.shinyapps.io/ims-05-infer-06/){target="_blank"}
+:::

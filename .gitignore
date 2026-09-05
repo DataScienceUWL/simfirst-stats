@@ -1,0 +1,35 @@
+# Quarto build output
+_book/
+.quarto/
+*_files/
+*_cache/
+/.luarc.json
+
+# Freeze directory is intentionally NOT ignored — it makes CI renders fast.
+# _freeze/
+
+# LaTeX intermediates
+*.aux
+*.log
+*.toc
+*.out
+*.synctex.gz
+index.tex
+index.pdf
+Introduction-to-Statistics--A-Simulation-First-Approach.tex
+
+# R
+.Rproj.user/
+.Rhistory
+.RData
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+
+# Google Drive duplicate-file artifacts
+*\ \(1\)*
+*\ \(2\)*
+*\ \(3\)*

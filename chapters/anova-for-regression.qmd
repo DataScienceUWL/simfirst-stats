@@ -1,0 +1,174 @@
+---
+title: "ANOVA for Regression"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+::: {.chapterintro}
+In the linear regression chapter we tested a single hypothesis: is the population slope $\beta_1$ zero? That test used a $t$-statistic, and it answered a single question about a single coefficient. In this chapter we develop a *different* view of regression that scales naturally to models with many predictors: the **analysis of variance (ANOVA) table for regression**. This view partitions the total variability in the response into a piece the model explains and a piece it doesn't, and summarizes the resulting evidence for the model *as a whole* with an $F$-statistic. In simple regression the ANOVA $F$-test is algebraically equivalent to the $t$-test on $\beta_1$ (specifically, $F = t^2$), so it provides no new answers there --- but the framework is the one that carries over to multiple regression, where it becomes essential.
+:::
+
+::: {.statlens}
+**See it in action.** Open the [Slope tool with ANOVA panel]({{< var tool-url >}}/inference/slope/?dataset=possum_regression&anova=true){target="_blank"} to display the ANOVA table for a simple regression fit (SS partition, $F$-statistic, model $R^2$), with the $F = t^2$ equivalence shown below the table. Pair with the [Regression Explorer]({{< var tool-url >}}/explore/regression/){target="_blank"} to see the fitted line and residuals side by side.
+:::
+
+## The two-question view of regression {#sec-two-questions}
+
+When we fit a simple linear regression model $\hat{y} = b_0 + b_1 x$ to sample data, we can ask two related but distinct questions:
+
+1.  **Is the slope different from zero?** This is a *coefficient-level* question. In the linear regression chapter we answered it with a $t$-test on $b_1$.
+2.  **Is the model useful at all?** This is a *model-level* question. Does the fitted regression explain a discernible share of the variability in $y$, compared to using $\bar{y}$ as a "prediction" for every case?
+
+In simple regression these two questions have the same answer, because a single-predictor model is "useful" exactly when its one slope coefficient is nonzero. When we add more predictors in the next chapter, the two questions come apart --- some coefficients can be individually nonsignificant while the model as a whole is highly significant, or vice versa. The ANOVA-for-regression view is the tool we use to ask the *model-level* question.
+
+## Partitioning the total sum of squares {#sec-ss-partition}
+
+The **total variability** in the response is measured by
+
+$$SST = \sum_{i=1}^{n} (y_i - \bar{y})^2,$$
+
+the sum of squared deviations of each observation from the sample mean. For any fitted regression line, we can split each deviation $y_i - \bar{y}$ into two pieces:
+
+$$y_i - \bar{y} = \underbrace{(\hat{y}_i - \bar{y})}_{\text{explained by the model}} + \underbrace{(y_i - \hat{y}_i)}_{\text{unexplained (the residual)}}.$$
+
+Squaring and summing gives an identity that is arguably the single most important formula in this chapter:
+
+::: {.important}
+**The sum-of-squares decomposition for regression.**
+
+$$SST = SSR + SSE,$$
+
+where
+
+- $SST = \sum (y_i - \bar{y})^2$ is the **total sum of squares** (total variability in $y$),
+- $SSR = \sum (\hat{y}_i - \bar{y})^2$ is the **regression sum of squares** (variability *explained* by the model),
+- $SSE = \sum (y_i - \hat{y}_i)^2$ is the **error** or **residual sum of squares** (variability *not* explained).
+:::
+
+The cross-product term that would appear in a naive expansion vanishes because the ordinary least-squares fit is orthogonal to the residuals by construction; you can take that as a promise for now.
+
+This decomposition also gives an interpretation of $R^2$ that is the same one you already know but written in the new language:
+
+$$R^2 = \frac{SSR}{SST} = 1 - \frac{SSE}{SST}.$$
+
+$R^2$ is the fraction of total variability that the regression model explains.
+
+## The ANOVA table for regression {#sec-anova-table-regression}
+
+Software organizes the sum-of-squares decomposition, degrees of freedom, and derived quantities into an **ANOVA table**:
+
+| Source | df | SS | MS | $F$ | p-value |
+|---|:-:|:-:|:-:|:-:|:-:|
+| Regression | $1$ | $SSR$ | $MSR = SSR / 1$ | $F = MSR/MSE$ | (from $F_{1,\,n-2}$) |
+| Residual | $n - 2$ | $SSE$ | $MSE = SSE / (n-2)$ | | |
+| Total | $n - 1$ | $SST$ | | | |
+
+: The ANOVA table for a simple linear regression fit. In simple regression the numerator degrees of freedom is always 1 (one slope estimated); the denominator is $n - 2$ (one intercept and one slope). {#tbl-anova-simple}
+
+Two of the columns deserve extra comment.
+
+- The **degrees of freedom** row is what you would guess: we lose two df fitting the two coefficients ($b_0$ and $b_1$), leaving $n - 2$ for the residual row; the regression row picks up the remaining $1$ so that everything sums to the total's $n - 1$.
+- $MSE$ estimates the residual variance $\sigma^2$ around the true regression line. Its square root, $s = \sqrt{MSE}$, is the **residual standard error** that software reports on the same output.
+
+## The $F$-statistic and its distribution {#sec-f-stat-regression}
+
+The **$F$-statistic** for regression is a ratio of two variance estimates:
+
+$$F = \frac{MSR}{MSE} = \frac{SSR / 1}{SSE / (n-2)}.$$
+
+Under $H_0: \beta_1 = 0$ (and the LINE conditions from the linear regression chapter), this statistic follows an $F$ distribution with $1$ numerator degree of freedom and $n - 2$ denominator degrees of freedom. When the true slope is zero, both $MSR$ and $MSE$ estimate the same noise variance $\sigma^2$, so $F$ hovers near 1. When the slope is nonzero, the model captures real signal and $MSR$ inflates relative to $MSE$, driving $F$ above 1. So the test is always right-tailed: we compute a p-value as the area *to the right* of the observed $F$ on the $F_{1,\,n-2}$ curve.
+
+::: {.definition}
+The **model-level $F$-test** for a simple linear regression tests
+
+$$H_0: \beta_1 = 0 \quad \text{vs.} \quad H_A: \beta_1 \ne 0$$
+
+with test statistic $F = MSR / MSE$. Under $H_0$ and the LINE conditions, $F \sim F_{1,\,n-2}$. Small p-values (large $F$) provide evidence that the regression model captures real signal in $y$.
+:::
+
+## Worked example: possum head length on total length {#sec-possum-anova}
+
+::: {.workedexample}
+The linear regression chapter fit a model of possum head length (mm) on total length (cm) using $n = 104$ possums. Suppose the software reports the following:
+
+| Quantity | Value |
+|---|---|
+| Slope estimate $b_1$ | 0.573 |
+| $SE(b_1)$ | 0.062 |
+| $t$-statistic for $H_0: \beta_1 = 0$ | 9.24 |
+| Residual standard error $s$ | 2.60 mm |
+| $R^2$ | 0.456 |
+
+Fill in the ANOVA table.
+
+---
+
+**Total sum of squares.** With $n = 104$, the residual row has $df = n - 2 = 102$. The regression row has $df = 1$. The total row has $df = n - 1 = 103$.
+
+The residual mean square is $MSE = s^2 = 2.60^2 = 6.76$, so
+$$SSE = df_{\text{resid}} \times MSE = 102 \times 6.76 = 689.5.$$
+
+$R^2 = 0.456$ means the model explains $45.6\%$ of the total variability, so
+$$SSR = \frac{R^2}{1 - R^2} \cdot SSE = \frac{0.456}{0.544} \times 689.5 \approx 578.$$
+
+(Equivalently, $SST = SSE / (1 - R^2) \approx 689.5 / 0.544 \approx 1267$ and $SSR = SST - SSE \approx 578$.)
+
+**The regression mean square** is $MSR = SSR / 1 = 578$, and
+
+$$F = \frac{MSR}{MSE} = \frac{578}{6.76} \approx 85.5.$$
+
+Compare to $t^2 = 9.24^2 \approx 85.4$ --- the two match to within rounding.
+
+Under $H_0$ the null distribution is $F_{1, 102}$, and $F = 85.5$ is far into the right tail; the p-value from software is essentially zero. The ANOVA $F$-test rejects the null of no linear relationship, in exact agreement with the $t$-test we ran in the linear regression chapter.
+:::
+
+## $F = t^2$ in simple regression {#sec-f-equals-t-squared}
+
+The near-equality of $F$ and $t^2$ in the worked example is not a coincidence.
+
+::: {.important}
+**In a simple linear regression**, the ANOVA $F$-statistic and the slope $t$-statistic satisfy
+
+$$F = t^2,$$
+
+and the two tests give **identical** p-values. Rejecting $H_0: \beta_1 = 0$ with the $t$-test is the same event as rejecting the model-level $H_0$ with the $F$-test.
+:::
+
+This equivalence is a special case of a broader algebraic fact about $F$ distributions: an $F$ random variable with $1$ numerator degree of freedom is the square of a $t$ random variable with the corresponding denominator degrees of freedom. So in simple regression the two tests are literally the same test dressed in different notation.
+
+Why bother introducing the ANOVA framework at all, then? Because in **multiple regression** --- with two or more predictors --- the $F$-test tests whether *any* of the slopes are nonzero. There is no single $t$-statistic that answers that question; each predictor gets its own $t$, and the model-level $F$ combines them. The ANOVA-for-regression view is the correct generalization; the coincidence of $F = t^2$ in the one-predictor case simply reflects that the two views have to agree when there is only one slope to test.
+
+## Bridge to multiple regression {#sec-anova-mlr-bridge}
+
+The next chapter introduces regression models with **more than one** predictor. The ANOVA framework extends naturally.
+
+- The **regression sum of squares** picks up the variability jointly explained by all the predictors together; its degrees of freedom equal the number of predictors $k$.
+- The **residual sum of squares** measures the variability the multi-predictor model still cannot explain; its degrees of freedom are $n - k - 1$ (one lost per slope plus one for the intercept).
+- The **overall $F$-statistic** tests $H_0: \beta_1 = \beta_2 = \cdots = \beta_k = 0$, i.e. "none of the predictors help." Under $H_0$ it follows an $F_{k,\,n-k-1}$ distribution.
+- The **coefficient-level $t$-tests** answer individual questions about each predictor "controlling for the others." A predictor with a discernible $t$-test contributes above and beyond the other predictors already in the model.
+
+In simple regression there is only one $t$-test and one $F$-test and they agree; in multiple regression there are $k+1$ tests and they can disagree in informative ways. The rest of that story is Chapter 23.
+
+## Chapter review {#sec-anova-for-regression-review}
+
+### Summary
+
+This chapter introduced the ANOVA-for-regression framework. The total sum of squares $SST$ decomposes as $SST = SSR + SSE$, splitting the response's variability into a piece the model explains and a piece it does not. Organizing this decomposition alongside degrees of freedom, mean squares, and an $F$-statistic gives the **ANOVA table for regression**. The $F$-statistic tests the model as a whole; in simple regression it satisfies $F = t^2$ and gives the same p-value as the slope $t$-test, but the framework generalizes to multiple regression where the two views come apart. Along the way we reinterpreted $R^2 = SSR/SST$ as the fraction of total variability the model explains.
+
+### Terms
+
+$SST$, $SSR$, $SSE$, sum-of-squares decomposition, regression mean square $MSR$, residual mean square $MSE$, ANOVA table for regression, model-level $F$-test, $F$ distribution, residual standard error, $F = t^2$ equivalence in simple regression.
+
+### Attribution
+
+This chapter's ANOVA-for-regression framing --- SS partition, $F$-statistic, $R^2$ through the ANOVA lens, and residual standard error --- aligns with the same treatment in the UWL STAT 145 coursepack (Bingham, `coursepack/sections/Unit4/ch18-additional-regression.qmd`). The two contemporary CC BY-SA OER intro-stats texts (IMS 2e's `inf-model-slr.qmd` and OpenIntro Statistics's regression chapters) both use the coefficient-level $t$-test route to slope inference without a formal ANOVA table; the exposition here is authored fresh rather than remixed from either. The $F = t^2$ equivalence and the bridge section to multiple regression are original to this chapter.
+
+## Exercises {.exercises}
+
+{{< include ../exercises/_anova-for-regression-exercises.qmd >}}
+
+{{< include ../exercises/_anova-for-regression-statlens-exercises.qmd >}}

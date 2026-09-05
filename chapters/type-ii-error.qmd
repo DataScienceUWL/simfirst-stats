@@ -1,0 +1,249 @@
+---
+title: "Type II Error and Power"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+:::{.callout-note appearance="simple" icon=false}
+**Extended Content.** This chapter extends beyond UWL's core STAT 145 curriculum. It is included for completeness and for instructors who wish to cover additional topics. Content is in draft form.
+:::
+
+::: {.chapterintro}
+In the chapter on decision errors we met the two ways a hypothesis test can go wrong and named their probabilities $\alpha$ and $\beta$. The Type I error rate $\alpha$ is ours to choose; the Type II error rate $\beta$ is not --- it depends on the unknown truth. This chapter takes a closer look at $\beta$: we use simulation to *see* how often a real effect goes undetected, examine the factors that drive the Type II error rate, and connect these ideas to the **power** of a study. This material extends beyond the core STAT 145 sequence and is intended for readers who want to go deeper.
+:::
+
+
+## Recap: the two error types {#sec-error-recap}
+
+Recall from the chapter on decision errors:
+
+- A **Type I error** rejects a true $H_0$; its probability is the discernibility level $\alpha$, which we choose.
+- A **Type II error** fails to reject $H_0$ when $H_A$ is true; its probability is $\beta$.
+
+We can set $\alpha$ directly, but $\beta$ depends on the effect size, the sample size, and the variability in the data. The rest of this chapter studies what determines $\beta$ --- and how to drive it down.
+
+## Visualizing Type II error {#sec-visualizing-type-ii}
+
+::: {.original}
+The most effective way to build intuition about Type II error is to think about what happens when there *is* a real effect but our test fails to detect it. Simulation makes this concrete.
+
+### A simulation thought experiment
+
+Imagine the following scenario. A tutoring program truly raises students' exam scores by an average of 5 points (on a 100-point scale). The standard deviation of exam scores in the population is 15 points. A researcher recruits $n = 20$ students, has them go through the tutoring program, and compares their scores to the known population mean using a one-sample $t$-test at $\alpha = 0.05$.
+
+Here is what might happen:
+
+- **The truth**: $\mu = 75$ (population mean with tutoring), while $\mu_0 = 70$ (the null hypothesis value without tutoring). The real effect is $\mu - \mu_0 = 5$ points.
+- **One simulated study**: The researcher collects 20 scores. Due to natural variability, the sample mean might be $\bar{x} = 73.2$ with $s = 14.8$. The test statistic is:
+
+$$t = \frac{73.2 - 70}{14.8 / \sqrt{20}} = \frac{3.2}{3.31} = 0.97$$
+
+The p-value for this test is about 0.17 — not discernible at $\alpha = 0.05$. The researcher fails to reject $H_0$, even though the tutoring program really does work. This is a Type II error.
+
+- **Another simulated study**: A different random sample of 20 students happens to include several who benefited greatly from tutoring. The sample mean is $\bar{x} = 76.8$ with $s = 13.5$. Now:
+
+$$t = \frac{76.8 - 70}{13.5 / \sqrt{20}} = \frac{6.8}{3.02} = 2.25$$
+
+The p-value is about 0.018 — discernible at $\alpha = 0.05$. This time the researcher correctly rejects $H_0$. This is a correct decision.
+
+### What happens across many studies?
+
+If we repeated this experiment 1,000 times — each time drawing a fresh sample of 20 students from a population where the true effect is 5 points — we would find that roughly 340 of those experiments reject $H_0$ and roughly 660 do not. That means:
+
+- About 34% of the time, we correctly detect the real effect.
+- About 66% of the time, we commit a Type II error.
+
+The Type II error rate is $\beta \approx 0.66$ — alarmingly high! Nearly two-thirds of studies with this design would miss the real effect. This is not because the effect doesn't exist; it's because the sample size is too small relative to the effect size and variability.
+
+```{r}
+#| label: fig-type-ii-sim
+#| fig-cap: "Visualization of 1,000 simulated hypothesis tests when the true effect is 5 points. Each point represents one simulated study. Green circles are studies that correctly rejected H₀ (correct decisions); red triangles are studies that failed to reject H₀ (Type II errors). [↗ Try this live](https://learnlens.org/statlens/conceptual/decision-errors/) — simulate many studies as hits / Type II misses / Type I false alarms."
+#| fig-alt: "A dot plot showing the results of 1,000 simulated hypothesis tests. About 340 points are green circles (reject H-null, correct decision) and about 660 points are red triangles (fail to reject H-null, Type II error). The circles tend to have larger sample means, while the triangles cluster closer to the null hypothesis value."
+
+library(ggplot2)
+
+set.seed(42)
+n <- 20
+mu_true <- 75
+mu_null <- 70
+sigma <- 15
+n_sims <- 1000
+
+sim_results <- data.frame(
+  sim = 1:n_sims,
+  sample_mean = replicate(n_sims, mean(rnorm(n, mean = mu_true, sd = sigma)))
+)
+sim_results$se <- sigma / sqrt(n)
+sim_results$t_stat <- (sim_results$sample_mean - mu_null) / sim_results$se
+sim_results$p_value <- 2 * pt(-abs(sim_results$t_stat), df = n - 1)
+sim_results$decision <- ifelse(sim_results$p_value < 0.05, "Reject H0\n(Correct)", "Fail to reject H0\n(Type II Error)")
+
+ggplot(sim_results, aes(x = sample_mean, y = 0, color = decision, shape = decision)) +
+  geom_jitter(height = 0.4, size = 1.4, alpha = 0.6) +
+  scale_color_manual(values = c("Reject H0\n(Correct)" = COL_GREEN,
+                                "Fail to reject H0\n(Type II Error)" = COL_RED),
+                     name = "Decision") +
+  scale_shape_manual(values = c("Reject H0\n(Correct)" = 16,
+                                "Fail to reject H0\n(Type II Error)" = 17),
+                     name = "Decision") +
+  geom_vline(xintercept = mu_null, linetype = "dashed", color = "gray40") +
+  annotate("text", x = mu_null, y = 0.55, label = expression(mu[0] == 70),
+           hjust = 1.1, size = 4) +
+  geom_vline(xintercept = mu_true, linetype = "dashed", color = COL_BLUE) +
+  annotate("text", x = mu_true, y = 0.55, label = expression(mu[true] == 75),
+           hjust = -0.1, size = 4) +
+  labs(x = "Sample Mean", y = "") +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+```
+
+::: {.guidedpractice}
+In the tutoring program simulation above, what would happen to the Type II error rate if the researcher increased the sample size from 20 to 100 students? Would $\beta$ increase, decrease, or stay the same?
+
+<details>
+<summary>Show answer</summary>
+The Type II error rate would decrease substantially. With 100 students instead of 20, the standard error drops from $15/\sqrt{20} = 3.35$ to $15/\sqrt{100} = 1.50$. The test becomes much more precise, making it easier to distinguish the true mean of 75 from the null value of 70. In fact, with $n = 100$, the power would be about 94%, meaning $\beta \approx 0.06$ — the test would miss the real effect only about 6% of the time.
+</details>
+:::
+:::
+
+::: {.original}
+::: {.statlens}
+**See it in action.** Open the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/?alpha=0.05&n=30&delta=1&sigma=2&tail=right){target="_blank"} to *see* Type II error: it overlays the null and alternative curves and shades $\alpha$, $\beta$, and the power $1-\beta$. Increase sample size or effect size and watch $\beta$ shrink; lower $\alpha$ and watch it grow. For the sim companion, pair with the [Power Lab]({{< var tool-url >}}/conceptual/power-sim/?delta=1&sigma=2&n=30&alpha=0.05&tail=right){target="_blank"} (repeated z-tests, empirical reject-rate).
+:::
+:::
+
+## Factors that affect the Type II error rate {#sec-factors-type-ii}
+
+::: {.original}
+Four key factors determine how likely a study is to commit a Type II error:
+
+### 1. Effect size
+
+The **effect size** is the magnitude of the difference between the true parameter value and the null hypothesis value. Larger effects are easier to detect.
+
+- If a tutoring program raises scores by 20 points, almost any reasonable study will detect it.
+- If a tutoring program raises scores by 2 points, you need a very large or very precise study to detect it.
+
+Intuitively, a large effect "sticks out" from the noise, while a small effect can easily be hidden by random variability.
+
+### 2. Sample size
+
+Larger samples provide more precise estimates and smaller standard errors. The standard error of the sample mean is $SE = \sigma / \sqrt{n}$, which decreases as $n$ increases. A smaller standard error means the sampling distribution is narrower, making it easier to distinguish the true effect from zero.
+
+::: {.important}
+**More data, fewer missed effects.** Increasing the sample size is the most common way to reduce the Type II error rate. This is why large clinical trials with thousands of participants are more likely to detect treatment effects than small pilot studies.
+:::
+
+### 3. Population variability ($\sigma$)
+
+When individual observations are highly variable, it is harder to estimate the population mean precisely. The standard error depends directly on $\sigma$: high variability means a wide sampling distribution, which makes it harder to distinguish $H_A$ from $H_0$.
+
+For example, if exam scores range from 20 to 100 with $\sigma = 25$, it is much harder to detect a 5-point effect than if scores range from 60 to 80 with $\sigma = 5$.
+
+::: {.guidedpractice}
+A researcher is studying whether a dietary supplement improves reaction time. She can either recruit participants from the general population (where reaction times are highly variable) or from a group of trained athletes (where reaction times are more consistent). Which group would give her study a lower Type II error rate, assuming the supplement has the same true effect in both populations?
+
+<details>
+<summary>Show answer</summary>
+The group of trained athletes would give a lower Type II error rate because their reaction times are less variable (smaller $\sigma$). A smaller $\sigma$ leads to a smaller standard error, making it easier to detect the true effect of the supplement.
+</details>
+:::
+
+### 4. Discernibility level ($\alpha$)
+
+As we discussed in @sec-tradeoff, a smaller $\alpha$ makes the test more conservative — it demands stronger evidence before rejecting $H_0$. This directly increases $\beta$ because the rejection region shrinks.
+
+The table below summarizes these four factors:
+
+| Factor                          | Change                 | Effect on $\beta$ |
+|:--------------------------------|:-----------------------|:-------------------|
+| Effect size                     | Larger effect          | $\beta$ decreases  |
+| Sample size ($n$)               | Larger $n$             | $\beta$ decreases  |
+| Population variability ($\sigma$)| Larger $\sigma$       | $\beta$ increases  |
+| Discernibility level ($\alpha$)   | Smaller $\alpha$       | $\beta$ increases  |
+
+: How each factor affects the Type II error rate. {#tbl-factors-beta}
+
+::: {.workedexample}
+A researcher plans a two-sample $t$-test to compare a new therapy to a standard therapy. She knows from pilot data that the standard deviation of patient outcomes is about $\sigma = 12$. She is hoping to detect a difference of at least 4 points between the two therapies. Her initial plan calls for 30 patients per group with $\alpha = 0.05$.
+
+The standard error for the difference in means is approximately:
+
+$$SE = \sqrt{\frac{12^2}{30} + \frac{12^2}{30}} = \sqrt{\frac{144}{30} + \frac{144}{30}} = \sqrt{9.6} = 3.10$$
+
+The rejection boundary for a two-sided test is approximately $1.96 \times SE = 1.96 \times 3.10 = 6.07$. Since the true effect is only 4 points — smaller than the rejection boundary of 6.07 — the study will more often than not fail to detect the effect. The Type II error rate will be high.
+
+What could she change to reduce the Type II error rate?
+
+---
+
+She has several options: (1) increase the sample size to reduce the standard error, (2) try to reduce variability through better measurement or a more homogeneous study population, or (3) increase $\alpha$ to 0.10 (though this increases the Type I error rate). The most practical option is usually to increase the sample size.
+:::
+:::
+
+## Practical vs. statistical discernibility revisited {#sec-practical-significance-revisited}
+
+::: {.original}
+The concepts of Type I and Type II error are closely connected to the distinction between **statistical discernibility** and **practical importance** that we first encountered in earlier chapters.
+
+**Statistical discernibility** means the data provide enough evidence to reject $H_0$ at our chosen $\alpha$ level. It says: "The effect is probably not zero."
+
+**Practical importance** means the effect is large enough to matter in the real world. It says: "The effect is big enough to be useful."
+
+These are different questions, and they can give different answers:
+
+| Scenario | Statistically discernible? | Practically important? | What happened? |
+|:---------|:---------------------------|:-------------------------|:---------------|
+| Large effect, large $n$ | Yes | Yes | Ideal outcome |
+| Large effect, small $n$ | Possibly not | Yes | Type II error risk — effect exists but may be missed |
+| Small effect, large $n$ | Yes | No | "Discernible but trivial" — very large studies can detect tiny, unimportant effects |
+| Small effect, small $n$ | No | No | No news |
+
+The lower-left cell is the Type II error danger zone: a real, important effect exists, but the study is too small to detect it. The upper-right cell represents a different problem: a large study that detects a trivially small effect that has no practical importance.
+
+::: {.workedexample}
+A study with 50,000 participants finds that a new teaching method raises test scores by 0.3 points on a 100-point scale, with $p = 0.002$. Is this result practically important?
+
+---
+
+The result is statistically discernible ($p = 0.002 < 0.05$), meaning we have strong evidence that the effect is not zero. However, a 0.3-point improvement on a 100-point scale is almost certainly too small to matter in practice. No school would adopt a new teaching method for a gain of one-third of a point. This is a case of statistical discernibility without practical importance — the study was so large that it detected a real but trivially small effect.
+:::
+
+::: {.important}
+**Statistical discernibility is not the same as practical importance.** A statistically discernible result tells you the effect is probably real, but it does not tell you the effect is important. Always consider the *size* of the effect, not just whether it is statistically discernible.
+:::
+
+::: {.guidedpractice}
+A small pilot study with 12 participants finds that a new exercise program reduces resting heart rate by 8 beats per minute, but the result is not statistically discernible ($p = 0.09$). Does this mean the exercise program doesn't work?
+
+<details>
+<summary>Show answer</summary>
+Not necessarily. An 8 bpm reduction in resting heart rate is a clinically meaningful effect. The study may simply have been too small to detect it — this is a potential Type II error. The non-discernible result means we don't have enough evidence to be confident the effect is real, but it doesn't prove the program is ineffective. A larger study with more participants would be warranted.
+</details>
+:::
+:::
+
+## Chapter review {#sec-type-ii-error-review}
+
+::: {.original}
+### Summary
+
+This chapter looked closely at the Type II error rate $\beta$ and the power of a test. Simulation shows that a study with a small sample, a small true effect, or high variability can fail to detect a real effect a large fraction of the time. Four factors govern $\beta$: the **effect size** (larger effects are easier to detect), the **sample size** (more data lowers $\beta$), the **population variability** (more variability raises $\beta$), and the **discernibility level** (a smaller $\alpha$ raises $\beta$). Finally, statistical discernibility and practical importance are not the same: a very large study can detect a trivially small effect, while a small study can miss an important one.
+:::
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-type-ii-error) at the back of the book.
+
+{{< include ../exercises/_type-ii-error-exercises.qmd >}}
+
+{{< include ../exercises/_type-ii-error-statlens-exercises.qmd >}}

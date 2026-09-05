@@ -1,0 +1,38 @@
+<!-- Standard textbook exercises for ch 22 anova-for-regression -->
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd) at the back of the book.
+
+1.  **Reading the ANOVA table.** A regression of highway miles-per-gallon on curb weight for $n = 60$ vehicles produces the following (abbreviated) ANOVA table:
+
+    | Source | df | SS | MS | $F$ |
+    |---|:-:|:-:|:-:|:-:|
+    | Regression | | 442 | | |
+    | Residual | | 128 | | |
+    | Total | | | | |
+
+    (a) Fill in the missing degrees of freedom, mean squares, total sum of squares, and $F$-statistic.
+    (b) Compute $R^2$.
+    (c) State the null and alternative hypotheses that the $F$-test evaluates. Given the value of $F$ you computed, is the p-value small or large? (You may reason from the size of $F$ alone.)
+
+2.  **Filling gaps from $R^2$ and $s$.** A regression of test scores on hours studied for $n = 25$ students reports residual standard error $s = 4.20$ (points) and $R^2 = 0.36$.
+
+    (a) Compute $MSE$ and $SSE$.
+    (b) Compute $SST$ and $SSR$.
+    (c) Report the ANOVA $F$-statistic.
+
+3.  **The $F = t^2$ equivalence.** A software output reports $t = 3.1$ for the slope with 47 degrees of freedom, and $F = 9.61$ for the model.
+
+    (a) Show numerically that $F = t^2$ for this fit.
+    (b) Explain in one sentence why the two tests must give the same p-value.
+
+4.  **Interpreting $R^2$ using sums of squares.** Suppose a fitted regression has $SSR = 200$ and $SSE = 800$.
+
+    (a) Compute $R^2$.
+    (b) In plain English, what does the value of $R^2$ tell you about how useful the regression is at explaining $y$?
+    (c) Would you feel confident using this model for prediction? What other information would you want to see before deciding?
+
+5.  **When the $F$-test does *not* reject.** A study of $n = 40$ light bulbs regresses lifetime on bulb voltage. The ANOVA reports $F = 0.34$ with 1 and 38 degrees of freedom.
+
+    (a) Estimate the p-value roughly (you may use the "$F$ near 1 means no evidence" rule).
+    (b) What conclusion does this suggest about the linear relationship between voltage and lifetime in this sample?
+    (c) Does a non-rejecting $F$-test mean there is no relationship at all between voltage and lifetime? What are two alternative explanations?

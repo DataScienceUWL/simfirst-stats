@@ -1,0 +1,638 @@
+---
+title: "Probability Rules"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+Probability forms the foundation of statistics, and you are probably already aware of many of the ideas we will discuss in this chapter. However, formalizing these concepts is likely new. While this chapter provides the theoretical foundation for the inference methods you have already been using, it also offers practical tools for reasoning about uncertainty. We will define probability, develop rules for combining probabilities, and explore conditional probability and independence — all concepts that underpin the inference methods from Parts II and III.
+:::
+
+
+## Defining probability {#sec-defining-probability}
+
+Statistics is built on probability, and probability gives us the language to describe uncertainty. We begin with a few simple examples that may feel familiar.
+
+::: {.workedexample}
+A "die," the singular of "dice," is a cube with six faces numbered 1, 2, 3, 4, 5, and 6. What is the chance of getting a 1 when rolling a fair die?
+
+If the die is fair, then the chance of a 1 is as good as the chance of any other number. Since there are six equally likely outcomes, the chance must be 1-in-6 or, equivalently, $1/6$.
+:::
+
+::: {.workedexample}
+What is the chance of getting a 1 or 2 on the next roll?
+
+The outcomes 1 and 2 constitute two of the six equally likely outcomes, so the chance of getting one of these two is $2/6 = 1/3$.
+:::
+
+::: {.workedexample}
+What is the chance of not rolling a 2?
+
+Since the chance of rolling a 2 is $1/6$, the chance of not rolling a 2 must be $1 - 1/6 = 5/6$. Alternatively, not rolling a 2 means getting a 1, 3, 4, 5, or 6, which makes up five of the six equally likely outcomes.
+:::
+
+We use probability to describe and understand apparent randomness. We frame probability in terms of a **random process** giving rise to an **outcome**.
+
+| Random process | Possible outcomes |
+|:---------------|:-----------------|
+| Roll a die | 1, 2, 3, 4, 5, or 6 |
+| Flip a coin | H or T |
+
+::: {.definition}
+The **probability** of an outcome is the proportion of times the outcome would occur if we observed the random process an infinite number of times. Probability always takes values between 0 and 1 (inclusive) and may also be expressed as a percentage between 0% and 100%.
+:::
+
+Probability can be illustrated by rolling a die many times. Let $\hat{p}_n$ be the proportion of outcomes that are 1 after the first $n$ rolls. As the number of rolls increases, $\hat{p}_n$ converges to the probability $p = 1/6$.
+
+```{r}
+#| label: fig-law-large-numbers
+#| fig-cap: "The fraction of die rolls that are 1 at each stage in a simulation. The proportion tends to get closer to 1/6 as the number of rolls increases."
+#| fig-alt: "Line plot showing the proportion of 1s in a die-rolling simulation converging to 1/6 as the number of rolls increases from 1 to 100,000."
+
+library(ggplot2)
+
+set.seed(42)
+n <- 10000
+rolls <- sample(1:6, n, replace = TRUE)
+cumulative_prop <- cumsum(rolls == 1) / seq_len(n)
+
+df <- data.frame(roll = seq_len(n), proportion = cumulative_prop)
+
+ggplot(df, aes(x = roll, y = proportion)) +
+  geom_line(color = COL_BLUE, linewidth = 0.5) +
+  geom_hline(yintercept = 1/6, linetype = "dashed", color = COL_RED) +
+  scale_x_log10(labels = scales::comma) +
+  labs(x = "Number of rolls", y = "Proportion of 1s") +
+  annotate("text", x = 7000, y = 1/6 + 0.015, label = "p = 1/6",
+           color = COL_RED, size = 4.5) +
+  theme_minimal(base_size = 14)
+```
+
+::: {.definition}
+**Law of Large Numbers.** As more observations are collected, the proportion $\hat{p}_n$ of occurrences with a particular outcome converges to the probability $p$ of that outcome.
+:::
+
+Occasionally the proportion will veer away from the true probability, but these deviations become smaller as the number of trials increases.
+
+We write the probability of rolling a 1 as $P(\text{rolling a 1})$. When the context is clear, we abbreviate this as $P(1)$.
+
+::: {.guidedpractice}
+Random processes include rolling a die and flipping a coin. (a) Think of another random process. (b) Describe all the possible outcomes of that process.
+
+<details>
+<summary>Show answer</summary>
+(a) and (b) Here are several examples. (i) Whether someone gets sick next month: outcomes are *sick* and *not sick*. (ii) Randomly selecting a person and measuring their height: the outcome is a positive number. (iii) Whether the stock market goes up or down next week: outcomes are *up*, *down*, and *no change*. (iv) The number of emails you receive tomorrow: the outcome is a non-negative integer.
+</details>
+:::
+
+::: {.original}
+### Simulation: The law of large numbers in action
+
+One of the most powerful ways to build intuition about probability is through simulation. Imagine writing a computer program that simulates flipping a fair coin 10,000 times and tracking the running proportion of heads after each flip.
+
+- After 10 flips, the proportion of heads might be 0.30 or 0.70 — quite far from 0.50.
+- After 100 flips, the proportion is likely between 0.40 and 0.60.
+- After 1,000 flips, the proportion is usually between 0.47 and 0.53.
+- After 10,000 flips, it is almost certainly within 0.01 of 0.50.
+
+This is the Law of Large Numbers at work. The key insight is that probability is a *long-run* concept. In the short run, anything can happen. In the long run, patterns emerge with remarkable stability.
+
+This simulation perspective will recur throughout our course. In Parts II and III, we used simulation to build sampling distributions and test hypotheses. Here in Unit 4, we develop the *mathematical* rules that explain *why* those simulations work.
+:::
+
+## Sample spaces and events {#sec-sample-spaces}
+
+::: {.definition}
+The **sample space** $S$ of a random process is the set of all possible outcomes. An **event** is a subset of the sample space — that is, a collection of one or more outcomes.
+:::
+
+For rolling a single die, the sample space is $S = \{1, 2, 3, 4, 5, 6\}$.
+
+Let $A$ represent the event that the die roll results in 1 or 2, so $A = \{1, 2\}$. Let $B$ represent the event that the die roll is 4 or 6, so $B = \{4, 6\}$. These events are shown visually in the diagram below.
+
+```{r}
+#| label: fig-die-events
+#| fig-cap: "Three events for die outcomes. A and B are disjoint since they share no outcomes."
+#| fig-alt: "Diagram showing numbers 1 through 6 with events A circling 1 and 2, B circling 4 and 6, and D circling 2 and 3."
+
+par(mar = c(1, 1, 1, 1))
+plot(NULL, xlim = c(0, 7.5), ylim = c(-1.5, 3.5), axes = FALSE,
+     xlab = "", ylab = "", asp = 1)
+
+# Draw sample space rectangle
+rect(0, -1.5, 7.5, 3.5, border = "gray40", lwd = 2)
+text(0.4, 3.2, "S", font = 2, cex = 1.2)
+
+# Draw outcome circles
+for (i in 1:6) {
+  cx <- 0.5 + (i - 1) * 1.2
+  symbols(cx + 0.3, 1, circles = 0.45, add = TRUE, inches = FALSE,
+          bg = "white", fg = "gray50")
+  text(cx + 0.3, 1, labels = i, cex = 1.4, font = 2)
+}
+
+# Event A: {1, 2} — blue
+x_a <- c(0.5 + 0.3 - 0.7, 0.5 + 1.2 + 0.3 + 0.7)
+rect(x_a[1], -0.1, x_a[2], 2.1, border = COL_BLUE, lwd = 3, lty = 1)
+text(mean(x_a), 2.5, "A = {1, 2}", col = COL_BLUE, font = 2, cex = 1.1)
+
+# Event B: {4, 6} — red
+for (idx in c(4, 6)) {
+  cx <- 0.5 + (idx - 1) * 1.2 + 0.3
+  symbols(cx, 1, circles = 0.6, add = TRUE, inches = FALSE,
+          fg = COL_RED, bg = NA, lwd = 3)
+}
+text(5.1, 2.5, "B = {4, 6}", col = COL_RED, font = 2, cex = 1.1)
+
+# Event D: {2, 3} — pink
+x_d <- c(0.5 + 1.2 + 0.3 - 0.7, 0.5 + 2 * 1.2 + 0.3 + 0.7)
+rect(x_d[1], -0.5, x_d[2], -0.1 + 0.02, border = COL_PINK, lwd = 3, lty = 2)
+rect(x_d[1], -0.1, x_d[2], 2.1, border = COL_PINK, lwd = 3, lty = 2)
+text(mean(x_d), -1.1, "D = {2, 3}", col = COL_PINK, font = 2, cex = 1.1)
+```
+
+## The complement rule {#sec-complement}
+
+Let $D = \{2, 3\}$ represent the event that the outcome of a die roll is 2 or 3. Then the **complement** of $D$, denoted $D^c$, represents all outcomes in the sample space that are *not* in $D$:
+
+$$D^c = \{1, 4, 5, 6\}$$
+
+::: {.guidedpractice}
+(a) Compute $P(D^c) = P(\text{rolling a 1, 4, 5, or 6})$. (b) What is $P(D) + P(D^c)$?
+
+<details>
+<summary>Show answer</summary>
+(a) The outcomes are disjoint and each has probability $1/6$, so $P(D^c) = 4/6 = 2/3$. (b) $P(D) = 1/6 + 1/6 = 1/3$. Since $D$ and $D^c$ are disjoint, $P(D) + P(D^c) = 1/3 + 2/3 = 1$.
+</details>
+:::
+
+A complement $A^c$ is constructed so that (i) every possible outcome not in $A$ is in $A^c$, and (ii) $A$ and $A^c$ are disjoint. This gives us:
+
+::: {.important}
+**Complement rule.** The complement of event $A$ is denoted $A^c$ and represents all outcomes not in $A$. The probabilities of $A$ and $A^c$ are related by:
+
+$$P(A) + P(A^c) = 1 \qquad \text{equivalently,} \qquad P(A) = 1 - P(A^c)$$
+:::
+
+The complement rule is especially useful when computing a probability directly would be tedious but the complement is simple.
+
+::: {.workedexample}
+Let $A$ represent the event where the sum of two dice is less than 12. What is $P(A)$?
+
+The complement $A^c$ is the event that the sum equals 12. The only way to roll a sum of 12 is to get two 6s, so $P(A^c) = 1/36$. Using the complement rule:
+
+$$P(A) = 1 - P(A^c) = 1 - \frac{1}{36} = \frac{35}{36}$$
+:::
+
+::: {.guidedpractice}
+Find the following probabilities for rolling two dice: (a) The sum is *not* 6. (b) The sum is at least 4. (c) The sum is no more than 10.
+
+<details>
+<summary>Show answer</summary>
+(a) $P(\text{sum} = 6) = 5/36$, so $P(\text{not 6}) = 1 - 5/36 = 31/36$. (b) $P(\text{sum} = 2 \text{ or } 3) = 1/36 + 2/36 = 1/12$, so $P(\text{at least 4}) = 1 - 1/12 = 11/12$. (c) $P(\text{sum} = 11 \text{ or } 12) = 2/36 + 1/36 = 1/12$, so $P(\text{no more than 10}) = 1 - 1/12 = 11/12$.
+</details>
+:::
+
+## The addition rule {#sec-addition-rule}
+
+### Disjoint (mutually exclusive) events
+
+Two outcomes or events are called **disjoint** (or **mutually exclusive**) if they cannot both happen at the same time. For instance, when rolling a die, the outcomes 1 and 2 are disjoint since they cannot both occur on a single roll.
+
+::: {.important}
+**Addition rule for disjoint events.** If $A_1$ and $A_2$ are disjoint events, then:
+
+$$P(A_1 \text{ or } A_2) = P(A_1) + P(A_2)$$
+
+More generally, if $A_1, A_2, \ldots, A_k$ are all mutually disjoint, then:
+
+$$P(A_1 \text{ or } A_2 \text{ or } \cdots \text{ or } A_k) = P(A_1) + P(A_2) + \cdots + P(A_k)$$
+:::
+
+::: {.guidedpractice}
+We are interested in the probability of rolling a 1, 4, or 5. (a) Explain why the outcomes 1, 4, and 5 are disjoint. (b) Apply the addition rule to determine $P(1 \text{ or } 4 \text{ or } 5)$.
+
+<details>
+<summary>Show answer</summary>
+(a) At most one of these outcomes can occur on a single die roll, so they are disjoint. (b) $P(1 \text{ or } 4 \text{ or } 5) = P(1) + P(4) + P(5) = 1/6 + 1/6 + 1/6 = 3/6 = 1/2$.
+</details>
+:::
+
+### Probability distributions
+
+A **probability distribution** is a table of all disjoint outcomes and their associated probabilities. For example, the distribution for the sum of two dice:
+
+| Dice sum | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|:---------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Probability | $\frac{1}{36}$ | $\frac{2}{36}$ | $\frac{3}{36}$ | $\frac{4}{36}$ | $\frac{5}{36}$ | $\frac{6}{36}$ | $\frac{5}{36}$ | $\frac{4}{36}$ | $\frac{3}{36}$ | $\frac{2}{36}$ | $\frac{1}{36}$ |
+
+::: {.important}
+**Rules for probability distributions.** A valid probability distribution must satisfy three rules:
+
+1. The outcomes listed must be disjoint.
+2. Each probability must be between 0 and 1.
+3. The probabilities must total 1.
+:::
+
+### The general addition rule
+
+When events are *not* disjoint, we cannot simply add their probabilities — doing so would double-count the outcomes they share.
+
+Consider a standard deck of 52 cards. Let $A$ be the event "the card is a diamond" and $B$ be the event "the card is a face card." These events overlap: the jack, queen, and king of diamonds are both diamonds and face cards.
+
+```{r}
+#| label: fig-venn-cards
+#| fig-cap: "A Venn diagram for diamonds and face cards showing 10 diamonds that are not face cards, 9 face cards that are not diamonds, and 3 cards that are both."
+#| fig-alt: "Venn diagram with two overlapping circles labeled Diamonds and Face Cards. The left-only region shows 10, the overlap shows 3, the right-only region shows 9, and outside both circles shows 30."
+
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+plot(NULL, xlim = c(-3.5, 3.5), ylim = c(-2.5, 2.8), axes = FALSE,
+     xlab = "", ylab = "", asp = 1)
+
+# Outer rectangle
+rect(-3.5, -2.5, 3.5, 2.8, border = "gray40", lwd = 2)
+
+# Draw circles
+theta <- seq(0, 2 * pi, length.out = 200)
+# Left circle (Diamonds)
+cx1 <- -0.8; cy1 <- 0; r <- 1.6
+lines(cx1 + r * cos(theta), cy1 + r * sin(theta), col = COL_BLUE, lwd = 3)
+# Right circle (Face Cards)
+cx2 <- 0.8; cy2 <- 0
+lines(cx2 + r * cos(theta), cy2 + r * sin(theta), col = COL_PINK, lwd = 3)
+
+# Labels
+text(cx1, 2.0, "Diamonds", col = COL_BLUE, font = 2, cex = 1.2)
+text(cx2, 2.0, "Face Cards", col = COL_PINK, font = 2, cex = 1.2)
+
+# Counts
+text(-1.6, 0, "10", cex = 1.5, font = 2)
+text(0, 0, "3", cex = 1.5, font = 2)
+text(1.6, 0, "9", cex = 1.5, font = 2)
+text(-2.8, -2.0, "30", cex = 1.3, font = 2, col = "gray40")
+```
+
+If we compute $P(A) + P(B) = 13/52 + 12/52 = 25/52$, we have counted the 3 cards in the overlap twice. We correct this:
+
+$$P(A \text{ or } B) = P(A) + P(B) - P(A \text{ and } B) = \frac{13}{52} + \frac{12}{52} - \frac{3}{52} = \frac{22}{52} = \frac{11}{26}$$
+
+::: {.important}
+**General addition rule.** For any two events $A$ and $B$ (disjoint or not):
+
+$$P(A \text{ or } B) = P(A) + P(B) - P(A \text{ and } B)$$
+:::
+
+::: {.caution}
+**"Or" is inclusive in statistics.** When we write "$A$ or $B$," we mean "$A$, $B$, or both" unless explicitly stated otherwise.
+:::
+
+::: {.guidedpractice}
+(a) If $A$ and $B$ are disjoint, explain why $P(A \text{ and } B) = 0$. (b) Show that the general addition rule simplifies to the simpler addition rule when $A$ and $B$ are disjoint.
+
+<details>
+<summary>Show answer</summary>
+(a) If $A$ and $B$ are disjoint, they can never occur simultaneously, so $P(A \text{ and } B) = 0$. (b) Substituting 0 for $P(A \text{ and } B)$ in the general addition rule gives $P(A \text{ or } B) = P(A) + P(B) - 0 = P(A) + P(B)$, which is the simpler addition rule.
+</details>
+:::
+
+## Conditional probability {#sec-conditional-probability}
+
+### Exploring conditional probability with data
+
+There can be rich relationships between two or more variables, and conditional probability provides the framework for exploring them. Suppose we have data from a study classifying 1,822 photos using both a machine learning (ML) algorithm and human judgment:
+
+|  | Truth: fashion | Truth: not | Total |
+|:---|---:|---:|---:|
+| ML: pred_fashion | 197 | 22 | 219 |
+| ML: pred_not | 112 | 1491 | 1603 |
+| Total | 309 | 1513 | 1822 |
+
+::: {.workedexample}
+If a photo is actually about fashion, what is the chance the ML classifier correctly identified it?
+
+Of the 309 fashion photos, the ML algorithm correctly classified 197:
+
+$$P(\text{ML predicts fashion} \mid \text{truth is fashion}) = \frac{197}{309} = 0.638$$
+:::
+
+We call this a **conditional probability** because we computed the probability *under a condition* — that the photo was actually about fashion.
+
+### Marginal and joint probabilities
+
+::: {.definition}
+A **marginal probability** is a probability based on a single variable, without regard to other variables. A **joint probability** is the probability of two or more outcomes occurring together.
+:::
+
+From the photo classification data: $P(\text{ML predicts fashion}) = 219/1822 = 0.120$ is a marginal probability, while $P(\text{ML predicts fashion and truth is fashion}) = 197/1822 = 0.108$ is a joint probability.
+
+### The conditional probability formula
+
+::: {.important}
+**Conditional probability.** The conditional probability of outcome $A$ given condition $B$ is:
+
+$$P(A \mid B) = \frac{P(A \text{ and } B)}{P(B)}$$
+:::
+
+The vertical bar "$\mid$" is read as "given."
+
+::: {.workedexample}
+Using the photo classification data, we can verify our earlier calculation using proportions alone:
+
+$$P(\text{truth is fashion} \mid \text{ML predicts fashion}) = \frac{P(\text{truth is fashion and ML predicts fashion})}{P(\text{ML predicts fashion})} = \frac{0.108}{0.120} = 0.900$$
+
+If the ML classifier says a photo is about fashion, there is a 90% probability it actually is.
+:::
+
+::: {.guidedpractice}
+The smallpox dataset provides data on 6,224 individuals in Boston in 1721. Of these, 3.92% were inoculated. Among those not inoculated, 14.11% died. Among those inoculated, only 2.46% died. Write out, in formal notation, the probability a randomly selected person who was not inoculated died from smallpox.
+
+<details>
+<summary>Show answer</summary>
+$P(\text{result} = \text{died} \mid \text{inoculated} = \text{no}) = \frac{P(\text{died and not inoculated})}{P(\text{not inoculated})} = \frac{0.1356}{0.9608} = 0.1411$.
+</details>
+:::
+
+## The multiplication rule {#sec-multiplication-rule}
+
+### Multiplication rule for independent processes
+
+Consider rolling two dice. If $1/6$ of the time the first die is a 1, and $1/6$ of *those* times the second die is also a 1, then:
+
+$$P(\text{both are 1}) = \frac{1}{6} \times \frac{1}{6} = \frac{1}{36}$$
+
+::: {.important}
+**Multiplication rule for independent processes.** If $A$ and $B$ represent events from two different and independent processes, then:
+
+$$P(A \text{ and } B) = P(A) \times P(B)$$
+
+If there are $k$ events $A_1, \ldots, A_k$ from $k$ independent processes, then:
+
+$$P(A_1 \text{ and } A_2 \text{ and } \cdots \text{ and } A_k) = P(A_1) \times P(A_2) \times \cdots \times P(A_k)$$
+:::
+
+::: {.guidedpractice}
+About 9% of people are left-handed. Suppose 2 people are selected at random from the US population. (a) What is the probability that both are left-handed? (b) What is the probability that both are right-handed?
+
+<details>
+<summary>Show answer</summary>
+(a) $0.09 \times 0.09 = 0.0081$. (b) $P(\text{right-handed}) = 1 - 0.09 = 0.91$, so $0.91 \times 0.91 = 0.8281$.
+</details>
+:::
+
+::: {.guidedpractice}
+Suppose 5 people are selected at random. (a) What is the probability that all are right-handed? (b) What is the probability that not all are right-handed?
+
+<details>
+<summary>Show answer</summary>
+(a) $0.91^5 = 0.624$. (b) Using the complement: $P(\text{not all right-handed}) = 1 - 0.624 = 0.376$.
+</details>
+:::
+
+### The general multiplication rule
+
+The general multiplication rule handles events that may not be independent:
+
+::: {.important}
+**General multiplication rule.** If $A$ and $B$ represent two outcomes or events, then:
+
+$$P(A \text{ and } B) = P(A \mid B) \times P(B)$$
+
+This is simply a rearrangement of the conditional probability formula.
+:::
+
+::: {.workedexample}
+In the smallpox data, 96.08% of residents were not inoculated, and 85.88% of those who were not inoculated survived. What is the probability that a resident was not inoculated and lived?
+
+$$P(\text{lived and not inoculated}) = P(\text{lived} \mid \text{not inoculated}) \times P(\text{not inoculated}) = 0.8588 \times 0.9608 = 0.8251$$
+:::
+
+### Tree diagrams
+
+**Tree diagrams** are a tool to organize outcomes and probabilities when two or more processes occur in sequence and each process is conditioned on its predecessors.
+
+::: {.workedexample}
+Suppose 13% of students earned an A on the midterm. Of those who earned an A on the midterm, 47% received an A on the final. Of those who earned lower than an A on the midterm, 11% received an A on the final. You randomly pick up a final exam and notice the student received an A. What is the probability the student also earned an A on the midterm?
+
+We organize the information into a tree diagram:
+
+```{r}
+#| label: fig-tree-midterm
+#| fig-cap: "Tree diagram for midterm and final exam grades."
+#| fig-alt: "Tree diagram splitting on midterm grade (A with probability 0.13, Other with probability 0.87), then splitting on final grade with conditional probabilities. Joint probabilities shown at the ends of branches."
+
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+plot(NULL, xlim = c(0, 10), ylim = c(0, 6), axes = FALSE,
+     xlab = "", ylab = "")
+
+# Root
+x0 <- 1; y0 <- 3
+
+# Level 1: Midterm
+x1 <- 4
+y1_top <- 5  # A
+y1_bot <- 1  # Other
+
+segments(x0, y0, x1, y1_top, lwd = 2, col = COL_BLUE)
+segments(x0, y0, x1, y1_bot, lwd = 2, col = COL_PINK)
+
+text((x0 + x1) / 2, (y0 + y1_top) / 2 + 0.4, "0.13", cex = 1.0, col = COL_BLUE)
+text((x0 + x1) / 2, (y0 + y1_bot) / 2 - 0.4, "0.87", cex = 1.0, col = COL_PINK)
+
+text(x1, y1_top + 0.3, "Midterm A", font = 2, cex = 0.95)
+text(x1, y1_bot - 0.3, "Midterm Other", font = 2, cex = 0.95)
+
+# Level 2: Final (from Midterm A)
+x2 <- 7
+y2_aa <- 5.7; y2_ao <- 4.3
+segments(x1, y1_top, x2, y2_aa, lwd = 2, col = COL_BLUE)
+segments(x1, y1_top, x2, y2_ao, lwd = 2, col = "gray50")
+text((x1 + x2) / 2, (y1_top + y2_aa) / 2 + 0.3, "0.47", cex = 0.9, col = COL_BLUE)
+text((x1 + x2) / 2, (y1_top + y2_ao) / 2 - 0.3, "0.53", cex = 0.9, col = "gray50")
+
+text(x2 + 0.1, y2_aa + 0.02, "Final A", pos = 4, cex = 0.9)
+text(x2 + 0.1, y2_ao + 0.02, "Final Other", pos = 4, cex = 0.9)
+
+# Level 2: Final (from Midterm Other)
+y2_oa <- 1.7; y2_oo <- 0.3
+segments(x1, y1_bot, x2, y2_oa, lwd = 2, col = COL_BLUE)
+segments(x1, y1_bot, x2, y2_oo, lwd = 2, col = "gray50")
+text((x1 + x2) / 2, (y1_bot + y2_oa) / 2 + 0.3, "0.11", cex = 0.9, col = COL_BLUE)
+text((x1 + x2) / 2, (y1_bot + y2_oo) / 2 - 0.3, "0.89", cex = 0.9, col = "gray50")
+
+text(x2 + 0.1, y2_oa + 0.02, "Final A", pos = 4, cex = 0.9)
+text(x2 + 0.1, y2_oo + 0.02, "Final Other", pos = 4, cex = 0.9)
+
+# Joint probabilities
+text(9.5, y2_aa, "0.0611", cex = 0.9, font = 2, col = COL_BLUE)
+text(9.5, y2_ao, "0.0689", cex = 0.9, col = "gray50")
+text(9.5, y2_oa, "0.0957", cex = 0.9, font = 2, col = COL_BLUE)
+text(9.5, y2_oo, "0.7743", cex = 0.9, col = "gray50")
+```
+
+From the tree:
+
+- $P(\text{midterm A and final A}) = 0.13 \times 0.47 = 0.0611$
+- $P(\text{final A}) = 0.0611 + 0.0957 = 0.1568$
+- $P(\text{midterm A} \mid \text{final A}) = \frac{0.0611}{0.1568} = 0.390$
+
+The probability the student also earned an A on the midterm is about 0.39.
+:::
+
+::: {.important}
+**Sum of conditional probabilities.** If $A_1, \ldots, A_k$ represent all disjoint outcomes of a variable, and $B$ is an event, then:
+
+$$P(A_1 \mid B) + P(A_2 \mid B) + \cdots + P(A_k \mid B) = 1$$
+
+The complement rule also holds for conditional probabilities: $P(A \mid B) = 1 - P(A^c \mid B)$.
+:::
+
+## Independence {#sec-independence}
+
+::: {.definition}
+Two processes are **independent** if knowing the outcome of one provides no useful information about the outcome of the other. Mathematically, events $A$ and $B$ are independent if:
+
+$$P(A \text{ and } B) = P(A) \times P(B)$$
+
+Equivalently, $A$ and $B$ are independent if $P(A \mid B) = P(A)$.
+:::
+
+::: {.workedexample}
+If we draw one card from a shuffled deck, is the event that the card is a heart independent of the event that the card is an ace?
+
+$P(\heartsuit) = 1/4$, $P(\text{ace}) = 1/13$, and $P(\heartsuit \text{ and ace}) = 1/52$. We check:
+
+$$P(\heartsuit) \times P(\text{ace}) = \frac{1}{4} \times \frac{1}{13} = \frac{1}{52} = P(\heartsuit \text{ and ace})$$
+
+Because the equation holds, "heart" and "ace" are independent events.
+:::
+
+::: {.guidedpractice}
+Let $X$ and $Y$ represent the outcomes of rolling two dice. (a) What is $P(X = 1)$? (b) What is $P(Y = 1 \text{ and } X = 1)$? (c) Compute $P(Y = 1 \mid X = 1)$. (d) Compare $P(Y = 1)$ with the result from (c).
+
+<details>
+<summary>Show answer</summary>
+(a) $1/6$. (b) $1/36$. (c) $\frac{1/36}{1/6} = 1/6$. (d) $P(Y = 1) = 1/6$, the same as part (c). Knowledge about $X$ does not change the probability for $Y$, confirming the dice are independent.
+</details>
+:::
+
+::: {.caution}
+**The gambler's fallacy.** Ron is watching a roulette table and notices the last five spins were all black. He bets on red, reasoning that "black six times in a row" is unlikely. This reasoning is flawed: each spin is independent of the previous spins. Past outcomes provide no information about future ones. Casinos often post recent outcomes precisely to encourage this fallacy.
+:::
+
+## Bayes' theorem (optional) {#sec-bayes-theorem}
+
+In many situations, we are given $P(B \mid A)$ but need $P(A \mid B)$ — the "inverted" conditional probability. Bayes' theorem provides a systematic way to perform this inversion.
+
+::: {.workedexample}
+In Canada, about 0.35% of women over 40 develop breast cancer in any given year. Mammograms produce false negatives 11% of the time (indicating no cancer when cancer is present) and false positives 7% of the time (indicating cancer when none is present). If a randomly selected woman over 40 tests positive, what is the probability she actually has breast cancer?
+
+We organize the information into a tree diagram:
+
+```{r}
+#| label: fig-tree-cancer
+#| fig-cap: "Tree diagram for breast cancer screening."
+#| fig-alt: "Tree diagram with primary branches for Cancer (0.0035) and No Cancer (0.9965), each splitting into Positive and Negative mammogram results with conditional probabilities and joint probabilities at the branch ends."
+
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+plot(NULL, xlim = c(0, 10), ylim = c(0, 6), axes = FALSE,
+     xlab = "", ylab = "")
+
+x0 <- 1; y0 <- 3
+
+# Level 1
+x1 <- 4
+y1_top <- 5; y1_bot <- 1
+
+segments(x0, y0, x1, y1_top, lwd = 2, col = COL_RED)
+segments(x0, y0, x1, y1_bot, lwd = 2, col = COL_BLUE)
+
+text((x0 + x1) / 2, (y0 + y1_top) / 2 + 0.4, "0.0035", cex = 0.95, col = COL_RED)
+text((x0 + x1) / 2, (y0 + y1_bot) / 2 - 0.4, "0.9965", cex = 0.95, col = COL_BLUE)
+
+text(x1, y1_top + 0.3, "Cancer", font = 2, cex = 0.95, col = COL_RED)
+text(x1, y1_bot - 0.3, "No Cancer", font = 2, cex = 0.95, col = COL_BLUE)
+
+# Level 2 from Cancer
+x2 <- 7
+y2_cp <- 5.7; y2_cn <- 4.3
+segments(x1, y1_top, x2, y2_cp, lwd = 2, col = COL_RED)
+segments(x1, y1_top, x2, y2_cn, lwd = 2, col = "gray50")
+text((x1 + x2) / 2, (y1_top + y2_cp) / 2 + 0.3, "0.89", cex = 0.9, col = COL_RED)
+text((x1 + x2) / 2, (y1_top + y2_cn) / 2 - 0.3, "0.11", cex = 0.9, col = "gray50")
+text(x2 + 0.1, y2_cp, "Positive", pos = 4, cex = 0.9)
+text(x2 + 0.1, y2_cn, "Negative", pos = 4, cex = 0.9)
+
+# Level 2 from No Cancer
+y2_np <- 1.7; y2_nn <- 0.3
+segments(x1, y1_bot, x2, y2_np, lwd = 2, col = COL_PINK)
+segments(x1, y1_bot, x2, y2_nn, lwd = 2, col = "gray50")
+text((x1 + x2) / 2, (y1_bot + y2_np) / 2 + 0.3, "0.07", cex = 0.9, col = COL_PINK)
+text((x1 + x2) / 2, (y1_bot + y2_nn) / 2 - 0.3, "0.93", cex = 0.9, col = "gray50")
+text(x2 + 0.1, y2_np, "Positive", pos = 4, cex = 0.9)
+text(x2 + 0.1, y2_nn, "Negative", pos = 4, cex = 0.9)
+
+# Joint probabilities
+text(9.5, y2_cp, "0.00312", cex = 0.85, font = 2, col = COL_RED)
+text(9.5, y2_cn, "0.00039", cex = 0.85, col = "gray50")
+text(9.5, y2_np, "0.06976", cex = 0.85, font = 2, col = COL_PINK)
+text(9.5, y2_nn, "0.92674", cex = 0.85, col = "gray50")
+```
+
+From the tree:
+
+- $P(\text{cancer and positive}) = 0.0035 \times 0.89 = 0.00312$
+- $P(\text{positive}) = 0.00312 + 0.06976 = 0.07288$
+- $P(\text{cancer} \mid \text{positive}) = \frac{0.00312}{0.07288} \approx 0.043$
+
+Even with a positive mammogram, there is only about a 4% chance the patient has breast cancer. This is why doctors often run additional tests.
+:::
+
+::: {.important}
+**Bayes' theorem.** If $A_1, A_2, \ldots, A_k$ represent all possible disjoint outcomes of a first variable, and $B$ is an observed outcome of a second variable, then:
+
+$$P(A_1 \mid B) = \frac{P(B \mid A_1) \, P(A_1)}{P(B \mid A_1) \, P(A_1) + P(B \mid A_2) \, P(A_2) + \cdots + P(B \mid A_k) \, P(A_k)}$$
+
+The numerator is the probability of getting both $A_1$ and $B$. The denominator is the total (marginal) probability of $B$.
+:::
+
+**To apply Bayes' theorem:**
+
+1. Identify the marginal probabilities: $P(A_1), P(A_2), \ldots, P(A_k)$.
+2. Identify the conditional probabilities: $P(B \mid A_1), P(B \mid A_2), \ldots, P(B \mid A_k)$.
+3. Substitute into the formula.
+
+::: {.guidedpractice}
+Jose visits campus on Thursday evenings. Academic events occur 35% of evenings, sporting events 20%, and no events 45%. The parking garage fills up 25% of the time during academic events, 70% during sporting events, and 5% when there are no events. If Jose finds the garage full, what is the probability there is a sporting event?
+
+<details>
+<summary>Show answer</summary>
+Using Bayes' theorem with $A_1$ = sporting, $A_2$ = academic, $A_3$ = none, and $B$ = garage full: $P(\text{sporting} \mid \text{full}) = \frac{0.7 \times 0.2}{0.7 \times 0.2 + 0.25 \times 0.35 + 0.05 \times 0.45} = \frac{0.14}{0.25} = 0.56$. There is a 56% probability of a sporting event.
+</details>
+:::
+
+The strategy of updating beliefs based on new evidence is the foundation of **Bayesian statistics**, an important branch of statistics that we will not have time to explore further in this course.
+
+## Chapter review {#sec-probability-rules-review}
+
+### Summary
+
+In this chapter, we developed the mathematical rules of probability:
+
+- **Probability** is the long-run proportion of times an outcome occurs, governed by the **Law of Large Numbers**.
+- The **sample space** $S$ is the set of all possible outcomes; an **event** is a subset of $S$.
+- **Complement rule**: $P(A) = 1 - P(A^c)$.
+- **Addition rule**: $P(A \text{ or } B) = P(A) + P(B) - P(A \text{ and } B)$. For disjoint events, $P(A \text{ and } B) = 0$.
+- **Conditional probability**: $P(A \mid B) = P(A \text{ and } B) / P(B)$.
+- **Multiplication rule**: $P(A \text{ and } B) = P(A \mid B) \times P(B)$. For independent events, $P(A \text{ and } B) = P(A) \times P(B)$.
+- Events are **independent** if knowing one occurred does not change the probability of the other.
+- **Bayes' theorem** inverts conditional probabilities.
+
+## Exercises {.exercises}
+
+{{< include ../exercises/_probability-rules-exercises.qmd >}}

@@ -1,0 +1,406 @@
+---
+title: "Prediction and Model Fit"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+In the previous chapter, we developed the least squares regression line, interpreted its slope and intercept, and performed inference to test whether a linear relationship exists. In this chapter, we focus on using the regression model for prediction and assessing how well it fits the data. We discuss the dangers of extrapolation, introduce residual diagnostics for identifying problems with the model, examine leverage and influential points, and briefly introduce confidence intervals and prediction intervals for forecasts.
+:::
+
+## Making predictions {#sec-making-predictions}
+
+One of the primary uses of a regression model is to predict the value of the response variable $y$ for a given value of the explanatory variable $x$. To make a prediction, we simply plug the value of $x$ into the regression equation.
+
+::: {.workedexample}
+The least squares line for predicting gift aid from family income at Elmhurst College is:
+
+$$\widehat{\text{aid}} = 24.3 - 0.0431 \times \text{family\_income}$$
+
+Predict the gift aid for a student whose family income is \$80,000 (i.e., $x = 80$ in \$1,000s).
+
+---
+
+$$\widehat{\text{aid}} = 24.3 - 0.0431 \times 80 = 24.3 - 3.45 = 20.85$$
+
+The model predicts this student will receive approximately \$20,850 in gift aid.
+:::
+
+::: {.workedexample}
+Suppose a high school senior is considering Elmhurst College. Can they simply use the linear equation to calculate their financial aid?
+
+---
+
+They may use it as an estimate, but with important qualifiers. First, the data come from a single year, and aid policies may change. Second, the equation provides an imperfect estimate -- while the linear model captures the overall trend, individual students' aid will vary around the predicted value.
+:::
+
+## Extrapolation {#sec-extrapolation}
+
+::: {.workedexample}
+Use the Elmhurst model to estimate the aid for a student whose family has an income of \$1 million (i.e., $x = 1000$).
+
+---
+
+$$\widehat{\text{aid}} = 24.3 - 0.0431 \times 1000 = -18.8$$
+
+The model predicts $-\$18,800$ in aid! Elmhurst College does not charge extra tuition to wealthy students. This nonsensical prediction illustrates the danger of **extrapolation**.
+:::
+
+::: {.important}
+**Extrapolation is treacherous.**
+
+**Extrapolation** means applying a model to make predictions outside the range of the observed data. A linear model is only an approximation of the true relationship, and that approximation may break down badly outside the range of the data used to build it.
+
+Generally, predictions should only be made within the range of the observed predictor values. Predictions far outside this range are unreliable and should be treated with great skepticism.
+:::
+
+::: {.caution}
+Before making a prediction, always check whether the value of $x$ falls within the range of the data used to build the model. If it does not, acknowledge that you are extrapolating and that the prediction may be unreliable.
+:::
+
+## Residual diagnostics {#sec-residual-diagnostics}
+
+In the previous chapter, we introduced residual plots as a way to assess whether a linear model is appropriate. In this section, we examine residual diagnostics in more detail.
+
+### Patterns in residual plots
+
+A well-fitting linear model produces residuals that appear randomly scattered around zero. Systematic patterns in the residuals indicate problems:
+
+::: {.workedexample}
+Consider the three pairs of scatterplots and residual plots below.
+
+```{r}
+#| label: fig-residual-patterns
+#| fig-cap: "Three scatterplots with linear models in the top row and their corresponding residual plots in the bottom row. The first shows a good linear fit with random residuals. The second shows a curved relationship with a U-shaped residual pattern. The third shows a weak trend with random residuals. [↗ Try this live](https://learnlens.org/statlens/explore/regression/?show=residuals) — toggle scatterplot ↔ residual plot and see the pattern each fit leaves behind."
+#| fig-alt: "A grid of 2 by 3 plots. Top row: three scatterplots with regression lines. Bottom row: the corresponding residual plots. The first shows random scatter (good). The second shows a U-shape (bad -- nonlinearity). The third shows random scatter (good, but weak trend)."
+#| fig-width: 10
+#| fig-height: 6
+
+library(ggplot2)
+
+par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+
+set.seed(42)
+n <- 60
+
+# Dataset 1: Good linear fit
+x1 <- runif(n, 0, 10)
+y1 <- 2 + 1.5 * x1 + rnorm(n, 0, 2)
+m1 <- lm(y1 ~ x1)
+plot(x1, y1, pch = 19, col = COL_BLUE, main = "Good Linear Fit", xlab = "x", ylab = "y", cex = 0.8)
+abline(m1, col = COL_RED, lwd = 2)
+
+# Dataset 2: Curved relationship
+x2 <- runif(n, 0, 10)
+y2 <- 5 + 2 * x2 - 0.25 * x2^2 + rnorm(n, 0, 1)
+m2 <- lm(y2 ~ x2)
+plot(x2, y2, pch = 19, col = COL_BLUE, main = "Nonlinear Relationship", xlab = "x", ylab = "y", cex = 0.8)
+abline(m2, col = COL_RED, lwd = 2)
+
+# Dataset 3: Weak trend
+x3 <- runif(n, 0, 10)
+y3 <- 5 + 0.2 * x3 + rnorm(n, 0, 4)
+m3 <- lm(y3 ~ x3)
+plot(x3, y3, pch = 19, col = COL_BLUE, main = "Weak Trend", xlab = "x", ylab = "y", cex = 0.8)
+abline(m3, col = COL_RED, lwd = 2)
+
+# Residual plots
+plot(fitted(m1), residuals(m1), pch = 19, col = COL_BLUE, main = "Residuals (Good)", xlab = "Fitted", ylab = "Residual", cex = 0.8)
+abline(h = 0, lty = 2, col = "gray40")
+
+plot(fitted(m2), residuals(m2), pch = 19, col = COL_BLUE, main = "Residuals (U-shape)", xlab = "Fitted", ylab = "Residual", cex = 0.8)
+abline(h = 0, lty = 2, col = "gray40")
+
+plot(fitted(m3), residuals(m3), pch = 19, col = COL_BLUE, main = "Residuals (Weak)", xlab = "Fitted", ylab = "Residual", cex = 0.8)
+abline(h = 0, lty = 2, col = "gray40")
+
+par(mfrow = c(1, 1))
+```
+
+Describe any patterns in the residuals.
+
+---
+
+**Dataset 1:** The residuals show no obvious patterns. They are scattered randomly around zero. The linear model is appropriate.
+
+**Dataset 2:** There is a curved pattern in the residuals -- they are negative at the edges and positive in the middle. This indicates a nonlinear relationship. A straight line is not a good model for these data.
+
+**Dataset 3:** The residuals show no patterns, but the trend is very weak. The linear model is technically appropriate, but the relationship may not be practically meaningful.
+:::
+
+### Non-constant variability (heteroscedasticity)
+
+When the spread of the residuals changes as the predicted value increases, we have **non-constant variability** (also called **heteroscedasticity**). This often appears as a "fan shape" in the residual plot -- residuals spread out (or narrow) as the predicted values increase.
+
+```{r}
+#| label: fig-heteroscedasticity
+#| fig-cap: "A scatterplot and residual plot showing increasing variability as x increases. The residual plot shows a fan shape. [↗ Try this live](https://learnlens.org/statlens/explore/regression/?show=residuals) — load a fanning dataset and watch the residual plot widen with $x$."
+#| fig-alt: "A scatterplot showing increasing spread in y as x increases, and its residual plot showing a fan-shaped pattern."
+#| fig-width: 10
+#| fig-height: 4
+
+set.seed(42)
+n <- 80
+x_fan <- runif(n, 1, 15)
+y_fan <- 3 + 1.2 * x_fan + rnorm(n, 0, 0.5 * x_fan)
+m_fan <- lm(y_fan ~ x_fan)
+
+fan_scatter <- data.frame(x = x_fan, y = y_fan)
+fan_resid <- data.frame(fitted = fitted(m_fan), residuals = residuals(m_fan))
+
+p1 <- ggplot(fan_scatter, aes(x = x, y = y)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = COL_RED, linewidth = 1) +
+  labs(x = "x", y = "y", title = "Scatterplot") +
+  theme_minimal(base_size = 14)
+
+p2 <- ggplot(fan_resid, aes(x = fitted, y = residuals)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 2) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  labs(x = "Fitted Values", y = "Residuals", title = "Residual Plot (Fan Shape)") +
+  theme_minimal(base_size = 14)
+
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+```
+
+Non-constant variability does not bias the regression line itself, but it does affect inference: standard errors, confidence intervals, and p-values may be unreliable.
+
+## Leverage and influential points {#sec-leverage-influential}
+
+Not all observations have the same impact on the regression line. Some points, by virtue of their position, can exert a disproportionate influence on the model.
+
+### Leverage
+
+::: {.definition}
+**Leverage.**
+
+A point has **high leverage** if its $x$-value is far from $\bar{x}$ (the mean of the predictor variable). High-leverage points have the *potential* to strongly influence the slope and intercept of the regression line.
+:::
+
+High leverage does not automatically mean the point is problematic. If a high-leverage point falls close to the trend established by the other data, it may actually strengthen the model. A high-leverage point is only problematic if its $y$-value does not follow the pattern of the rest of the data.
+
+### Influential points
+
+::: {.definition}
+**Influential point.**
+
+A point is **influential** if removing it would substantially change the regression line (i.e., the estimated slope or intercept). Influential points are typically high-leverage points that do not follow the pattern of the rest of the data.
+:::
+
+::: {.workedexample}
+Consider three scenarios:
+
+```{r}
+#| label: fig-leverage-influence
+#| fig-cap: "Three scatterplots with regression lines. In the first, a point in the corner has high leverage but follows the trend (not influential). In the second, a point far from the trend has high leverage and is influential -- removing it changes the slope substantially. In the third, a point near the mean of x is an outlier in the y-direction but has low leverage and is not very influential."
+#| fig-alt: "Three scatterplots demonstrating leverage and influence. The first shows a high-leverage point that is not influential. The second shows an influential point. The third shows an outlier with low leverage."
+#| fig-width: 10
+#| fig-height: 3.5
+
+set.seed(42)
+n <- 30
+x_base <- runif(n, 2, 8)
+y_base <- 2 + 1.5 * x_base + rnorm(n, 0, 1.5)
+
+# Scenario 1: High leverage, not influential (follows trend)
+x1 <- c(x_base, 15)
+y1 <- c(y_base, 2 + 1.5 * 15 + 0.5)
+special1 <- length(x1)
+
+# Scenario 2: High leverage, influential (away from trend)
+x2 <- c(x_base, 15)
+y2 <- c(y_base, 5)
+special2 <- length(x2)
+
+# Scenario 3: Low leverage outlier (near x-bar, extreme y)
+x3 <- c(x_base, 5)
+y3 <- c(y_base, 20)
+special3 <- length(x3)
+
+par(mfrow = c(1, 3), mar = c(4, 4, 3, 1))
+
+# Panel 1
+m1 <- lm(y1 ~ x1)
+plot(x1, y1, pch = 19, col = COL_BLUE, main = "High Leverage,\nNot Influential",
+     xlab = "x", ylab = "y", cex = 0.9)
+points(x1[special1], y1[special1], pch = 19, col = COL_PINK, cex = 2)
+abline(m1, col = COL_RED, lwd = 2)
+abline(lm(y1[-special1] ~ x1[-special1]), col = COL_GREEN, lwd = 2, lty = 2)
+
+# Panel 2
+m2 <- lm(y2 ~ x2)
+plot(x2, y2, pch = 19, col = COL_BLUE, main = "High Leverage,\nInfluential",
+     xlab = "x", ylab = "y", cex = 0.9)
+points(x2[special2], y2[special2], pch = 19, col = COL_PINK, cex = 2)
+abline(m2, col = COL_RED, lwd = 2)
+abline(lm(y2[-special2] ~ x2[-special2]), col = COL_GREEN, lwd = 2, lty = 2)
+
+# Panel 3
+m3 <- lm(y3 ~ x3)
+plot(x3, y3, pch = 19, col = COL_BLUE, main = "Low Leverage,\nOutlier",
+     xlab = "x", ylab = "y", cex = 0.9)
+points(x3[special3], y3[special3], pch = 19, col = COL_PINK, cex = 2)
+abline(m3, col = COL_RED, lwd = 2)
+abline(lm(y3[-special3] ~ x3[-special3]), col = COL_GREEN, lwd = 2, lty = 2)
+
+legend("bottomright", legend = c("With point", "Without point"),
+       col = c(COL_RED, COL_GREEN), lty = c(1, 2), lwd = 2, cex = 0.7)
+
+par(mfrow = c(1, 1))
+```
+
+---
+
+**Scenario 1:** The point in the far right corner has high leverage (it is far from $\bar{x}$), but it falls along the trend of the other data. Removing it would barely change the regression line. It is *not* influential.
+
+**Scenario 2:** The point in the far right corner has high leverage *and* falls far from the trend. Removing it would substantially change the slope. It *is* influential.
+
+**Scenario 3:** The point near the center of the $x$-values is an outlier in the $y$-direction. It has low leverage because its $x$-value is near $\bar{x}$. Removing it would change the intercept slightly but not the slope very much. It has limited influence.
+:::
+
+::: {.important}
+**Dealing with influential points.**
+
+When you identify an influential point:
+
+1. Verify that it is not a data entry error.
+2. Run the analysis with and without the point and report both results.
+3. Do not automatically remove it -- if it is a legitimate observation, it contains real information.
+4. Be transparent about its effect on the conclusions.
+:::
+
+::: {.original}
+::: {.statlens}
+**See it in action.** [Regression Explorer with CI + PI bands]({{< var tool-url >}}/explore/regression/?dataset=possum_regression&bands=true){target="_blank"} --- toggles the 95% confidence band (mean response — the hourglass) and the wider 95% prediction band. For numeric bounds at a specific $x_0$, use the [Slope tool point interval]({{< var tool-url >}}/inference/slope/?dataset=possum_regression&interval=both){target="_blank"}: type $x_0$ and get $\hat{y}$, the CI for the mean, and the prediction interval (with extrapolation warnings).
+:::
+
+## Confidence and prediction intervals {#sec-ci-pi}
+
+:::{.callout-note appearance="simple" icon=false}
+**Extended Content.** UWL's core STAT 145 curriculum stops the regression story before formal confidence and prediction intervals. This section is retained for institutions and instructors who want to cover them, and for students who want the deeper treatment. It reads as a self-contained section on top of the residual-diagnostics material above.
+:::
+
+When we use a regression model to make predictions, there are two types of uncertainty to consider:
+
+### Confidence intervals for the mean response
+
+A **confidence interval for the mean response** estimates the average value of $y$ for all individuals with a particular value of $x$. This interval captures the uncertainty in estimating the population regression line.
+
+For example, we might ask: "What is the average gift aid for all Elmhurst students with a family income of \$80,000?" The confidence interval for the mean response at $x = 80$ would give a range of plausible values for this population average.
+
+The formula for a $(1-\alpha) \times 100\%$ confidence interval for the mean response at $x = x^*$ is:
+
+$$\hat{y} \pm t_{n-2}^* \cdot SE_{\hat{y}}$$
+
+where the standard error depends on the distance of $x^*$ from $\bar{x}$:
+
+$$SE_{\hat{y}} = s_e \sqrt{\frac{1}{n} + \frac{(x^* - \bar{x})^2}{\sum (x_i - \bar{x})^2}}$$
+
+Here $s_e = \sqrt{MSE}$ is the residual standard error.
+
+### Prediction intervals for individual observations
+
+A **prediction interval** estimates the value of $y$ for a *single* new individual with a particular value of $x$. This interval is always wider than the confidence interval for the mean response because it must account for both:
+
+1. The uncertainty in estimating the regression line (same as the confidence interval).
+2. The natural variability of individual observations around the line.
+
+The prediction interval at $x = x^*$ is:
+
+$$\hat{y} \pm t_{n-2}^* \cdot s_e \sqrt{1 + \frac{1}{n} + \frac{(x^* - \bar{x})^2}{\sum (x_i - \bar{x})^2}}$$
+
+Notice the extra "$1 +$" under the square root compared to the confidence interval formula. This is what makes the prediction interval wider.
+
+### Comparing the two intervals
+
+::: {.workedexample}
+For the possum data, suppose we want to predict the head length for possums with a total length of 85 cm.
+
+The point prediction is $\hat{y} = 41 + 0.59 \times 85 = 91.15$ mm.
+
+- A 95% **confidence interval for the mean** head length of all possums with total length 85 cm might be (89.8, 92.5) mm.
+- A 95% **prediction interval** for the head length of a single possum with total length 85 cm might be (83.2, 99.1) mm.
+
+---
+
+The confidence interval is relatively narrow because it estimates an average, which is estimated with moderate precision. The prediction interval is much wider because it must also account for the natural variation among individual possums -- even possums with the same total length have different head lengths.
+:::
+
+::: {.important}
+**Confidence interval vs. prediction interval.**
+
+- A **confidence interval for the mean response** estimates the average $y$ for a given $x$. It accounts for uncertainty in the regression line.
+- A **prediction interval** estimates the $y$ for a single new observation at a given $x$. It accounts for both the uncertainty in the regression line and the variability of individual observations.
+- Prediction intervals are always wider than confidence intervals.
+- Both intervals are narrowest at $x = \bar{x}$ and widen as $x$ moves away from $\bar{x}$.
+:::
+
+The fact that both intervals widen as $x$ moves away from $\bar{x}$ connects back to the danger of extrapolation: predictions become increasingly uncertain farther from the center of the data.
+
+```{r}
+#| label: fig-ci-pi-bands
+#| fig-cap: "A scatterplot with a regression line and both 95% confidence bands (narrow) and 95% prediction bands (wide). Both bands are narrowest near the mean of x and flare outward. [Open in StatLens]({{< var tool-url >}}/explore/regression/?dataset=possum_regression&bands=true){.open-in-statlens target='_blank' aria-label='Toggle CI and prediction bands on the possum regression in StatLens'}"
+#| fig-alt: "A scatterplot with a regression line and two sets of bands. The inner, narrower bands represent the 95% confidence interval for the mean response. The outer, wider bands represent the 95% prediction interval. Both are narrowest at the center of the data."
+
+possum <- openintro::possum
+possum_mod <- lm(head_l ~ total_l, data = possum)
+
+new_x <- data.frame(total_l = seq(min(possum$total_l), max(possum$total_l), length.out = 100))
+ci_band <- predict(possum_mod, newdata = new_x, interval = "confidence")
+pi_band <- predict(possum_mod, newdata = new_x, interval = "prediction")
+
+band_df <- data.frame(
+  total_l = new_x$total_l,
+  fit = ci_band[, "fit"],
+  ci_lwr = ci_band[, "lwr"], ci_upr = ci_band[, "upr"],
+  pi_lwr = pi_band[, "lwr"], pi_upr = pi_band[, "upr"]
+)
+
+ggplot() +
+  geom_ribbon(data = band_df, aes(x = total_l, ymin = pi_lwr, ymax = pi_upr),
+              fill = COL_PINK, alpha = 0.2) +
+  geom_ribbon(data = band_df, aes(x = total_l, ymin = ci_lwr, ymax = ci_upr),
+              fill = COL_BLUE, alpha = 0.3) +
+  geom_point(data = possum, aes(x = total_l, y = head_l),
+             color = COL_BLUE, alpha = 0.6, size = 2) +
+  geom_line(data = band_df, aes(x = total_l, y = fit),
+            color = COL_RED, linewidth = 1) +
+  annotate("text", x = max(possum$total_l) - 2, y = max(band_df$pi_upr) - 1,
+           label = "Prediction interval", color = COL_PINK, size = 4, fontface = "bold") +
+  annotate("text", x = max(possum$total_l) - 2, y = max(band_df$ci_upr) + 0.5,
+           label = "Confidence interval", color = COL_BLUE, size = 4, fontface = "bold") +
+  labs(x = "Total Length (cm)", y = "Head Length (mm)") +
+  theme_minimal(base_size = 14)
+```
+:::
+
+## Chapter review {#sec-prediction-model-fit-review}
+
+### Summary
+
+In this chapter, we focused on using regression models for prediction and evaluating their fit. We learned that extrapolation -- predicting outside the range of the observed data -- is dangerous and can lead to nonsensical predictions. Residual diagnostics help us identify violations of the model assumptions, including nonlinearity, non-constant variance, and the influence of unusual points. Leverage measures how far a point's $x$-value is from the center of the data; influential points are high-leverage observations that do not follow the overall trend and substantially affect the regression line when removed. Finally, we distinguished between confidence intervals for the mean response and prediction intervals for individual observations, noting that prediction intervals are always wider because they account for individual variability.
+
+### Key terms
+
+- Extrapolation
+- Residual diagnostics
+- Non-constant variability (heteroscedasticity)
+- Leverage
+- Influential point
+- Confidence interval for the mean response
+- Prediction interval
+
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-prediction-model-fit) at the back of the book.
+
+{{< include ../exercises/_prediction-model-fit-exercises.qmd >}}
+
+{{< include ../exercises/_prediction-model-fit-statlens-exercises.qmd >}}

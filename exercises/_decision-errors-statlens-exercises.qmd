@@ -1,0 +1,47 @@
+<!-- StatLens Interactive Exercises — Decision Errors -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: reasoning about Type I and II    -->
+<!-- errors via the conceptual/decision-errors simulator. Power gets the      -->
+<!-- fuller treatment in Ch 29–31; this chapter focuses on framing.            -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Frame the question (and the two ways to be wrong).** A pharmaceutical company tests whether a new drug raises the success rate above the existing 50% standard.
+
+    a.  Write $H_0$ and $H_A$ in symbols.
+    b.  In context, describe a **Type I error** and a **Type II error** in plain English (no Greek letters).
+    c.  In context, who pays the cost of each error --- patients, the company, regulators? When the costs of the two errors are unequal, which one do you typically want to control more tightly, and how?
+
+
+2.  **Pick the right $\alpha$ for the situation.** For each scenario, would you set $\alpha$ at the **conventional** 0.05, **lower** (e.g., 0.01), or **higher** (e.g., 0.10)? Justify.
+
+    a.  A smoke alarm: $H_0$ = "no fire" vs. $H_A$ = "fire." Type I = false alarm; Type II = silent during a real fire.
+    b.  Approving a new vaccine: $H_0$ = "no effect" vs. $H_A$ = "effective."
+    c.  An A/B test of two webpage headlines: $H_0$ = "same click rate" vs. $H_A$ = "different."
+    d.  A criminal trial: $H_0$ = "innocent" vs. $H_A$ = "guilty."
+
+
+3.  **Simulate the error rates.** Open the [Decision Errors simulator]({{< var tool-url >}}/conceptual/decision-errors/?activity=decision-errors.json){target="_blank"} and step through the gated activity. Run the *truth-is-$H_0$* scenario first.
+
+    a.  Set truth = $H_0$ ($p = 0.50$), $n = 100$, $\alpha = 0.05$. Run 500 studies. Of those, roughly what fraction reject $H_0$? What error does each rejection represent?
+    b.  Drop $\alpha$ to 0.01 and re-run 500 studies. Did the fraction of rejections go up or down? Is this consistent with what $\alpha$ is *supposed* to be?
+    c.  Now flip truth to $H_A$ with $p_{\text{true}} = 0.65$, $n = 100$, $\alpha = 0.05$. Run 500 studies. Roughly what fraction reject? Of the **non-rejections**, what kind of error are those?
+    d.  With truth = $H_A$, $p_{\text{true}} = 0.65$, $\alpha = 0.05$, run at $n = 50$, $n = 100$, and $n = 200$. How does the rejection rate (the **power**) change with $n$?
+
+
+4.  **The conditional nature of $\alpha$ and $\beta$.**
+
+    a.  Why is $\alpha$ a probability **conditional on $H_0$ being true**, and $\beta$ a probability **conditional on a specific $H_A$**?
+    b.  A student says: "If $\alpha = 0.05$, then 5% of rejections are wrong." Why is this wrong, even though it sounds plausible?
+    c.  Suppose 1000 hypothesis tests are run, all at $\alpha = 0.05$. In 800 of them $H_0$ is actually true. How many *false positives* (Type I errors) do you expect? How does this differ from the "5% are wrong" framing?
+    d.  Connect to **multiple comparisons**: why does running 20 tests at $\alpha = 0.05$ each give you a substantial chance of at least one false rejection, even if all 20 null hypotheses are true?
+
+
+5.  **A glimpse of power (formal treatment in Ch 29--31).** Suppose a clinical trial will test whether a drug raises the success rate from 50% to 65%. With $n = 100$ patients and $\alpha = 0.05$ (one-sided).
+
+    a.  Predict, without running anything: do you think this trial has enough patients to *reliably detect* a real 15-percentage-point effect? "Reliably" usually means at least 80% power.
+    b.  Open the [Decision Errors simulator]({{< var tool-url >}}/conceptual/decision-errors/){target="_blank"} with truth = $H_A$, $p_{\text{true}} = 0.65$, $n = 100$, $\alpha = 0.05$ and run 1000 studies. What is the simulated power?
+    c.  Given the power you found, what's the practical implication --- if the drug really works, what's the chance the trial *fails*?
+    d.  Name **two** things you could change *before* the trial begins to **raise** its power (say, if the effect had turned out smaller and power fell short). Which one is usually under the researcher's control?
+

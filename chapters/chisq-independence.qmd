@@ -1,0 +1,364 @@
+---
+title: "Chi-Square Test of Independence"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+In the previous chapter, we used the chi-square statistic to test whether a single categorical variable follows a particular distribution. In this chapter, we extend the chi-square framework to two-way tables, where we have two categorical variables and want to assess whether they are associated. The key question becomes: is the distribution of one variable the same across all levels of the other variable, or does the distribution shift depending on the group? As with our other inference methods, we begin with a simulation-based approach (randomization) and then introduce the mathematical chi-square approximation.
+
+Note that with two-way tables, there is not an obvious single parameter of interest. Instead, research questions focus on how the proportions of the response variable change (or not) across the different levels of the explanatory variable. Because there is no single population parameter to estimate, we focus on hypothesis testing (and not confidence intervals).
+:::
+
+## Randomization test of independence {#sec-rand-chisq-indep}
+
+### Case study: The iPod experiment
+
+We all buy used products -- cars, computers, textbooks -- and we sometimes assume the sellers will be forthright about any underlying problems. Researchers recruited 219 participants in a study where they would sell a used iPod that was known to have frozen twice in the past. The participants were incentivized to get as much money as they could. The researchers wanted to understand what types of questions would elicit the seller to disclose the freezing issue.
+
+The buyers (who were collaborating with the researchers) asked one of three scripted questions:
+
+- **General**: "What can you tell me about it?"
+- **Positive Assumption**: "It does not have any problems, does it?"
+- **Negative Assumption**: "What problems does it have?"
+
+The results are shown below:
+
+| Question | Disclose problem | Hide problem | Total |
+|---|:---:|:---:|:---:|
+| General | 2 | 71 | 73 |
+| Positive assumption | 23 | 50 | 73 |
+| Negative assumption | 36 | 37 | 73 |
+| **Total** | **61** | **158** | **219** |
+
+The data suggest that asking "What problems does it have?" was the most effective at getting the seller to disclose the past freezing issues. But could we see these results due to chance alone, or is this evidence that some questions are more effective at getting to the truth?
+
+### Expected counts in two-way tables
+
+The hypothesis test is about assessing whether there is convincing evidence that the question asked was related to whether the seller disclosed the problem. In other words, we want to check whether the buyer's question was **independent** of whether the seller disclosed a problem.
+
+::: {.workedexample}
+From the experiment, the overall proportion of sellers who disclosed the freezing problem was $61/219 = 0.2785$. If there really is no difference among the questions and 27.85% of sellers were going to disclose regardless, how many of the 73 people in the General group would we have expected to disclose?
+
+---
+
+We would predict that $0.2785 \times 73 = 20.33$ sellers would disclose the problem. We observed far fewer than this, though it is not yet clear if that is due to chance variation or because the questions truly differ in effectiveness.
+:::
+
+::: {.guidedpractice}
+If the questions were actually equally effective, meaning about 27.85% of respondents would disclose the freezing issue regardless of what question they were asked, about how many sellers in the Positive Assumption group would we expect to *hide* the freezing problem?
+
+<details>
+<summary>Show answer</summary>
+We would expect $(1 - 0.2785) \times 73 = 52.67$.
+</details>
+:::
+
+We can compute the expected number for all cells using the row totals, column totals, and table total. For instance, the proportion who disclosed overall was $61/219$. Multiplying by each row total:
+
+$$
+\begin{aligned}
+\frac{61}{219} \times 73 &= 20.33 \quad \text{(for each question group)}
+\end{aligned}
+$$
+
+More generally, this can be rewritten as:
+
+$$
+\text{Expected Count}_{\text{row } i, \text{ col } j} = \frac{(\text{row } i \text{ total}) \times (\text{column } j \text{ total})}{\text{table total}}
+$$
+
+::: {.important}
+**Computing expected counts in a two-way table.**
+
+To calculate the expected count for the $i^{th}$ row and $j^{th}$ column, compute:
+
+$$\text{Expected Count}_{\text{row } i, \text{ col } j} = \frac{(\text{row } i \text{ total}) \times (\text{column } j \text{ total})}{\text{table total}}$$
+:::
+
+Using this formula, the observed counts with expected counts in parentheses are:
+
+| Question | Disclose problem | Hide problem | Total |
+|---|:---:|:---:|:---:|
+| General | 2 (20.33) | 71 (52.67) | 73 |
+| Positive assumption | 23 (20.33) | 50 (52.67) | 73 |
+| Negative assumption | 36 (20.33) | 37 (52.67) | 73 |
+| **Total** | **61** | **158** | **219** |
+
+### The observed chi-square statistic
+
+The chi-square test statistic for a two-way table is found by computing the squared standardized difference for every cell in the table and summing them:
+
+$$
+\begin{aligned}
+&\text{General formula} &&
+    \frac{(\text{observed count} - \text{expected count})^2}
+        {\text{expected count}} \\
+&\text{Row 1, Col 1} &&
+    \frac{(2 - 20.33)^2}{20.33} = 16.53 \\
+&\text{Row 2, Col 1} &&
+    \frac{(23 - 20.33)^2}{20.33} = 0.35 \\
+& \hspace{9mm}\vdots &&
+    \hspace{13mm}\vdots \\
+&\text{Row 3, Col 2} &&
+    \frac{(37 - 52.67)^2}{52.67} = 4.66
+\end{aligned}
+$$
+
+Adding the computed value for each cell gives the chi-square test statistic:
+
+$$X^2 = 16.53 + 0.35 + \dots + 4.66 = 40.13$$
+
+### Variability of the statistic
+
+Is 40.13 a big number? Does it indicate that the observed and expected values are really different, or is it a value we might expect to see just due to natural variability?
+
+Assuming that the individuals would disclose or hide the problems **regardless** of the question they were given (i.e., that the null hypothesis is true), we can randomize the data by reassigning the 61 disclosed problems and 158 hidden problems to the three question groups at random. This is exactly the same type of randomization we used in previous chapters.
+
+One such randomization might produce:
+
+| Question | Disclose problem | Hide problem | Total |
+|---|:---:|:---:|:---:|
+| General | 29 | 44 | 73 |
+| Positive assumption | 15 | 58 | 73 |
+| Negative assumption | 17 | 56 | 73 |
+| **Total** | **61** | **158** | **219** |
+
+Computing the chi-square statistic for this randomized table:
+
+$$
+\begin{aligned}
+X^2 &= \frac{(29 - 20.33)^2}{20.33} + \frac{(15 - 20.33)^2}{20.33} + \cdots + \frac{(56 - 52.67)^2}{52.67} = 8
+\end{aligned}
+$$
+
+This is much smaller than 40.13.
+
+### Observed statistic vs. null chi-square statistics
+
+One randomization is not sufficient. We generate many chi-square statistics under the null hypothesis to build a null distribution.
+
+```{r}
+#| label: fig-chisq-indep-null
+#| fig-cap: "A histogram of chi-square statistics from 1,000 simulations produced under the null hypothesis, where the question is independent of the response. The observed statistic of 40.13 is marked by a red line. None of the 1,000 simulations had a chi-square value anywhere close to 40.13. [↗ Try this live](https://learnlens.org/statlens/simulate/randomization-chisq/) — build the null χ² distribution live and place your observed value on it."
+#| fig-alt: "A histogram of 1,000 simulated chi-square statistics under the null hypothesis of independence. The distribution is right-skewed with values mostly below 10. The observed value of 40.13 is far to the right of all simulated values."
+
+library(ggplot2)
+
+set.seed(42)
+n_sims <- 1000
+n_total <- 219
+n_disclose <- 61
+n_hide <- 158
+group_size <- 73
+
+chisq_stats <- replicate(n_sims, {
+  outcomes <- sample(c(rep(1, n_disclose), rep(0, n_hide)))
+  g1 <- sum(outcomes[1:73])
+  g2 <- sum(outcomes[74:146])
+  g3 <- sum(outcomes[147:219])
+  observed <- matrix(c(g1, 73 - g1, g2, 73 - g2, g3, 73 - g3),
+                     nrow = 3, byrow = TRUE)
+  expected <- matrix(rep(c(n_disclose / 3, n_hide / 3), 3),
+                     nrow = 3, byrow = TRUE)
+  sum((observed - expected)^2 / expected)
+})
+
+sim_df <- data.frame(chisq = chisq_stats)
+
+ggplot(sim_df, aes(x = chisq)) +
+  geom_histogram(binwidth = 0.5, fill = COL_BLUE, color = "white", alpha = 0.8) +
+  geom_vline(xintercept = 40.13, color = COL_RED, linewidth = 1, linetype = "dashed") +
+  annotate("text", x = 40.13, y = Inf, label = expression(X^2 == 40.13),
+           hjust = -0.15, vjust = 2, size = 4, color = COL_RED) +
+  labs(x = expression(Simulated ~ X^2 ~ Statistic), y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+The observed value is so far from the null statistics that the simulated p-value is essentially zero. We conclude that the decision of whether to disclose the iPod's problem **is changed** by the question asked. We use the causal language of "changed" because the study was a randomized experiment.
+
+Note that with a chi-square test, we only know that the two variables (question type and response) are related (i.e., not independent). We are not able to claim which specific type of question causes which specific type of response.
+
+## Mathematical model for test of independence {#sec-math-chisq-indep}
+
+### The chi-square test of independence
+
+The chi-square test statistic follows a **chi-square distribution** when the null hypothesis is true and the conditions are met. For two-way tables, the degrees of freedom are:
+
+$$df = (R - 1) \times (C - 1)$$
+
+where $R$ is the number of rows and $C$ is the number of columns.
+
+```{r}
+#| label: fig-chisq-distributions-indep
+#| fig-cap: "The chi-square distribution for different degrees of freedom. The larger the degrees of freedom, the longer the right tail extends. The smaller the degrees of freedom, the more peaked the mode on the left becomes. [↗ Try this live](https://learnlens.org/statlens/conceptual/chi-square-distribution/) — drive the df slider and see the shape shift with df."
+#| fig-alt: "Three overlapping chi-square distribution curves with degrees of freedom 2, 4, and 9, showing how the shape changes."
+
+x_vals <- seq(0.01, 25, length.out = 500)
+
+chisq_df <- data.frame(
+  x = rep(x_vals, 3),
+  density = c(dchisq(x_vals, df = 2), dchisq(x_vals, df = 4), dchisq(x_vals, df = 9)),
+  df = factor(rep(c("df = 2", "df = 4", "df = 9"), each = length(x_vals)),
+              levels = c("df = 2", "df = 4", "df = 9"))
+)
+
+ggplot(chisq_df, aes(x = x, y = density, color = df, linetype = df)) +
+  geom_line(linewidth = 1.1) +
+  scale_color_manual(values = c("df = 2" = COL_BLUE, "df = 4" = COL_PINK, "df = 9" = COL_GREEN),
+                     name = "Degrees of Freedom") +
+  scale_linetype_manual(values = c("df = 2" = "solid", "df = 4" = "dashed", "df = 9" = "dotted"),
+                        name = "Degrees of Freedom") +
+  labs(x = expression(X^2), y = "Density") +
+  coord_cartesian(ylim = c(0, 0.5)) +
+  theme_minimal(base_size = 14)
+```
+
+### Variability of the chi-square statistic
+
+As it turns out, the chi-square test statistic follows a chi-square distribution when the null hypothesis is true. For two-way tables, the degrees of freedom equal $(R-1) \times (C-1)$. In the iPod example, this is $(3-1) \times (2-1) = 2$.
+
+::: {.important}
+**The test statistic for assessing independence between two categorical variables is $X^2$.**
+
+The $X^2$ statistic is a ratio of how the observed counts differ from the expected counts, standardized by the expected counts:
+
+$$X^2 = \sum_{i,j} \frac{(\text{observed count} - \text{expected count})^2}{\text{expected count}}$$
+
+When the null hypothesis is true and the conditions are met, $X^2$ has a chi-square distribution with $df = (R-1) \times (C-1)$.
+
+**Conditions:**
+
+- Independent observations
+- Large samples: at least 5 expected counts in each cell
+:::
+
+::: {.important}
+**Computing degrees of freedom for a two-way table.**
+
+When applying the chi-square test to a two-way table, use $df = (R-1) \times (C-1)$ where $R$ is the number of rows and $C$ is the number of columns.
+:::
+
+### Finding the p-value
+
+We can safely assume that the observations in the iPod experiment are independent (the question groups were randomly assigned). Each expected count exceeds 5, so the conditions for using the chi-square distribution are met. The test statistic $X^2 = 40.13$ follows a chi-square distribution with 2 degrees of freedom.
+
+```{r}
+#| label: fig-chisq-pvalue-indep
+#| fig-cap: "The chi-square distribution with df = 2, showing the area to the right of χ² = 40.13. The p-value is so small it is not visible on the plot. [↗ Try this live](https://learnlens.org/statlens/conceptual/chi-square-distribution/) — drag the cutline to any χ² value and read the p-value."
+#| fig-alt: "Chi-square distribution with 2 degrees of freedom. The area to the right of 40.13 is essentially zero."
+
+x_vals <- seq(0.01, 45, length.out = 500)
+y_vals <- dchisq(x_vals, df = 2)
+curve_df <- data.frame(x = x_vals, y = y_vals)
+
+shade_x <- x_vals[x_vals >= 40.13]
+shade_df <- data.frame(
+  x = c(40.13, shade_x, max(shade_x)),
+  y = c(0, dchisq(shade_x, df = 2), 0)
+)
+
+ggplot() +
+  geom_polygon(data = shade_df, aes(x = x, y = y), fill = COL_PINK, alpha = 0.5) +
+  geom_line(data = curve_df, aes(x = x, y = y), color = COL_BLUE, linewidth = 1.1) +
+  geom_vline(xintercept = 40.13, linetype = "dashed", color = COL_RED) +
+  annotate("text", x = 40.13, y = 0.1, label = expression(X^2 == 40.13),
+           hjust = -0.1, size = 4.5, color = COL_RED) +
+  annotate("text", x = 40.13, y = 0.07, label = "p-value ≈ 0",
+           hjust = -0.1, size = 4, color = COL_RED) +
+  labs(x = expression(X^2), y = "Density") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.workedexample}
+Find the p-value and draw a conclusion about whether the question affects the seller's likelihood of reporting the freezing problem.
+
+---
+
+Using a chi-square distribution with 2 degrees of freedom, the tail area above $X^2 = 40.13$ is approximately 0.000000002.
+
+Using a discernibility level of $\alpha = 0.05$, the null hypothesis is rejected since the p-value is much smaller. The data provide convincing evidence that the question asked did affect a seller's likelihood to tell the truth about problems with the iPod.
+:::
+
+### Another example: Diabetes treatment
+
+::: {.workedexample}
+An experiment evaluated three treatments for Type 2 Diabetes in patients aged 10--17 who were being treated with metformin. The three treatments were: continued metformin alone (met), metformin combined with rosiglitazone (rosi), or a lifestyle intervention program. Each patient had a primary outcome of either failure (lacked glycemic control) or success (maintained glycemic control). The results are shown below.
+
+| Treatment | Failure | Success | Total |
+|---|:---:|:---:|:---:|
+| met | 120 | 114 | 234 |
+| rosi | 90 | 143 | 233 |
+| lifestyle | 109 | 123 | 232 |
+| **Total** | **319** | **380** | **699** |
+
+What are appropriate hypotheses for this test?
+
+---
+
+- $H_0$: There is no difference in the effectiveness of the three treatments.
+- $H_A$: There is some difference in effectiveness between the three treatments, e.g., perhaps the rosiglitazone treatment performed better than lifestyle intervention.
+:::
+
+::: {.guidedpractice}
+Compute the expected counts for each of the six cells in the diabetes treatment table.
+
+<details>
+<summary>Show answer</summary>
+Row 1, Col 1: $\frac{234 \times 319}{699} = 106.8$. Row 1, Col 2: $\frac{234 \times 380}{699} = 127.2$. Row 2, Col 1: $\frac{233 \times 319}{699} = 106.3$. Row 2, Col 2: $\frac{233 \times 380}{699} = 126.7$. Row 3, Col 1: $\frac{232 \times 319}{699} = 105.9$. Row 3, Col 2: $\frac{232 \times 380}{699} = 126.1$.
+</details>
+:::
+
+Note: when analyzing 2-by-2 contingency tables (where both variables have only two categories), it is generally preferable to use the two-proportion methods from earlier chapters.
+
+::: {.statlens}
+**See it in action.** Open the [Chi-Square Independence walkthrough]({{< var tool-url >}}/inference/chisq/?activity=chisq-independence.json){target="_blank"} for a guided pass through framing → conditions → running the test → reading standardized residuals. Or open the [Chi-Square Test]({{< var tool-url >}}/inference/chisq/){target="_blank"} or [Randomization Chi-Square]({{< var tool-url >}}/simulate/randomization-chisq/){target="_blank"} directly on your own data.
+:::
+
+## Comparing the simulation and chi-square approaches
+
+Both the randomization test and the mathematical chi-square test address the same question: are two categorical variables independent? The two approaches generally give very similar results, especially when the sample size is large and the expected counts are well above 5.
+
+The **randomization test** is more flexible because:
+
+- It does not require any minimum expected count.
+- It works well even for small samples.
+- It requires no distributional assumptions beyond independence.
+
+The **mathematical chi-square test** is more convenient because:
+
+- It does not require a computer to simulate thousands of randomizations.
+- It provides a simple formula and distribution for computing p-values.
+- It is widely implemented in statistical software.
+
+In practice, the chi-square test is the standard approach when conditions are met, while the randomization test provides a useful check or alternative when conditions are questionable.
+
+## Chapter review {#sec-chisq-independence-review}
+
+### Summary
+
+In this chapter, we extended the chi-square framework to two-way tables, testing whether two categorical variables are independent. The randomization approach shuffles the data under the null hypothesis to build a distribution of the chi-square statistic, while the mathematical approach uses the chi-square distribution with $(R-1) \times (C-1)$ degrees of freedom. Both approaches require that observations are independent and that expected counts are sufficiently large (at least 5 in each cell).
+
+The chi-square test of independence tells us *whether* two variables are related, but does not tell us *how* they are related or *which* groups differ. To understand the nature of the relationship, we must examine the individual cells and their contributions to the chi-square statistic.
+
+### Key terms
+
+- Independence
+- Expected counts (two-way table)
+- Chi-square statistic
+- Chi-square distribution
+- Degrees of freedom (two-way table)
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-chisq-independence) at the back of the book.
+
+{{< include ../exercises/_chisq-independence-exercises.qmd >}}
+
+{{< include ../exercises/_chisq-independence-statlens-exercises.qmd >}}

@@ -1,0 +1,193 @@
+project:
+  type: book
+  output-dir: _book
+  # Ship the bundled CSVs into _book so they deploy to GitHub Pages. This lets the
+  # Jamovi tab download a real file and the StatLens tab load it via ?csv=<url>
+  # (same-origin as the StatLens site), so the labs/tutorials work without R.
+  resources:
+    - datasets/*.csv
+
+bibliography: references.bib
+
+book:
+  title: "Introduction to Statistics: A Simulation-First Approach"
+  subtitle: "An Open Educational Resource"
+  author: "Jeff Baggett"
+  date: last-modified
+  reader-mode: true
+
+  page-footer:
+    left: |
+      Introduction to Statistics: A Simulation-First Approach
+    right: |
+      Licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>.
+      Built with <a href="https://quarto.org/">Quarto</a>.
+
+  # Cover and branding
+  # cover-image: images/cover.png
+  favicon: images/favicon.svg
+
+  # Repo integration — public CC BY-SA source mirror (see
+  # scripts/sync-public-textbook.sh). Edits made there are overwritten on the
+  # next sync, so "edit" points people at the file and "issue" is the real
+  # feedback path.
+  repo-url: https://github.com/DataScienceUWL/simfirst-stats
+  repo-branch: main
+  repo-actions: [edit, issue]
+
+  # Search
+  search:
+    location: sidebar
+    type: textbox
+
+  # Sidebar navigation
+  sidebar:
+    style: docked
+    collapse-level: 1
+
+  chapters:
+    - index.qmd
+    - preface.qmd
+
+    - part: parts/part-i.qmd
+      chapters:
+        - chapters/intro-to-data.qmd
+        - chapters/study-design.qmd
+        - chapters/data-visualization.qmd
+        - chapters/describing-distributions.qmd
+        - chapters/relationships.qmd
+        - reviews/review-explore.qmd
+        - tech/tech-tutorial-explore.qmd
+        - projects/project-eda.qmd
+
+    - part: parts/part-ii.qmd
+      chapters:
+        - chapters/sampling-variability.qmd
+        - chapters/randomization-tests.qmd
+        - chapters/decision-errors.qmd
+        - chapters/bootstrap-ci.qmd
+        - chapters/sampling-distributions.qmd
+        - reviews/review-simulate.qmd
+        - tech/tech-tutorial-simulate.qmd
+
+    - part: parts/part-iii.qmd
+      chapters:
+        - chapters/normal-approximation.qmd
+        - chapters/inference-proportions.qmd
+        - chapters/ci-for-means.qmd
+        - chapters/hypothesis-tests-means.qmd
+        - reviews/review-calculate.qmd
+        - tech/tech-tutorial-calculate.qmd
+        - projects/project-proportions.qmd
+        - projects/project-means.qmd
+
+    - part: parts/part-iv.qmd
+      chapters:
+        - chapters/chisq-gof.qmd
+        - chapters/chisq-independence.qmd
+        - chapters/anova.qmd
+        - chapters/multiple-comparisons.qmd
+        - chapters/correlation.qmd
+        - chapters/linear-regression.qmd
+        - chapters/prediction-model-fit.qmd
+        - chapters/anova-for-regression.qmd
+        - chapters/multiple-regression.qmd
+        - reviews/review-apply.qmd
+        - tech/tech-tutorial-apply.qmd
+        - projects/project-anova.qmd
+        - projects/project-chisq.qmd
+        - projects/project-chisq-ai.qmd
+        - projects/project-regression.qmd
+
+    - part: parts/part-v.qmd
+      chapters:
+        - chapters/probability-rules.qmd
+        - chapters/random-variables.qmd
+        - chapters/expected-value.qmd
+        - chapters/binomial.qmd
+        - chapters/normal-distribution.qmd
+        - chapters/type-ii-error.qmd
+        - chapters/statistical-power.qmd
+        - chapters/sample-size.qmd
+        - reviews/review-foundations.qmd
+        - tech/tech-tutorial-foundations.qmd
+
+  appendices:
+    - technology-setup.qmd
+    - appendices/datasets.qmd
+    - appendices/statlens-guide.qmd
+    - appendices/tables.qmd
+    - appendices/exercise-solutions.qmd
+
+format:
+  html:
+    theme:
+      light: [cosmo, scss/simfirst.scss, scss/simfirst-a11y.scss]
+      dark: [cosmo, scss/simfirst.scss, scss/simfirst-dark.scss]
+    mainfont: Atkinson Hyperlegible
+    monofont: Source Code Pro
+    fig-dpi: 300
+    fig-show: hold
+    fig-align: center
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    number-depth: 3
+    code-link: true
+    lightbox:
+      match: auto
+      loop: false
+    # Reviewer feedback: Hypothesis margin annotations (HTML only).
+    # Colleagues read the site and comment inline; they select the private
+    # "145 Textbook Review" group in the Hypothesis sidebar. No git required.
+    # NOTE: keep the DEFAULT theme — theme:clean removes the visible launcher
+    # tab, leaving no way to open the sidebar.
+    comments:
+      hypothesis: true
+    # Accessibility
+    lang: en
+    title-block-banner: false
+  pdf:
+    include-in-header: latex/stat145-style.tex
+    documentclass: book
+    classoption:
+      - 10pt
+      - openany
+    pdf-engine: xelatex
+    keep-tex: true
+    block-headings: false
+    top-level-division: chapter
+    fig-dpi: 300
+    fig-show: hold
+    fig-pos: H
+    tbl-pos: H
+    fig-align: center
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    number-depth: 3
+    colorlinks: true
+    lang: en
+
+# R code chunks generate figures; code is hidden from readers
+execute:
+  echo: false
+  eval: true
+  warning: false
+  message: false
+  cache: true
+  # `freeze: auto` stores computed chunk output per-format in _freeze/ so
+  # re-rendering a chapter whose source hasn't changed skips execution
+  # entirely. Critical for keeping HTML+PDF rebuilds fast — without it,
+  # every PDF render has to re-execute all R chunks from scratch because
+  # knitr's cache stores format-specific output (PNG vs vector PDF).
+  freeze: auto
+
+# ── StatLens integration ──────────────────────────────────────────────
+# StatLens base URL: https://learnlens.org/statlens
+# StatLens repo: /home/jbaggett/statlens
+# Contract docs (tool manifest + URL API) live in the StatLens repo.
+# Chapter files use {{< var tool-url >}} shortcode (defined in _variables.yml).
+
+# MathJax for accessible math rendering
+# (MathJax supports screen readers via its Accessibility extensions)

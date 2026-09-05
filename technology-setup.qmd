@@ -1,0 +1,67 @@
+---
+title: "Technology Setup"
+---
+
+Throughout this book you'll use software to do real statistical analysis — making
+graphs, computing summaries, and carrying out tests and confidence intervals. The
+*ideas* are the same no matter which tool you use, so the book is built around a
+shared explanation with a **tabbed choice of tool**: wherever there's a hands-on
+step, you'll see a **Jamovi** tab and an **R** tab.
+
+::: {.callout-important}
+## Which tool should I use?
+
+**Your instructor will tell you whether to use Jamovi or R**, and what resources
+are available to you — for example a shared cloud version, a computer lab, or a
+Posit Cloud workspace. Pick that tool's tab the first time you see one, and the
+book will keep showing that tool from then on. You can switch any time.
+:::
+
+## Option 1 — Jamovi (point-and-click)
+
+[Jamovi](https://www.jamovi.org) is **free, open-source**, and menu-driven — no
+code required. It's a good fit if you want to focus on the statistics rather than
+on programming.
+
+- **Install it:** download the desktop version for Windows or Mac from
+  [jamovi.org](https://www.jamovi.org/download.html) and run the installer.
+- **Or use it in a browser:** a cloud version runs at
+  [cloud.jamovi.org](https://cloud.jamovi.org) with nothing to install.
+- **Learn it:** each section's **Jamovi** tab includes a short demonstration video
+  (with a transcript) showing exactly which menus to use.
+
+When you open data in Jamovi, your analyses are saved in an `.omv` file that
+re-runs automatically — so your work is reproducible, and you can always see the
+underlying steps.
+
+## Option 2 — R (code)
+
+[R](https://www.r-project.org) is a free programming language for statistics, used
+widely in research and industry. It has a steeper start than Jamovi but gives you a
+fully reproducible, scriptable workflow.
+
+- **Install it:** install [R](https://cloud.r-project.org) and then the free
+  [RStudio / Posit](https://posit.co/download/rstudio-desktop/) editor.
+- **Or use it in a browser:** [Posit Cloud](https://posit.cloud) runs RStudio with
+  nothing to install (your instructor may provide a shared workspace).
+- **Learn it:** the **R** tabs link to OpenIntro's free, interactive
+  [IMS tutorials](https://openintrostat.github.io/ims-tutorials/) — self-paced
+  lessons that build your R skills one step at a time. The book's R code uses the
+  same **tidyverse** style those tutorials teach.
+
+## Either way: StatLens for the ideas
+
+Separately from Jamovi and R, this book links to **StatLens** — small interactive
+visualizations you run right in your browser to *see* a concept (a bootstrap
+distribution forming, a confidence interval's coverage, and so on). StatLens is for
+building intuition; Jamovi or R is for producing your actual analysis and report.
+
+---
+
+::: {.callout-note}
+## For instructors
+
+This page is intentionally tool-neutral. Tell students which tab to use and add any
+institution-specific resources here (shared cloud Jamovi, Posit Cloud workspace
+links, lab availability, license details).
+:::

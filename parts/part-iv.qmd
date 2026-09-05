@@ -1,0 +1,5 @@
+---
+title: "Unit 4: Apply"
+---
+
+You now have the full inference toolkit — simulation-based and formula-based. In this part, we apply that toolkit to new data types and richer questions: testing categorical distributions with chi-square, comparing multiple groups with ANOVA, and modeling relationships with correlation and linear regression.

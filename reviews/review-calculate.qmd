@@ -1,0 +1,97 @@
+# Compute — Unit Review {.unnumbered}
+
+::: {.chapterintro}
+Unit 3 revisits the same questions you answered by simulation — *is there an
+effect?* and *how big is it?* — but answers them with **formulas**. When the
+conditions hold, the simulated distributions of Unit 2 are approximately
+**normal** (or **t**), so a short calculation replaces thousands of resamples.
+This review consolidates *which* formula goes with which question, and *when you're
+allowed to use it.*
+:::
+
+## The big picture {#sec-review-calculate-bigpicture}
+
+[Mathematical models](../chapters/normal-approximation.qmd) showed that, under the right conditions, the sampling distribution of a statistic is approximately **normal**. That single fact powers the rest of the part:
+
+- **[Inference for proportions](../chapters/inference-proportions.qmd)** — the normal model gives the **z**-procedures for one and two proportions.
+- **[Confidence intervals for means](../chapters/ci-for-means.qmd)** and **[hypothesis tests for means](../chapters/hypothesis-tests-means.qmd)** — because we estimate the standard deviation from the data, means use the **t**-distribution (one-sample, two-sample, and paired).
+
+The logic is identical to Unit 2 — a **test** gives a p-value, an **interval** gives a range — but the null/sampling distribution now comes from a *model* instead of a simulation. The trade: formulas are fast, but they're only valid when their **conditions** are met.
+
+## Which z- or t-procedure? {#sec-review-calculate-compare}
+
+Pin the procedure with three questions — **proportion or mean? one group or two? (for means) paired or independent?** — then check the condition.
+
+| Situation | Procedure | Key condition |
+|---|---|---|
+| One **proportion** vs. a value | one-proportion **z** | $np_0 \ge 10$ and $n(1-p_0) \ge 10$ |
+| Two **proportions** compared | two-proportion **z** | each group has ≥10 successes & ≥10 failures |
+| One **mean** vs. a value | one-sample **t** | roughly normal, or large $n$ |
+| Two **means**, independent groups | two-sample **t** | each group roughly normal / large |
+| **Paired** measurements (before/after, matched) | paired **t** (t on the differences) | the *differences* roughly normal |
+
+::: {.important}
+**Paired vs. independent is a design question, not a math question.** If each value in one group is naturally linked to a specific value in the other (same subject twice, matched pairs), it's **paired** — analyze the differences. If the two groups are separate samples, it's **two-sample**.
+:::
+
+## Simulation or formula? {#sec-review-calculate-decision}
+
+Both routes answer the same question; pick by **conditions**:
+
+1. **Identify the procedure** from the table (proportion/mean, one/two, paired).
+2. **Check its condition.**
+   - **Conditions met** → the **z/t formula** is valid and convenient.
+   - **Conditions fail** (e.g. too few successes/failures, small skewed sample) → fall back to the **simulation** method from Unit 2 (randomization test or bootstrap), which makes no normality assumption.
+3. Remember they **agree when both apply** — the formula is the shortcut the simulation justifies.
+
+## Key ideas to carry forward {#sec-review-calculate-vocab}
+
+**Sampling distribution** · **standard error** · **z-procedure** (proportions) · **t-distribution** (means) · **degrees of freedom** · **success–failure condition** · **pooled proportion** · **paired vs. two-sample** · **margin of error** · **critical value** ($z^*$, $t^*$) · **p-value** · **confidence level**.
+
+## Common pitfalls {#sec-review-calculate-pitfalls}
+
+- **Using a z-test on a proportion when $np_0 < 10$** — the normal model is unreliable; use simulation (this is the malaria/medical-consultant lesson).
+- **Treating paired data as two independent samples** (or vice versa) — wrong standard error, wrong df.
+- **"Fail to reject" ≠ "accept the null."**
+- **A bigger sample shrinks the margin of error and raises power** — but never fixes bias.
+- **A confidence interval is about the procedure's long-run capture rate**, not a probability for the one interval.
+
+## Exercises {#sec-review-calculate-exercises}
+
+The Unit 3 skill is **naming the right z/t procedure and checking whether you're allowed to use it.** Answers are provided so you can check your work.
+
+1.  **Name the procedure.** For each scenario, give the specific analytic procedure (one-proportion z, two-proportion z, one-sample t, two-sample t, or paired t).
+
+    a.  Is the proportion of defective chips different from the 1% target?
+    b.  Do graduates of program A earn a higher *average* starting salary than graduates of program B (two separate samples)?
+    c.  Did blood pressure change after a 12-week program, measured on the *same* patients before and after?
+    d.  Is the average dosage in a batch different from the labeled 500 mg?
+    e.  Is the proportion of voters favoring a measure different between two cities?
+
+    <details><summary>Show answer</summary>
+    **a.** one-proportion z (vs. 0.01). **b.** two-sample t. **c.** paired t (test the before–after differences). **d.** one-sample t (vs. 500). **e.** two-proportion z.
+    </details>
+
+2.  **Are you allowed to use it?** A clinic claims its complication rate is below the national 10%. In a sample of $n = 62$ patients, 3 had complications. Should you trust a one-proportion **z**-test here? What should you do instead?
+
+    <details><summary>Show answer</summary>
+    Check the condition with $p_0 = 0.10$: $np_0 = 62(0.10) = 6.2 < 10$, so the **success–failure condition fails** — the z-test is **not** trustworthy. Use a **simulation** (a bootstrap interval or randomization test), which makes no normality assumption. ("Run the test" sometimes correctly answers "the conditions don't support this test.")
+    </details>
+
+3.  **Paired or two-sample?** Two studies compare a drug to a placebo. Study X gives the drug to one group and placebo to a *different* group. Study Y gives *each* subject the drug for a month and placebo for a month and compares within subject. Which t-procedure does each use?
+
+    <details><summary>Show answer</summary>
+    **Study X → two-sample t** (independent groups). **Study Y → paired t** (each subject is their own control; analyze the within-subject differences). Same comparison, different design → different procedure and standard error.
+    </details>
+
+4.  **Simulation vs. formula.** On a tidy dataset with 200 observations and dozens of successes and failures in each group, a two-proportion z-test and a randomization test give nearly the same p-value. On a 20-observation dataset with a zero cell, they diverge. Explain the pattern.
+
+    <details><summary>Show answer</summary>
+    With large counts the sampling distribution of $\hat{p}_1 - \hat{p}_2$ is close to normal, so the **formula and the simulation agree**. With tiny, lopsided counts the normal model is a poor fit, so the z-test's p-value is unreliable and **diverges** from the simulation — which stays valid. Divergence is a *signal that the conditions failed*; trust the simulation there.
+    </details>
+
+5.  **Interval ⇔ test.** A 95% confidence interval for $\mu_1 - \mu_2$ is $(0.8, 3.4)$. Two-sided at $\alpha = 0.05$, does the matched t-test reject $H_0: \mu_1 - \mu_2 = 0$?
+
+    <details><summary>Show answer</summary>
+    **Yes.** The interval lies entirely above 0, so 0 is not plausible — the matched two-sided test rejects $H_0$ at $\alpha = 0.05$.
+    </details>

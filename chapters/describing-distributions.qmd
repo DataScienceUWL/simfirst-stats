@@ -1,0 +1,801 @@
+---
+title: "Exploring Quantitative Data"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+::: {.chapterintro}
+In the previous chapter we explored categorical data. Now we turn to **quantitative data** — variables that take numerical values where arithmetic makes sense (heights, incomes, interest rates). This chapter teaches you to both *see* and *measure* distributions. We first **visualize** a distribution with dot plots and histograms, then **measure** its center and spread, flag any **outliers**, and pull it all together with a **box plot**. By the end, you will be able to describe any distribution in terms of its shape, center, spread, and unusual features.
+:::
+
+
+## Visualizing quantitative data {#sec-distribution-shape}
+
+### Dot plots
+
+A **dot plot** is the simplest display for a single quantitative variable. Each observation is represented by a dot placed above its value on a number line. When observations share the same value (or are rounded to the same value), the dots stack vertically.
+
+Consider the interest rates on 50 loans from a lending platform. In a dot plot, each of the 50 loans is a single dot. The red triangle marks the mean.
+
+```{r}
+#| label: fig-dotplot-interest
+#| fig-cap: "A dot plot of interest rates for 50 loans. Most values cluster between 5% and 15%, with a few high rates pulling the distribution to the right. The red triangle marks the mean (11.57%). [Open in StatLens]({{< var tool-url >}}/explore/descriptive/?dataset=loan50&chart=dotplot){.open-in-statlens target='_blank' aria-label='Explore loan50 interest rates in StatLens'}"
+#| fig-alt: "A dot plot of interest rates ranging from about 5% to 26%. Most dots are clustered between 5% and 15%, with a few dots scattered at higher rates, showing right skew. A red triangle marks the mean at about 11.6%."
+
+library(ggplot2)
+library(openintro)
+
+ggplot(loan50, aes(x = interest_rate)) +
+  geom_dotplot(binwidth = 1, fill = COL_BLUE, color = "white",
+               method = "histodot", stackratio = 1.1) +
+  annotate("point", x = mean(loan50$interest_rate), y = -0.03,
+           shape = 17, size = 4, color = COL_RED) +
+  scale_y_continuous(NULL, breaks = NULL) +
+  labs(x = "Interest Rate (%)") +
+  theme_minimal(base_size = 14)
+```
+
+Dot plots are most useful for small datasets (up to about 50–100 observations) where you want to see every individual value. For larger datasets, histograms provide a better summary.
+
+### Histograms {#sec-histograms}
+
+A **histogram** groups quantitative data into bins (intervals) and displays the count or proportion of observations in each bin as a bar. Unlike bar charts for categorical data, histogram bars touch each other because the bins represent a continuous range of values.
+
+To build a histogram, we:
+
+1. Choose a bin width (e.g., 2.5 percentage points for interest rates)
+2. Count how many observations fall in each bin
+3. Draw bars whose heights equal the counts
+
+| Interest rate bin | Count |
+|:------------------|------:|
+| (5.0% - 7.5%]    |    11 |
+| (7.5% - 10.0%]   |    15 |
+| (10.0% - 12.5%]  |     8 |
+| (12.5% - 15.0%]  |     4 |
+| (15.0% - 17.5%]  |     5 |
+| (17.5% - 20.0%]  |     4 |
+| (20.0% - 22.5%]  |     1 |
+| (22.5% - 25.0%]  |     1 |
+| (25.0% - 27.5%]  |     1 |
+
+```{r}
+#| label: fig-histogram-interest
+#| fig-cap: "A histogram of interest rates with bin width 2.5 percentage points. The distribution is right skewed. [Open in StatLens]({{< var tool-url >}}/explore/descriptive/?dataset=loan50&chart=histogram){.open-in-statlens target='_blank' aria-label='Explore the loan50 interest-rate histogram in StatLens'}"
+#| fig-alt: "A histogram with interest rates on the horizontal axis and counts on the vertical axis. The tallest bars are at the left (5% to 10%) and bars decrease in height toward the right, indicating right skew."
+
+ggplot(openintro::loan50, aes(x = interest_rate)) +
+  geom_histogram(binwidth = 2.5, fill = COL_BLUE, color = "white",
+                 boundary = 5) +
+  labs(x = "Interest Rate (%)", y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+Histograms provide a view of the **data density**: higher bars indicate where data values are more common, and lower bars indicate where they are less common.
+
+::: {.important}
+**Choosing bin width.** The bin width affects the appearance of a histogram. Too few bins (wide bins) can obscure important features; too many bins (narrow bins) can create a jagged display that is hard to interpret. There is no single "correct" bin width — experiment with different choices and look for the display that best reveals the shape of the data.
+:::
+
+### Density plots
+
+A **density plot** is a smoothed version of a histogram. Instead of bars, it draws a smooth curve that estimates the distribution of the data. The area under the entire curve equals 1.
+
+```{r}
+#| label: fig-density-interest
+#| fig-cap: "A density plot of interest rates, showing the same right-skewed shape as the histogram. [Open in StatLens]({{< var tool-url >}}/explore/descriptive/?dataset=loan50){.open-in-statlens target='_blank' aria-label='Explore the loan50 interest-rate density in StatLens'}"
+#| fig-alt: "A smooth curve showing the density of interest rates. The curve peaks around 7-9% and has a long tail extending to the right past 25%."
+
+ggplot(openintro::loan50, aes(x = interest_rate)) +
+  geom_density(fill = COL_BLUE, alpha = 0.5, color = COL_BLUE) +
+  labs(x = "Interest Rate (%)", y = "Density") +
+  theme_minimal(base_size = 14)
+```
+
+Density plots are particularly useful for comparing the shapes of distributions because overlapping curves are easier to read than overlapping histogram bars.
+
+### Skewness
+
+Histograms are especially useful for identifying the **shape** of a distribution. One key characteristic is symmetry.
+
+::: {.definition}
+A distribution is **symmetric** if the left and right sides are approximately mirror images of each other.
+
+A distribution is **right skewed** (or skewed to the right) if the right **tail** — the thinner end of the distribution — is longer. Most observations are on the left, with a few large values pulling the tail to the right.
+
+A distribution is **left skewed** (or skewed to the left) if the left tail is longer. Most observations are on the right, with a few small values pulling the tail to the left.
+:::
+
+::: {.important}
+**Identifying skew.** The direction of skew refers to the direction of the *long tail*, not the direction where most data are concentrated. A distribution with a long tail stretching to the right is right skewed, even though the bulk of the data is on the left side.
+:::
+
+```{r}
+#| label: fig-skewness-shapes
+#| fig-cap: "Three distributions illustrating left skewed, symmetric, and right skewed shapes."
+#| fig-alt: "Three histograms side by side. The left histogram shows a left-skewed distribution with a long tail to the left. The middle histogram shows a symmetric bell-shaped distribution. The right histogram shows a right-skewed distribution with a long tail to the right."
+
+set.seed(42)
+skew_df <- data.frame(
+  value = c(rbeta(1000, 5, 2) * 10,
+            rnorm(1000, 5, 1.5),
+            rbeta(1000, 2, 5) * 10),
+  shape = factor(rep(c("Left Skewed", "Symmetric", "Right Skewed"), each = 1000),
+                 levels = c("Left Skewed", "Symmetric", "Right Skewed"))
+)
+
+ggplot(skew_df, aes(x = value)) +
+  geom_histogram(bins = 25, fill = COL_BLUE, color = "white") +
+  facet_wrap(~shape, scales = "free") +
+  labs(x = NULL, y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.guidedpractice}
+Consider the distribution of home prices in a city. Would you expect this distribution to be symmetric, left skewed, or right skewed? Explain your reasoning.
+
+<details>
+<summary>Show answer</summary>
+Home prices tend to be right skewed. Most homes fall in a moderate price range, but a small number of very expensive homes create a long right tail. This is common with income, wealth, and price data.
+</details>
+:::
+
+### Modality
+
+::: {.definition}
+A **mode** is a prominent peak in a distribution. A distribution with a single prominent peak is called **unimodal**. A distribution with two prominent peaks is **bimodal**, and a distribution with more than two prominent peaks is **multimodal**.
+
+A distribution with no prominent peaks — where all values are roughly equally likely — is called **uniform**.
+:::
+
+```{r}
+#| label: fig-modality-shapes
+#| fig-cap: "Three distributions: unimodal, bimodal, and multimodal."
+#| fig-alt: "Three histograms. The first shows a unimodal distribution with one clear peak. The second shows a bimodal distribution with two distinct peaks. The third shows a multimodal distribution with three peaks."
+
+set.seed(42)
+modal_df <- data.frame(
+  value = c(rnorm(1000, 5, 1),
+            c(rnorm(500, 3, 0.7), rnorm(500, 7, 0.7)),
+            c(rnorm(400, 2, 0.5), rnorm(300, 5, 0.5), rnorm(300, 8, 0.5))),
+  shape = factor(rep(c("Unimodal", "Bimodal", "Multimodal"), each = 1000),
+                 levels = c("Unimodal", "Bimodal", "Multimodal"))
+)
+
+ggplot(modal_df, aes(x = value)) +
+  geom_histogram(bins = 30, fill = COL_BLUE, color = "white") +
+  facet_wrap(~shape, scales = "free") +
+  labs(x = NULL, y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.workedexample}
+Height measurements were collected from a group of young students and adult teachers at an elementary school. How many modes would you expect in a histogram of these heights?
+
+---
+
+You would likely expect two modes (bimodal): one centered on the typical height of children and another centered on the typical height of adults.
+:::
+
+::: {.guidedpractice}
+A histogram of interest rates shows one prominent peak near 7%. There is a very small bump near 20%, but it differs from its neighboring bins by only one or two observations. Would you call this distribution unimodal or bimodal?
+
+<details>
+<summary>Show answer</summary>
+Unimodal. The small bump near 20% is not a prominent peak — it differs only slightly from its neighbors. We look for prominent peaks when identifying modes.
+</details>
+:::
+
+### Transforming skewed data (optional) {#sec-data-transformation}
+
+*This topic is optional; later chapters do not depend on it.*
+
+Strongly right-skewed variables --- incomes, populations, prices --- can be hard to read on their original scale, because a long tail of large values squeezes most of the data into a narrow band on the left. A **transformation** re-expresses the data on a new scale to make the distribution easier to see and describe. The most common choice is the **logarithm**.
+
+Taking the log of each value pulls in the long right tail and often makes a right-skewed distribution roughly symmetric. @fig-log-transform shows the annual incomes of the 50 loan applicants on the original dollar scale and after a base-10 log transformation.
+
+```{r}
+#| label: fig-log-transform
+#| fig-cap: "Annual income of 50 loan applicants, shown on the original dollar scale (left) and after a base-10 logarithm (right). The log transformation pulls in the long right tail, leaving a more symmetric distribution. [Open in StatLens]({{< var tool-url >}}/explore/descriptive/?dataset=loan50){.open-in-statlens target='_blank' aria-label='Explore the loan50 income distribution in StatLens'}"
+#| fig-alt: "Two histograms side by side. The left panel shows annual income in dollars: most bars are bunched at the low end with a long thin tail stretching to the right, a strongly right-skewed shape. The right panel shows the base-10 logarithm of income: the bars form a roughly symmetric, mound-shaped distribution."
+#| echo: false
+#| fig-width: 7
+#| fig-height: 3
+inc <- loan50$annual_income
+inc <- inc[!is.na(inc) & inc > 0]
+df_trans <- rbind(
+  data.frame(value = inc,        panel = "Original (dollars)"),
+  data.frame(value = log10(inc), panel = "Log-10 of income")
+)
+df_trans$panel <- factor(df_trans$panel,
+                         levels = c("Original (dollars)", "Log-10 of income"))
+ggplot(df_trans, aes(x = value)) +
+  geom_histogram(bins = 15, fill = COL_BLUE, color = "white") +
+  facet_wrap(~ panel, scales = "free_x") +
+  labs(x = NULL, y = "Count")
+```
+
+On the log scale a one-unit increase corresponds to a *tenfold* increase in income (because we used base 10), so the transformed values are easier to compare and summarize. After transforming, you can describe shape, center, and spread on the new scale just as you would for any distribution --- but remember that those summaries now describe the *log* of income, not income in dollars.
+
+::: {.important}
+**When (and when not) to transform.** A log transformation is useful for strongly right-skewed, positive-valued data such as incomes, city populations, or reaction times. It cannot be applied to values that are zero or negative, and it is rarely needed for roughly symmetric data. A square-root transformation is a milder alternative for moderate skew. Whether to transform depends on your goal: transformations help reveal structure, but the original scale is usually what readers ultimately care about.
+:::
+
+## Measures of center {#sec-measures-center}
+
+### The mean
+
+The **mean** (also called the **average**) is computed by adding up all the observed values and dividing by the number of observations.
+
+::: {.important}
+**Mean.**
+
+The sample mean can be calculated as the sum of the observed values divided by the number of observations:
+
+$$\bar{x} = \frac{x_1 + x_2 + \cdots + x_n}{n}$$
+:::
+
+The notation $\bar{x}$ (read "x-bar") represents the sample mean. It's useful to think of the mean as the **balancing point** of a distribution. In the dot plot above, the mean of 11.57% is where the data would balance if placed on a seesaw — the few high interest rates on the right pull the balance point away from where most of the dots are concentrated.
+
+The population mean is denoted by the Greek letter $\mu$ (pronounced "mew"). We often cannot measure $\mu$ directly because we rarely have access to every member of the population. Instead, we estimate $\mu$ using the sample mean $\bar{x}$.
+
+::: {.guidedpractice}
+In the formula for the mean, what does $x_1$ correspond to? And $x_2$? What does $x_i$ represent in general?
+
+<details>
+<summary>Show answer</summary>
+$x_1$ is the value of the variable for the first observation in the dataset, $x_2$ is the value for the second observation, and $x_i$ is the value for the $i$th observation. For example, if the variable is interest rate, $x_4$ is the interest rate of the fourth loan.
+</details>
+:::
+
+::: {.workedexample}
+Suppose we want to compute the average income per person in the US. We might think to take the mean of per capita incomes across all 3,142 counties. What is wrong with this approach?
+
+---
+
+Each county represents a different number of people. If we simply average the county-level incomes, we treat a county with 5,000 residents the same as one with 5,000,000 residents. Instead, we should compute the total income for each county, add up all counties' totals, and divide by the total population. This is called a **weighted mean**. Failing to weight by population would underestimate the true average because larger, higher-income urban counties would be underrepresented.
+:::
+
+### The median
+
+The **median** is the value in the middle of the ordered data. It divides the dataset in half: 50% of the observations fall below the median and 50% fall above it.
+
+::: {.important}
+**Median: the number in the middle.**
+
+If the data are ordered from smallest to largest, the **median** is the observation right in the middle. If there are an even number of observations, the median is the average of the two middle values.
+:::
+
+The dot plot below shows both the mean and the median marked on the interest rate data. Notice that the median (9.93%) is lower than the mean (11.57%) — the few loans with very high interest rates pull the mean to the right, but the median stays anchored in the middle of the data.
+
+```{r}
+#| label: fig-dotplot-mean-median
+#| fig-cap: "A dot plot of interest rates with the mean (red triangle, 11.57%) and median (blue diamond, 9.93%) marked. The mean is pulled to the right by the high-interest loans. [Open in StatLens]({{< var tool-url >}}/explore/descriptive/?dataset=loan50&chart=dotplot){.open-in-statlens target='_blank' aria-label='Explore loan50 interest rate mean vs median in StatLens'}"
+#| fig-alt: "A dot plot of 50 interest rates. A red triangle marks the mean at 11.57% and a blue diamond marks the median at 9.93%. The mean is to the right of the median because the distribution is right skewed."
+
+loan50 <- openintro::loan50
+
+ggplot(loan50, aes(x = interest_rate)) +
+  geom_dotplot(binwidth = 1, fill = COL_BLUE, color = "white",
+               method = "histodot", stackratio = 1.1) +
+  annotate("point", x = mean(loan50$interest_rate), y = -0.03,
+           shape = 17, size = 4, color = COL_RED) +
+  annotate("text", x = mean(loan50$interest_rate), y = -0.08,
+           label = paste0("Mean = ", round(mean(loan50$interest_rate), 2), "%"),
+           size = 3.5, color = COL_RED) +
+  annotate("point", x = median(loan50$interest_rate), y = -0.03,
+           shape = 18, size = 4, color = COL_GREEN) +
+  annotate("text", x = median(loan50$interest_rate), y = -0.12,
+           label = paste0("Median = ", round(median(loan50$interest_rate), 2), "%"),
+           size = 3.5, color = COL_GREEN) +
+  scale_y_continuous(NULL, breaks = NULL) +
+  labs(x = "Interest Rate (%)") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.guidedpractice}
+For a dataset with 7 observations arranged in order, which observation is the median?
+
+<details>
+<summary>Show answer</summary>
+The 4th observation. With an odd number of observations, the median is the single middle value. There are 3 observations below it and 3 above it.
+</details>
+:::
+
+### The mode
+
+::: {.original}
+The **mode** is the most frequently occurring value in a dataset. While useful for categorical data (e.g., the most common eye color), the mode is less useful for continuous quantitative data because many values may occur only once.
+
+In practice, when we refer to the "mode" of a quantitative distribution, we usually mean the location of a prominent *peak* in a histogram or density plot (as discussed in @sec-distribution-shape), rather than a single repeated value.
+:::
+
+### How skewness affects the mean and median {#sec-describing-shape}
+
+Now we can connect what we see in a histogram to the summary statistics we computed earlier.
+
+In a **symmetric** distribution, the mean and median are approximately equal.
+
+In a **right-skewed** distribution, the mean is pulled toward the right tail and is larger than the median.
+
+In a **left-skewed** distribution, the mean is pulled toward the left tail and is smaller than the median.
+
+::: {.important}
+**Relationship between mean, median, and skewness.**
+
+- Right skewed: $\text{mean} > \text{median}$
+- Symmetric: $\text{mean} \approx \text{median}$
+- Left skewed: $\text{mean} < \text{median}$
+
+The direction of skew pulls the mean toward the tail. The median is more resistant to this pull.
+:::
+
+::: {.workedexample}
+The interest rate distribution is right skewed, with a mean of 11.57% and a median of 9.93%. How does the skewness explain the gap between these two values?
+
+---
+
+The few loans with very high interest rates (above 20%) pull the mean to the right. The median, which simply finds the middle value, is not affected by how extreme those high rates are. This is why the mean (11.57%) is larger than the median (9.93%) in a right-skewed distribution.
+:::
+
+::: {.statlens}
+**See it in action.** Open the [Descriptive Statistics Explorer]({{< var tool-url >}}/explore/descriptive/?dataset=loan50_interest_rate){target="_blank"} on the interest-rate data --- switch between histograms, dot plots, and box plots, and compare the mean and median in the summary panel.
+:::
+
+### When to use the mean vs. the median
+
+The mean and median measure different things. The choice between them depends on the context:
+
+::: {.workedexample}
+A company wants to understand its profit per customer. Should it use the mean or the median?
+
+---
+
+It depends on the question:
+
+- If the concern is overall profitability (total profit divided by number of customers), the **mean** is the right statistic. A company could have a positive median profit per customer and still be unprofitable if a few customers generate large losses.
+- If the concern is understanding what the *typical* customer experience looks like, the **median** tells you more about the profit from a representative customer.
+:::
+
+::: {.important}
+**Mean vs. median: which to choose?**
+
+- The **mean** is best when you care about the *total* or *aggregate* (e.g., total revenue, total time spent).
+- The **median** is best when you care about the *typical* observation, especially when the distribution is skewed or contains outliers.
+- For symmetric distributions without extreme outliers, the mean and median are approximately equal and either is appropriate.
+:::
+
+::: {.guidedpractice}
+The distribution of home prices in a city is strongly right skewed. If you wanted to describe the price of a typical home, should you report the mean or the median? Why?
+
+<details>
+<summary>Show answer</summary>
+The median. In a right-skewed distribution, a few very expensive homes pull the mean upward, making it unrepresentative of a typical home price. The median is not affected by these extreme values and better represents what a typical buyer would encounter.
+</details>
+:::
+
+## Measures of spread {#sec-measures-spread}
+
+Knowing the center of a distribution is important, but it tells only part of the story. Two distributions can have the same center but look very different if one is tightly clustered and the other is widely dispersed. We need measures of **variability** (also called spread or dispersion).
+
+### Range
+
+The simplest measure of spread is the **range**: the difference between the maximum and minimum values.
+
+$$\text{Range} = \text{Maximum} - \text{Minimum}$$
+
+::: {.original}
+While easy to compute, the range has a major weakness: it depends entirely on the two most extreme observations. A single outlier can dramatically increase the range, giving a misleading impression of the overall variability. For this reason, we usually prefer the IQR or standard deviation.
+:::
+
+### The interquartile range (IQR)
+
+The **interquartile range** measures the spread of the middle 50% of the data. We already saw the IQR when constructing box plots — it is the length of the box.
+
+::: {.important}
+**Interquartile range (IQR).**
+
+The IQR is computed as:
+
+$$\text{IQR} = Q_3 - Q_1$$
+
+where $Q_1$ is the first quartile (25th percentile) and $Q_3$ is the third quartile (75th percentile).
+:::
+
+::: {.workedexample}
+For the 50-loan interest rate data, $Q_1 \approx 8\%$ and $Q_3 \approx 14\%$. What is the IQR, and what does it tell us?
+
+---
+
+$\text{IQR} = 14\% - 8\% = 6$ percentage points. This means the middle 50% of loans have interest rates spanning a range of 6 percentage points. Half of all loans have rates between about 8% and 14%.
+:::
+
+### Variance and standard deviation {#sec-variance-sd}
+
+The **standard deviation** is the most commonly used measure of spread. It roughly describes how far the typical observation is from the mean.
+
+We start with the concept of a **deviation**: the distance of an observation from the mean.
+
+$$\text{deviation of } x_i = x_i - \bar{x}$$
+
+Some deviations are positive (observations above the mean) and some are negative (observations below the mean). If we simply averaged the deviations, the positives and negatives would cancel out, giving us zero. To avoid this, we *square* each deviation before averaging.
+
+::: {.definition}
+The **variance** (denoted $s^2$) is the average of the squared deviations, using $n-1$ in the denominator:
+
+$$s^2 = \frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n-1} = \frac{(x_1 - \bar{x})^2 + (x_2 - \bar{x})^2 + \cdots + (x_n - \bar{x})^2}{n-1}$$
+
+The **standard deviation** (denoted $s$) is the square root of the variance:
+
+$$s = \sqrt{s^2} = \sqrt{\frac{\sum_{i=1}^{n}(x_i - \bar{x})^2}{n-1}}$$
+:::
+
+We divide by $n - 1$ rather than $n$ when computing a sample's variance. The mathematical reasons are beyond this course, but the practical effect is that this makes the statistic slightly more reliable as an estimate of the population variance.
+
+::: {.guidedpractice}
+Why do we square the deviations instead of just taking the absolute value? What are the two consequences of squaring?
+
+<details>
+<summary>Show answer</summary>
+Squaring the deviations does two things: (1) it eliminates negative signs (since any number squared is non-negative), and (2) it makes large deviations relatively *much* larger than small ones. An observation that is 10 units from the mean contributes 100 to the sum of squared deviations, while one that is 2 units away contributes only 4. This means the variance and standard deviation are especially sensitive to outliers.
+</details>
+:::
+
+The following histogram shows the interest rate data with shaded bands marking one and two standard deviations from the mean. The standard deviation of 5.05 percentage points gives us a sense of how spread out the data are around the mean of 11.57%.
+
+```{r}
+#| label: fig-histogram-sd-bands
+#| fig-cap: "A histogram of interest rates with shaded regions showing one standard deviation (dark) and two standard deviations (light) from the mean. [Open in StatLens]({{< var tool-url >}}/explore/descriptive/?dataset=loan50&chart=histogram){.open-in-statlens target='_blank' aria-label='Explore loan50 histogram with SD bands in StatLens'}"
+#| fig-alt: "A histogram of interest rates with the mean marked by a dashed red line at 11.57%. A dark shaded band spans from about 6.5% to 16.6% (one SD from the mean) and a lighter band spans from about 1.5% to 21.7% (two SDs from the mean). Most of the data falls within two standard deviations."
+
+loan50 <- openintro::loan50
+m <- mean(loan50$interest_rate)
+s <- sd(loan50$interest_rate)
+
+ggplot(loan50, aes(x = interest_rate)) +
+  annotate("rect", xmin = m - 2*s, xmax = m + 2*s, ymin = 0, ymax = Inf,
+           fill = "#A9CFDF", alpha = 0.4) +
+  annotate("rect", xmin = m - s, xmax = m + s, ymin = 0, ymax = Inf,
+           fill = COL_BLUE, alpha = 0.3) +
+  geom_histogram(binwidth = 2.5, fill = COL_BLUE, color = "white",
+                 boundary = 5) +
+  geom_vline(xintercept = m, linetype = "dashed", color = COL_RED, linewidth = 1) +
+  annotate("text", x = m + 0.5, y = 14, label = paste0("Mean = ", round(m, 2), "%"),
+           hjust = 0, size = 3.5, color = COL_RED) +
+  annotate("text", x = m + s, y = 16, label = "1 SD", hjust = -0.2, size = 3, color = COL_GREEN) +
+  annotate("text", x = m + 2*s, y = 16, label = "2 SD", hjust = -0.2, size = 3, color = COL_GREEN) +
+  labs(x = "Interest Rate (%)", y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.workedexample}
+For the 50-loan interest rate data, the variance is $s^2 = 25.52$ and the standard deviation is $s = \sqrt{25.52} = 5.05$ percentage points. What does a standard deviation of 5.05 percentage points mean in context?
+
+---
+
+The standard deviation tells us that interest rates typically deviate about 5 percentage points from the mean (11.57%). Most loans have rates that are within one standard deviation of the mean — roughly between 6.5% and 16.6%.
+:::
+
+Like the mean, the population values for variance and standard deviation have special symbols: $\sigma^2$ for the variance and $\sigma$ for the standard deviation. The Greek letter $\sigma$ is pronounced "sigma."
+
+::: {.important}
+**Variance and standard deviation.**
+
+The variance is the average squared distance from the mean. The standard deviation is the square root of the variance. The standard deviation represents the *typical* deviation of observations from the mean. Often about 68% of the data will be within one standard deviation of the mean and about 95% will be within two standard deviations. However, these percentages are not strict rules.
+:::
+
+## Outliers and robust statistics {#sec-outliers-robust}
+
+### Identifying outliers
+
+::: {.definition}
+An **outlier** is an observation that appears extreme relative to the rest of the data.
+:::
+
+Examining data for outliers serves several purposes:
+
+- Identifying strong skew in the distribution
+- Identifying possible data collection or data entry errors
+- Providing insight into interesting or unusual properties of the data
+
+::: {.caution}
+Not all outliers are errors, and not all errors are outliers. Some datasets naturally have long tails and outlying points are legitimate observations. **Never remove an outlier without a substantive reason** (e.g., confirmed data entry error). Blindly removing outliers can lead to misleading conclusions.
+:::
+
+A common rule for identifying outliers in the context of box plots is the **1.5 IQR rule**: any observation more than $1.5 \times \text{IQR}$ below $Q_1$ or above $Q_3$ is flagged as a potential outlier. This is the rule used to determine which points appear as dots beyond the whiskers of a box plot.
+
+### Robust statistics
+
+::: {.definition}
+A statistic is called **robust** (or **resistant**) if extreme observations have little effect on its value.
+:::
+
+Consider what happens when we change a single extreme observation in the interest rate data. The table below shows how the median, IQR, mean, and standard deviation respond when the most extreme value (26.3%) is moved:
+
+| Scenario              | Median | IQR  | Mean  | SD   |
+|:----------------------|-------:|-----:|------:|-----:|
+| Original data         |  9.93  | 5.75 | 11.57 | 5.05 |
+| Move 26.3% to 15%    |  9.93  | 5.75 | 11.34 | 4.61 |
+| Move 26.3% to 35%    |  9.93  | 5.75 | 11.74 | 5.68 |
+
+::: {.workedexample}
+In the table above, the median and IQR are unchanged across all three scenarios, but the mean and standard deviation shift. Why?
+
+---
+
+The median and IQR are determined by the values near the middle of the ordered data ($Q_1$, the median, and $Q_3$). Moving a single extreme value does not change the positions of these middle values. The mean and standard deviation, however, use every data value in their calculations. The mean adds up all values, so changing one extreme value changes the sum. The standard deviation squares deviations from the mean, so extreme values have an outsized effect.
+:::
+
+::: {.important}
+**Robust vs. non-robust statistics.**
+
+| Robust (resistant to outliers)   | Not robust (sensitive to outliers)   |
+|:---------------------------------|:-------------------------------------|
+| Median                           | Mean                                 |
+| IQR                              | Standard deviation                   |
+|                                  | Range                                |
+
+When a distribution is skewed or contains outliers, robust statistics (median and IQR) often give a more representative summary of the "typical" observation. When a distribution is roughly symmetric with no extreme outliers, the mean and standard deviation work well and carry additional mathematical advantages.
+:::
+
+::: {.guidedpractice}
+The distribution of salaries at a company is right skewed because a few executives earn much more than most employees. Which pair of summary statistics would better represent the "typical" salary and its variability: (mean, standard deviation) or (median, IQR)?
+
+<details>
+<summary>Show answer</summary>
+The median and IQR. In a right-skewed distribution, the mean is pulled upward by the high executive salaries, making it unrepresentative of the typical employee. The median is not affected by these extreme values, and the IQR captures the spread of the middle 50% of salaries.
+</details>
+:::
+
+::: {.guidedpractice}
+The distribution of loan amounts is right skewed. If you wanted to understand the typical loan size, should you be more interested in the mean or the median?
+
+<details>
+<summary>Show answer</summary>
+If the goal is to understand what a typical individual loan looks like, the median is probably more useful. However, if the goal is to understand something that scales — such as the total amount of money needed on hand to fund 1,000 loans — then the mean would be more useful.
+</details>
+:::
+
+::: {.statlens}
+**See it in action.** Open the [Outliers and Robust Statistics]({{< var tool-url >}}/explore/descriptive/?dataset=county_pop&activity=robust-statistics.json){target="_blank"} activity on US county populations --- one of the most skewed distributions you'll encounter --- to see firsthand why the mean and SD mislead and the median and IQR don't.
+:::
+
+## Box plots {#sec-boxplots}
+
+A **box plot** (also called a box-and-whisker plot) provides a compact summary of a distribution using five numbers: the minimum, first quartile ($Q_1$), median, third quartile ($Q_3$), and maximum — with special handling for outliers.
+
+### Constructing a box plot
+
+The components of a box plot are:
+
+1. **The box**: Spans from $Q_1$ (the 25th percentile) to $Q_3$ (the 75th percentile). This box contains the middle 50% of the data. The length of the box is the **interquartile range** (IQR = $Q_3 - Q_1$).
+
+2. **The median line**: A line inside the box marks the median (the 50th percentile), which divides the data in half.
+
+3. **The whiskers**: Lines extending from the box toward the smallest and largest observations that are *not* outliers. Specifically, the whiskers extend to the most extreme data points within $1.5 \times \text{IQR}$ of the box.
+
+4. **Outlier points**: Any observations beyond $1.5 \times \text{IQR}$ from the edges of the box are plotted individually as dots. These are potential outliers.
+
+```{r}
+#| label: fig-dotplot-boxplot-interest
+#| fig-cap: "A dot plot and box plot of the same interest rate data, shown one above the other for comparison. The box plot summarizes the distribution with five numbers plus outliers. [Open in StatLens]({{< var tool-url >}}/explore/descriptive/?dataset=loan50&chart=boxplot){.open-in-statlens target='_blank' aria-label='Compare dotplot and boxplot on loan50 in StatLens'}"
+#| fig-alt: "A dot plot on top and a box plot on the bottom, both showing interest rates from 0% to 30%. The box plot shows the box spanning from about 8% to 14%, with a median line near 10%. The right whisker extends to about 20%, and there are a few outlier points above 24%."
+
+p_dot <- ggplot(openintro::loan50, aes(x = interest_rate)) +
+  geom_dotplot(binwidth = 1, fill = COL_BLUE, color = "white",
+               method = "histodot", stackratio = 1.1) +
+  scale_y_continuous(NULL, breaks = NULL) +
+  labs(x = NULL) +
+  theme_minimal(base_size = 14)
+
+p_box <- ggplot(openintro::loan50, aes(x = interest_rate)) +
+  geom_boxplot(fill = COL_BLUE, color = "black", outlier.color = COL_RED,
+               outlier.size = 2) +
+  labs(x = "Interest Rate (%)") +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+gridExtra::grid.arrange(p_dot, p_box, ncol = 1, heights = c(2, 1))
+```
+
+::: {.definition}
+The **first quartile** ($Q_1$) is the 25th percentile — 25% of the data fall below this value. The **third quartile** ($Q_3$) is the 75th percentile — 75% of the data fall below this value.
+
+The **interquartile range** (IQR) is the range of the middle 50% of the data: $\text{IQR} = Q_3 - Q_1$.
+:::
+
+### Interpreting a box plot
+
+::: {.workedexample}
+A box plot of interest rates shows: the left edge of the box at about 8%, the median line at about 10%, and the right edge of the box at about 14%. Two dots appear beyond the right whisker at about 25% and 26%. What can we learn from this display?
+
+---
+
+The middle 50% of interest rates fall between about 8% and 14% (the IQR is about 6 percentage points). The median rate is about 10%. The right whisker extends to about 20%, and the two dots beyond the whisker at 25% and 26% indicate unusually high interest rates. The box plot also reveals right skew, since the median is closer to the left edge of the box and the right whisker is longer than the left whisker.
+:::
+
+::: {.guidedpractice}
+What percentage of observations fall between $Q_1$ and the median? What percentage fall between the median and $Q_3$?
+
+<details>
+<summary>Show answer</summary>
+25% of the data fall between $Q_1$ and the median, and another 25% fall between the median and $Q_3$. Together, the middle 50% of the data lie within the box.
+</details>
+:::
+
+::: {.statlens}
+**See it in action.** Open the [Comparing Charts for Quantitative Data]({{< var tool-url >}}/explore/descriptive/?dataset=ames_price&activity=numerical-charts.json){target="_blank"} activity to walk through dot plots, histograms, and box plots on home sale prices and see what each chart type reveals (and hides).
+:::
+
+## Describing a distribution {#sec-describing-distribution}
+
+A complete description of a distribution should address three things: **shape**, **center**, and **spread**.
+
+::: {.original}
+A good description of a distribution should always:
+
+1. Name the **shape**: symmetric or skewed (and direction), and the number of modes
+2. Give the **center**: report the mean and/or median with units
+3. Give the **spread**: report the standard deviation and/or IQR with units
+4. Note any **unusual features**: outliers, gaps, clusters
+5. Use **context**: refer to the actual variable and its units, not just abstract numbers
+
+**Example**: "The distribution of commute times is unimodal and right skewed, with a median of 22 minutes and an IQR of 15 minutes. A few commuters have commute times exceeding 90 minutes."
+:::
+
+::: {.workedexample}
+Write a complete description of the interest rate distribution from the loan dataset.
+
+---
+
+The distribution of interest rates is **unimodal** and **right skewed**. The **center** is around 10–12% (median = 9.93%, mean = 11.57%). The **spread** is moderate: the standard deviation is 5.05 percentage points and the IQR is about 6 percentage points. There are a few **unusually high** interest rates above 20%, which contribute to the right skew and the gap between the mean and median.
+:::
+
+::: {.guidedpractice}
+A description says: "The mean is 15 and the standard deviation is 3." What is missing from this description?
+
+<details>
+<summary>Show answer</summary>
+The description lacks context (what variable? what units?), shape information (symmetric? skewed? unimodal?), and any mention of unusual features. A better version might be: "The distribution of wait times (in minutes) is approximately symmetric and unimodal, with a mean of 15 minutes and a standard deviation of 3 minutes. There are no obvious outliers."
+</details>
+:::
+
+## The empirical rule and Chebyshev's theorem {#sec-empirical-rule}
+
+### The empirical rule (68-95-99.7 rule)
+
+For distributions that are approximately **bell-shaped** (symmetric and unimodal), the standard deviation provides a useful ruler. Statisticians call this particular bell shape the **normal distribution** — it comes up so often in statistics that it has its own name. We'll study it formally later, but for now, just know that "bell-shaped" and "normal" mean the same thing.
+
+::: {.important}
+**The empirical rule.**
+
+For a roughly bell-shaped distribution:
+
+- About **68%** of the data fall within 1 standard deviation of the mean: $(\bar{x} - s, \ \bar{x} + s)$
+- About **95%** of the data fall within 2 standard deviations of the mean: $(\bar{x} - 2s, \ \bar{x} + 2s)$
+- About **99.7%** of the data fall within 3 standard deviations of the mean: $(\bar{x} - 3s, \ \bar{x} + 3s)$
+:::
+
+```{r}
+#| label: fig-empirical-rule
+#| fig-cap: "A bell-shaped distribution with shaded regions showing 68%, 95%, and 99.7% of the data within 1, 2, and 3 standard deviations of the mean, respectively. [↗ Try this live](https://learnlens.org/statlens/conceptual/normal-distribution/) — drag the cutlines in the Normal Distribution tool to see the 68-95-99.7 boundaries move as you change μ and σ."
+#| fig-alt: "A symmetric bell-shaped curve with the mean at the center. The region within one standard deviation of the mean is shaded darkly and labeled 68%. The region within two standard deviations is shaded more lightly and labeled 95%. The region within three standard deviations covers nearly the entire curve and is labeled 99.7%."
+
+library(ggplot2)
+
+x <- seq(-4, 4, length.out = 400)
+y <- dnorm(x)
+norm_df <- data.frame(x = x, y = y)
+
+ggplot(norm_df, aes(x, y)) +
+  geom_area(data = subset(norm_df, x >= -3 & x <= 3),
+            fill = "#E8F0F6", alpha = 0.9) +
+  geom_area(data = subset(norm_df, x >= -2 & x <= 2),
+            fill = "#A9CFDF", alpha = 0.9) +
+  geom_area(data = subset(norm_df, x >= -1 & x <= 1),
+            fill = COL_BLUE, alpha = 0.9) +
+  geom_line(linewidth = 0.8) +
+  annotate("text", x = 0, y = 0.17, label = "68%", size = 5, fontface = "bold") +
+  annotate("text", x = 0, y = 0.06, label = "95%", size = 4.5, fontface = "bold") +
+  annotate("text", x = 0, y = 0.01, label = "99.7%", size = 4, fontface = "bold") +
+  annotate("text", x = 0, y = -0.02, label = expression(bar(x)), size = 5) +
+  annotate("text", x = -1, y = -0.02, label = expression(bar(x) - s), size = 4) +
+  annotate("text", x = 1, y = -0.02, label = expression(bar(x) + s), size = 4) +
+  annotate("text", x = -2, y = -0.02, label = expression(bar(x) - 2*s), size = 3.5) +
+  annotate("text", x = 2, y = -0.02, label = expression(bar(x) + 2*s), size = 3.5) +
+  annotate("text", x = -3, y = -0.02, label = expression(bar(x) - 3*s), size = 3) +
+  annotate("text", x = 3, y = -0.02, label = expression(bar(x) + 3*s), size = 3) +
+  scale_x_continuous(breaks = -3:3, labels = NULL) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.y = element_blank(),
+        panel.grid = element_blank())
+```
+
+::: {.workedexample}
+The heights of adult women in the US are approximately bell-shaped with a mean of 64.5 inches and a standard deviation of 2.5 inches. Use the empirical rule to estimate the range of heights for the middle 95% of women.
+
+---
+
+By the empirical rule, about 95% of the data fall within 2 standard deviations of the mean:
+
+$$64.5 - 2(2.5) = 59.5 \text{ inches} \quad \text{to} \quad 64.5 + 2(2.5) = 69.5 \text{ inches}$$
+
+So about 95% of adult women in the US are between 59.5 inches (4'11.5") and 69.5 inches (5'9.5") tall.
+:::
+
+::: {.guidedpractice}
+Using the same height distribution (mean = 64.5 inches, SD = 2.5 inches), what percentage of women are shorter than 59.5 inches?
+
+<details>
+<summary>Show answer</summary>
+By the empirical rule, about 95% of women are between 59.5 and 69.5 inches. That means about 5% are outside this range. Since the distribution is symmetric, about half of that 5% (i.e., about 2.5%) are below 59.5 inches.
+</details>
+:::
+
+::: {.caution}
+The empirical rule is only an approximation, and it works best for distributions that are roughly bell-shaped. For skewed or multimodal distributions, the percentages can be quite different. For example, in a right-skewed distribution, more than 68% of the data may fall within one standard deviation of the mean because the bulk of the data is concentrated on one side.
+:::
+
+::: {.guidedpractice}
+Three distributions all have the same mean (0) and the same standard deviation (1), but one is bimodal, one is bell-shaped, and one is right skewed. Would the empirical rule work well for all three? Why or why not?
+
+<details>
+<summary>Show answer</summary>
+No. The empirical rule works well only for the bell-shaped distribution. The bimodal distribution would have more data near the edges (near the two peaks) and less in the middle. The right-skewed distribution would have more data close to the mean on one side and a long tail on the other. In both cases, the 68-95-99.7 percentages would be poor approximations.
+</details>
+:::
+
+### Chebyshev's theorem
+
+::: {.original}
+While the empirical rule applies only to bell-shaped distributions, **Chebyshev's theorem** provides a guarantee that works for *any* distribution, regardless of shape:
+
+::: {.important}
+**Chebyshev's theorem.**
+
+For **any** distribution (regardless of shape), at least $\left(1 - \frac{1}{k^2}\right) \times 100\%$ of the data fall within $k$ standard deviations of the mean, for any $k > 1$.
+
+| Standard deviations ($k$) | At least this % of data |
+|:--------------------------|:-----------------------:|
+| 2                         | 75%                     |
+| 3                         | 89%                     |
+| 4                         | 93.75%                  |
+:::
+
+Chebyshev's theorem is weaker than the empirical rule (it guarantees "at least 75%" within 2 standard deviations, while the empirical rule says "about 95%" for bell-shaped data), but it has the advantage of applying to every distribution. It is most useful when you cannot assume the distribution is bell-shaped.
+:::
+
+## Chapter review {#sec-describing-distributions-review}
+
+### Summary
+
+This chapter introduced the tools for exploring quantitative data — both visual and numerical. **Dot plots** show individual values for small datasets, **histograms** reveal the shape and density of a distribution, **density plots** provide smoothed alternatives, and **box plots** give a compact five-number summary. Distribution shape is described using **symmetry** (left skewed, symmetric, right skewed) and **modality** (unimodal, bimodal, multimodal). The **mean** and **median** measure center, with the mean being the balancing point and the median being the middle value. The **standard deviation** and **IQR** measure spread, with the standard deviation roughly representing the typical deviation from the mean and the IQR representing the range of the middle 50%. The **median** and **IQR** are robust to outliers, while the **mean** and **standard deviation** are sensitive to extreme values. The **empirical rule** connects the standard deviation to the distribution shape for bell-shaped data: about 68%, 95%, and 99.7% of observations fall within 1, 2, and 3 standard deviations of the mean.
+
+### Key terms
+
+- Dot plot, histogram, density plot, box plot
+- Data density, bin width
+- Symmetric, left skewed, right skewed, tail
+- Unimodal, bimodal, multimodal, uniform
+- Mean ($\bar{x}$), median, mode
+- Population mean ($\mu$), weighted mean
+- Deviation, variance ($s^2$), standard deviation ($s$)
+- Population variance ($\sigma^2$), population standard deviation ($\sigma$)
+- Range, interquartile range (IQR)
+- First quartile ($Q_1$), third quartile ($Q_3$), percentile
+- Outlier, robust statistic (resistant statistic)
+- Empirical rule (68-95-99.7 rule), Chebyshev's theorem
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-describing-distributions) at the back of the book.
+
+{{< include ../exercises/_describing-distributions-exercises.qmd >}}
+
+{{< include ../exercises/_describing-distributions-statlens-exercises.qmd >}}

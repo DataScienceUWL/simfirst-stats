@@ -1,0 +1,358 @@
+---
+title: "Correlation"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+When we have two quantitative variables, we often want to understand the relationship between them. Does one variable increase as the other increases? Does it decrease? Or is there no apparent pattern? In this chapter, we introduce tools for visualizing and quantifying the strength and direction of the linear relationship between two quantitative variables. We begin with scatterplots, then introduce the correlation coefficient $r$, discuss its properties and limitations, and address the ever-important distinction between correlation and causation.
+:::
+
+## Scatterplots {#sec-scatterplots}
+
+A **scatterplot** displays the relationship between two quantitative variables. Each point represents a single observation, with one variable on the horizontal axis and the other on the vertical axis. Scatterplots are the most useful tool for visualizing the relationship between two quantitative variables.
+
+When examining a scatterplot, we look for four key features:
+
+1. **Direction**: Is the relationship positive (upward trend), negative (downward trend), or neither?
+2. **Form**: Is the relationship linear (points cluster around a line) or nonlinear (points follow a curve)?
+3. **Strength**: How tightly do the points cluster around the trend? A strong relationship has little scatter; a weak relationship has lots of scatter.
+4. **Unusual observations**: Are there any outliers that deviate from the overall pattern?
+
+::: {.workedexample}
+Researchers captured 104 brushtail possums in Australia and took body measurements before releasing them. Consider the relationship between total body length (cm) and head length (mm).
+
+```{r}
+#| label: fig-possum-scatter
+#| fig-cap: "A scatterplot showing head length against total length for 104 brushtail possums. The relationship is moderately strong, positive, and linear. [Open in StatLens]({{< var tool-url >}}/explore/regression/?dataset=possum_regression){.open-in-statlens target='_blank' aria-label='Explore the possum scatterplot interactively in StatLens'}"
+#| fig-alt: "A scatterplot with total length on the x-axis and head length on the y-axis. The points show a moderately strong positive linear relationship."
+
+library(ggplot2)
+
+possum <- openintro::possum
+
+ggplot(possum, aes(x = total_l, y = head_l)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 2) +
+  labs(x = "Total Length (cm)", y = "Head Length (mm)") +
+  theme_minimal(base_size = 14)
+```
+
+Describe the relationship between total length and head length.
+
+---
+
+The relationship is **positive** (possums with longer total lengths tend to have longer heads), **linear** (the points cluster around a straight line, not a curve), and **moderate in strength** (the points are somewhat scattered around the trend, but the pattern is clear). There do not appear to be any extreme outliers.
+:::
+
+### When linear models are not appropriate
+
+There are cases where fitting a straight line to the data is not helpful, even if there is a clear relationship between the variables.
+
+```{r}
+#| label: fig-nonlinear-quadratic
+#| fig-cap: "A scatterplot showing a clear quadratic (U-shaped) relationship between angle of incline and distance traveled. The best-fitting straight line is flat and does not capture the pattern at all."
+#| fig-alt: "A scatterplot with a perfect quadratic relationship between angle of incline and distance traveled. A horizontal line of best fit is superimposed, showing that a linear model is inappropriate."
+
+set.seed(42)
+angle <- seq(-10, 10, length.out = 80)
+distance <- 2 * angle^2 + rnorm(80, 0, 8)
+quad_df <- data.frame(angle = angle, distance = distance)
+
+ggplot(quad_df, aes(x = angle, y = distance)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = COL_RED, linetype = "dashed", linewidth = 1) +
+  labs(x = "Angle of Incline", y = "Distance Traveled") +
+  theme_minimal(base_size = 14)
+```
+
+When the relationship is nonlinear, fitting a straight line can be misleading. We must always examine scatterplots before computing correlations or fitting linear models.
+
+## The correlation coefficient {#sec-correlation-coefficient}
+
+We need a way to quantify the strength and direction of a linear relationship. The **correlation coefficient** $r$ does exactly this.
+
+::: {.important}
+**Correlation: strength of a linear relationship.**
+
+**Correlation**, denoted $r$, always takes values between $-1$ and $1$ and describes the strength and direction of the linear relationship between two variables.
+
+The correlation is unitless and is not affected by linear changes in the units of measurement (e.g., converting from inches to centimeters).
+:::
+
+The formula for the correlation coefficient is:
+
+$$r = \frac{1}{n-1} \sum_{i=1}^{n} \frac{x_i - \bar{x}}{s_x} \cdot \frac{y_i - \bar{y}}{s_y}$$
+
+where $\bar{x}$ and $\bar{y}$ are the sample means, and $s_x$ and $s_y$ are the sample standard deviations for each variable. In practice, we always use a computer or calculator to compute $r$.
+
+### Interpreting correlation values
+
+```{r}
+#| label: fig-correlation-gallery
+#| fig-cap: "Eight scatterplots showing different correlation values. The first row shows positive relationships with r values of 1.00, 0.92, 0.73, and 0.31. The second row shows negative relationships with r values of -0.28, -0.58, -0.87, and -1.00. [↗ Try this live](https://learnlens.org/statlens/practice/correlation/) — play Guess the Correlation — build your feel for how $r$ maps to scatter."
+#| fig-alt: "Eight scatterplots with fabricated data showing correlations ranging from r = -1 to r = +1."
+#| fig-width: 10
+#| fig-height: 5
+
+set.seed(42)
+n <- 100
+target_r <- c(1.00, 0.92, 0.73, 0.31, -0.28, -0.58, -0.87, -1.00)
+labels <- c("r = 1.00", "r = 0.92", "r = 0.73", "r = 0.31",
+            "r = -0.28", "r = -0.58", "r = -0.87", "r = -1.00")
+
+gallery_list <- lapply(seq_along(target_r), function(i) {
+  r <- target_r[i]
+  if (abs(r) == 1) {
+    x <- rnorm(n)
+    y <- r * x
+  } else {
+    sigma <- matrix(c(1, r, r, 1), 2, 2)
+    xy <- MASS::mvrnorm(n, mu = c(0, 0), Sigma = sigma)
+    x <- xy[, 1]
+    y <- xy[, 2]
+  }
+  data.frame(x = x, y = y,
+             panel = factor(labels[i], levels = labels))
+})
+
+gallery_df <- do.call(rbind, gallery_list)
+
+ggplot(gallery_df, aes(x = x, y = y)) +
+  geom_point(color = COL_BLUE, alpha = 0.6, size = 1.2) +
+  facet_wrap(~ panel, nrow = 2, scales = "free") +
+  labs(x = "", y = "") +
+  theme_minimal(base_size = 12) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+Key patterns to notice:
+
+- When $r = 1$ or $r = -1$, all points fall exactly on a straight line (a perfect linear relationship).
+- When $r$ is close to $+1$ or $-1$, the relationship is strong and linear.
+- When $r$ is close to 0, there is no linear relationship (but there could still be a nonlinear relationship!).
+- Positive $r$ means both variables tend to increase together; negative $r$ means one tends to decrease as the other increases.
+
+### Properties of correlation
+
+The correlation coefficient has several important properties:
+
+1. **Range:** $-1 \le r \le 1$.
+2. **Unitless:** Correlation has no units. Changing the units of $x$ or $y$ (e.g., from cm to inches) does not change $r$.
+3. **Symmetric:** The correlation of $x$ with $y$ is the same as the correlation of $y$ with $x$.
+4. **Not affected by linear transformations:** Adding a constant to or multiplying a variable by a positive constant does not change $r$.
+5. **Only measures linear relationships:** Correlation can be misleading for nonlinear relationships.
+
+```{r}
+#| label: fig-units-comparison
+#| fig-cap: "Two scatterplots showing the same relationship between weight and height, measured in different units (kg/cm vs. lbs/in). The correlation r = 0.72 is the same in both plots."
+#| fig-alt: "Two scatterplots of weight vs. height in different units, with identical correlation r = 0.72 noted on each."
+#| fig-width: 10
+#| fig-height: 4
+
+set.seed(42)
+sigma <- matrix(c(1, 0.72, 0.72, 1), 2, 2)
+xy <- MASS::mvrnorm(80, mu = c(0, 0), Sigma = sigma)
+height_cm <- xy[, 1] * 10 + 170
+weight_kg <- xy[, 2] * 12 + 70
+
+units_df <- rbind(
+  data.frame(height = height_cm, weight = weight_kg,
+             panel = "Height (cm) vs. Weight (kg)"),
+  data.frame(height = height_cm / 2.54, weight = weight_kg * 2.205,
+             panel = "Height (in) vs. Weight (lbs)")
+)
+
+ggplot(units_df, aes(x = height, y = weight)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 2) +
+  facet_wrap(~ panel, scales = "free") +
+  geom_text(data = data.frame(
+    panel = c("Height (cm) vs. Weight (kg)", "Height (in) vs. Weight (lbs)"),
+    label = c("r = 0.72", "r = 0.72"),
+    x = c(Inf, Inf), y = c(Inf, Inf)),
+    aes(x = x, y = y, label = label), hjust = 1.2, vjust = 2,
+    size = 5, fontface = "bold", color = COL_GREEN) +
+  labs(x = "", y = "") +
+  theme_minimal(base_size = 14) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+### Correlation does not capture nonlinear relationships
+
+The correlation coefficient is designed to measure the strength of *linear* trends. Nonlinear trends, even when strong, can produce misleading correlations.
+
+```{r}
+#| label: fig-nonlinear-weak-r
+#| fig-cap: "Three scatterplots showing strong nonlinear relationships (quadratic, cyclic, and a complex curve) that have weak correlations."
+#| fig-alt: "Three scatterplots showing strong nonlinear patterns with weak correlation values, demonstrating that r measures only linear relationships."
+#| fig-width: 10
+#| fig-height: 3.5
+
+set.seed(42)
+n <- 100
+
+# Quadratic
+x1 <- runif(n, -3, 3)
+y1 <- x1^2 + rnorm(n, 0, 1)
+r1 <- round(cor(x1, y1), 2)
+
+# Cyclic
+x2 <- seq(0, 4 * pi, length.out = n)
+y2 <- sin(x2) + rnorm(n, 0, 0.3)
+r2 <- round(cor(x2, y2), 2)
+
+# Complex curve
+x3 <- seq(-3, 3, length.out = n)
+y3 <- x3^3 - 3 * x3 + rnorm(n, 0, 2)
+r3 <- round(cor(x3, y3), 2)
+
+nonlin_df <- rbind(
+  data.frame(x = x1, y = y1, panel = paste0("Quadratic (r = ", r1, ")")),
+  data.frame(x = x2, y = y2, panel = paste0("Cyclic (r = ", r2, ")")),
+  data.frame(x = x3, y = y3, panel = paste0("Cubic (r = ", r3, ")"))
+)
+
+ggplot(nonlin_df, aes(x = x, y = y)) +
+  geom_point(color = COL_BLUE, alpha = 0.6, size = 1.5) +
+  facet_wrap(~ panel, scales = "free", nrow = 1) +
+  labs(x = "", y = "") +
+  theme_minimal(base_size = 13) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+::: {.guidedpractice}
+No straight line is a good fit for any of the datasets in the figure above. If you drew nonlinear curves on each plot, what general features would be important in your fit?
+
+<details>
+<summary>Show answer</summary>
+The curves should be close to most points and reflect the overall nonlinear trend in the data.
+</details>
+:::
+
+::: {.caution}
+**Correlation only measures linear relationships.** Always examine a scatterplot before computing or interpreting a correlation. A correlation near zero does not necessarily mean there is no relationship -- it means there is no *linear* relationship. There may still be a strong nonlinear association.
+:::
+
+::: {.workedexample}
+Examine the scatterplots below showing the relationship between various crop yields across countries. Order the plots from strongest negative to strongest positive linear relationship.
+
+```{r}
+#| label: fig-crop-yield
+#| fig-cap: "Six scatterplots of crop yield percentages across countries. Each shows a different pair of crop types with varying degrees of correlation."
+#| fig-alt: "Six scatterplots showing relationships between pairs of crop yield percentages across countries, with varying directions and strengths of linear relationships."
+#| fig-width: 10
+#| fig-height: 7
+
+set.seed(42)
+n <- 40
+
+# Generate correlated pairs with different r values
+make_pair <- function(r, n) {
+  sigma <- matrix(c(1, r, r, 1), 2, 2)
+  xy <- MASS::mvrnorm(n, mu = c(50, 50), Sigma = sigma * 100)
+  xy <- pmax(xy, 5)
+  data.frame(x = xy[, 1], y = xy[, 2])
+}
+
+crops <- list(
+  list(r = -0.45, xl = "Potato Yield (%)", yl = "Banana Yield (%)", label = "(A)"),
+  list(r = 0.15, xl = "Soybean Yield (%)", yl = "Cassava Yield (%)", label = "(B)"),
+  list(r = 0.35, xl = "Maize Yield (%)", yl = "Cassava Yield (%)", label = "(C)"),
+  list(r = -0.30, xl = "Banana Yield (%)", yl = "Cocoa Yield (%)", label = "(D)"),
+  list(r = 0.60, xl = "Barley Yield (%)", yl = "Pea Yield (%)", label = "(E)"),
+  list(r = 0.85, xl = "Barley Yield (%)", yl = "Wheat Yield (%)", label = "(F)")
+)
+
+crop_all <- do.call(rbind, lapply(crops, function(c) {
+  d <- make_pair(c$r, n)
+  d$panel <- paste0(c$label, " ", c$xl, " vs. ", c$yl)
+  d
+}))
+
+ggplot(crop_all, aes(x = x, y = y)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 1.5) +
+  facet_wrap(~ panel, scales = "free", ncol = 3) +
+  labs(x = "Yield (%)", y = "Yield (%)") +
+  theme_minimal(base_size = 12) +
+  theme(strip.text = element_text(face = "bold", size = 9))
+```
+
+---
+
+Ordering from most negative to most positive correlation: the plots showing (A) bananas vs. potatoes, (D) cocoa vs. bananas, (B) cassava vs. soybeans, (C) cassava vs. maize, (E) peas vs. barley, and (F) wheat vs. barley.
+:::
+
+## Correlation and causation {#sec-correlation-causation}
+
+::: {.important}
+**Correlation does not imply causation.**
+
+Just because two variables are correlated does not mean that one causes the other. There may be a **confounding variable** (also called a lurking variable) that is associated with both $x$ and $y$, creating a correlation between them even though there is no direct causal link.
+:::
+
+::: {.workedexample}
+Studies have found a positive correlation between the number of firefighters sent to a fire and the amount of damage the fire causes. Does this mean sending more firefighters causes more damage?
+
+---
+
+No. The confounding variable is the **severity of the fire**. Larger fires cause more damage *and* require more firefighters. The number of firefighters does not cause the damage; both are driven by the severity of the fire.
+:::
+
+To establish causation, we need one of the following:
+
+1. A **randomized experiment** where the explanatory variable is randomly assigned.
+2. Strong theoretical justification combined with careful control of confounding variables.
+
+Observational studies can reveal associations (correlations), but they cannot establish causation on their own.
+
+::: {.original}
+## Sampling variability of correlation {#sec-sampling-var-correlation}
+
+Like any sample statistic, the correlation coefficient $r$ computed from a sample is just an estimate of the true population correlation $\rho$ (the Greek letter "rho"). Different samples from the same population will produce different values of $r$.
+
+When the sample size is small, $r$ can vary substantially from sample to sample, even when the true population correlation is zero. This means we should be cautious about interpreting correlations from small samples.
+
+::: {.workedexample}
+Suppose the true population correlation between two variables is $\rho = 0$ (no linear relationship). If we draw random samples of size $n = 10$, the sample correlation $r$ could reasonably fall anywhere between about $-0.55$ and $+0.55$ just by chance.
+
+With larger samples ($n = 100$), the sampling variability shrinks, and $r$ would typically fall between about $-0.20$ and $+0.20$.
+
+This illustrates why a formal test of discernibility is important: we need to determine whether an observed correlation is large enough to be unlikely under the null hypothesis that $\rho = 0$.
+:::
+
+We will return to inference for correlation when we discuss inference for regression in a later chapter. In particular, testing whether the slope of a regression line is zero is equivalent to testing whether the population correlation is zero.
+
+::: {.statlens}
+**See it in action.** [Guess the Correlation]({{< var tool-url >}}/practice/correlation/){target="_blank"} --- a short scored warmup that calibrates your eye on what "$r = 0.7$" actually *looks* like. For inference, the [Randomization Test for Correlation]({{< var tool-url >}}/simulate/randomization-correlation/){target="_blank"} shuffles $y$ to break the $x$--$y$ pairing and builds a null distribution of $r$. For general exploration, use the [Regression Explorer]({{< var tool-url >}}/explore/regression/){target="_blank"}.
+:::
+:::
+
+## Chapter review {#sec-correlation-review}
+
+### Summary
+
+In this chapter, we introduced scatterplots as the primary tool for visualizing the relationship between two quantitative variables. We then defined the correlation coefficient $r$ as a measure of the strength and direction of the linear relationship. Key properties of $r$ include: it ranges from $-1$ to $+1$, it is unitless, it is symmetric, and it measures only linear relationships. We emphasized that correlation does not imply causation -- confounding variables can create spurious associations. Finally, we noted that the sample correlation is subject to sampling variability, especially in small samples.
+
+### Key terms
+
+- Scatterplot
+- Correlation ($r$)
+- Positive association / negative association
+- Nonlinear relationship
+- Confounding variable
+- Correlation does not imply causation
+- Population correlation ($\rho$)
+
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-correlation) at the back of the book.
+
+{{< include ../exercises/_correlation-exercises.qmd >}}
+
+{{< include ../exercises/_correlation-statlens-exercises.qmd >}}

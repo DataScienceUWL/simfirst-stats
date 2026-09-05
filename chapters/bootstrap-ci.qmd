@@ -1,0 +1,496 @@
+---
+title: "Bootstrap Confidence Intervals"
+---
+
+```{r}
+#| include: false
+source("../_common.R")
+library(patchwork)
+data(penny_ages, package = "openintro")
+```
+
+::: {.chapterintro}
+In the sampling variability chapter, we saw that sample statistics vary from sample to sample. This variability is not a nuisance — it's the key to quantifying uncertainty. In this chapter, we learn **bootstrapping**: a simulation-based method for constructing confidence intervals that requires no formulas and no assumptions about the shape of the population.
+:::
+
+## The big idea: resampling {#sec-bootstrap-idea}
+
+In 2011, researchers collected a sample of 648 pennies in circulation and recorded how old each penny was (current year minus year minted). The question: what is the average age of *all* pennies currently in circulation in the United States?
+
+The sample mean is $\bar{x} = `r round(mean(penny_ages$age), 1)`$ years. This is our **point estimate** of the population mean $\mu$. But how precise is this estimate? If we collected a different sample of 648 pennies, we'd get a different $\bar{x}$. We can't keep collecting new samples — we only have this one.
+
+**The bootstrap idea**: Treat your sample as a stand-in for the population and resample *from it*. Each **bootstrap resample** is drawn with replacement from your original sample, at the same sample size $n$.
+
+::: {.definition}
+A **bootstrap resample** is a sample of size $n$ drawn **with replacement** from the original sample. The statistic computed from a bootstrap resample is called a **bootstrap statistic**. The collection of many bootstrap statistics forms the **bootstrap distribution**.
+:::
+
+Why does this work? If the original sample is representative of the population, then resampling from it mimics what would happen if we could repeatedly sample from the population itself. The variability we see in the bootstrap distribution approximates the true sampling variability of our statistic.
+
+## Bootstrapping a sample mean {#sec-bootstrap-action}
+
+Let's build a bootstrap confidence interval step by step.
+
+### Step 1: Collect data
+
+Our sample of 648 pennies has a right-skewed distribution — many young pennies and a long tail of older ones:
+
+```{r}
+#| label: fig-original-sample
+#| fig-cap: "Distribution of ages for 648 pennies sampled from circulation. The distribution is right-skewed with a mean of about 10.4 years. The sample mean is marked with a red triangle. [Open in StatLens]({{< var tool-url >}}/explore/descriptive/?dataset=penny_ages){.open-in-statlens target='_blank' aria-label='Explore penny ages data interactively in StatLens'}"
+#| fig-alt: "A histogram of penny ages ranging from 0 to about 50 years. The distribution is strongly right-skewed, with most pennies less than 20 years old and a long tail of older pennies. The tallest bars are near 0 to 5 years. A red upward-pointing triangle marks the sample mean at approximately 10.4 years."
+#| fig-width: 7
+#| fig-height: 3
+ggplot(penny_ages, aes(x = age)) +
+  geom_histogram(binwidth = 2, fill = COL_BLUE, color = "white") +
+  geom_point(aes(x = mean(age), y = -3), shape = 17, size = 4, color = COL_RED) +
+  annotate("text", x = mean(penny_ages$age) + 3, y = -3,
+           label = paste0("x̄ = ", round(mean(penny_ages$age), 1)),
+           color = COL_RED, size = 4, fontface = "bold") +
+  labs(x = "Penny age (years)", y = "Count")
+```
+
+The sample mean is $\bar{x} = `r round(mean(penny_ages$age), 1)`$ years. Notice the distribution is clearly not bell-shaped — it's skewed right. Bootstrapping doesn't care. It works regardless of the population shape.
+
+### Step 2: Resample with replacement
+
+We draw a new sample of 648 values from the original 648, *with replacement*. Some pennies will appear more than once; others will be left out. Each such draw is one **bootstrap resample**, and the mean of that resample is a **bootstrap statistic** $\bar{x}^*$.
+
+### Step 3: Repeat many times
+
+We repeat Step 2 a large number of times — typically $B = 1{,}000$ or more — and record the bootstrap mean $\bar{x}^*$ each time. This gives us a **bootstrap distribution**.
+
+```{r}
+#| label: fig-bootstrap-buildup
+#| fig-cap: "Building up the bootstrap distribution. With 10 resamples we see only a rough sketch; by 1,000 resamples the shape of the distribution is clear — and approximately bell-shaped (normal), even though the original data are skewed. [Open in StatLens]({{< var tool-url >}}/simulate/bootstrap-mean/?dataset=penny_ages){.open-in-statlens target='_blank' aria-label='Build the bootstrap distribution of penny ages interactively in StatLens'}"
+#| fig-alt: "Three histograms stacked vertically showing bootstrap distributions with B = 10, B = 100, and B = 1,000 resamples. The x-axis shows bootstrap sample means from about 8 to 12 years. With 10 resamples the distribution is rough and irregular with only a few bars. With 100 resamples a smoother mound shape appears. With 1,000 resamples the distribution is clearly bell-shaped and centered near the red dashed line marking the original sample mean."
+#| fig-width: 9
+#| fig-height: 6
+set.seed(42)
+
+boot_10    <- replicate(10,    mean(sample(penny_ages$age, replace = TRUE)))
+boot_100   <- replicate(100,   mean(sample(penny_ages$age, replace = TRUE)))
+boot_1000  <- replicate(1000,  mean(sample(penny_ages$age, replace = TRUE)))
+
+df_10   <- data.frame(xbar = boot_10,   B = "B = 10")
+df_100  <- data.frame(xbar = boot_100,  B = "B = 100")
+df_1000 <- data.frame(xbar = boot_1000, B = "B = 1,000")
+df_all  <- rbind(df_10, df_100, df_1000)
+df_all$B <- factor(df_all$B, levels = c("B = 10", "B = 100", "B = 1,000"))
+
+ggplot(df_all, aes(x = xbar)) +
+  geom_histogram(binwidth = 0.1, fill = COL_BLUE, color = "white") +
+  facet_wrap(~B, ncol = 1, scales = "free_y") +
+  geom_vline(xintercept = mean(penny_ages$age), color = COL_RED, linetype = "dashed", linewidth = 0.8) +
+  labs(x = "Bootstrap sample mean (years)", y = "Count") +
+  theme(strip.text = element_text(face = "bold", size = 13))
+```
+
+Notice two things: (1) the bootstrap distribution is centered near the original sample mean (dashed red line), and (2) even though the penny ages are right-skewed, the bootstrap distribution of the *mean* is approximately bell-shaped (what statisticians call a **normal** shape — recall this term from the empirical rule in @sec-empirical-rule). This is the Central Limit Theorem at work — we'll explore it more in the next chapter.
+
+::: {.statlens}
+**Predict → Do → Explain.** Open the [Bootstrap Resampling Activity]({{< var tool-url >}}/simulate/bootstrap-mean/?dataset=penny_ages&seed=ch8demo&activity=bootstrap-explore.json){target="_blank"} --- the gated activity opens with a **Predict** step (commit to the bootstrap distribution's center, spread, and shape *before* the buildup starts), walks you through generating 1, 10, 100, and 1,000 resamples in sequence with a reality-check gate at each stage, and closes with an **Explain** step where you articulate why the bootstrap distribution centers where it does and why it looks bell-shaped even when the raw data are skewed. Your predictions and explanation save locally in the tool, so you can leave the activity and return to your work on the same device.
+:::
+
+### Step 4: Find the confidence interval
+
+For a 95% confidence interval, we find the middle 95% of the bootstrap distribution by taking the **2.5th and 97.5th percentiles**.
+
+```{r}
+#| label: fig-bootstrap-ci
+#| fig-cap: "Bootstrap distribution of 1,000 sample means with the middle 95% shaded in blue. The 2.5th and 97.5th percentiles form the 95% confidence interval for the mean penny age. [Open in StatLens]({{< var tool-url >}}/simulate/bootstrap-mean/?dataset=penny_ages&ci=95){.open-in-statlens target='_blank' aria-label='See the bootstrap 95 percent CI for mean penny age in StatLens'}"
+#| fig-alt: "A histogram of 1,000 bootstrap sample means ranging from about 9 to 12 years. The middle 95 percent of bars are shaded blue, while the extreme 2.5 percent on each tail are shaded gray. Vertical dashed lines mark the 2.5th percentile on the left and the 97.5th percentile on the right, with labels showing their numeric values. These boundaries form the 95 percent confidence interval."
+#| fig-width: 7
+#| fig-height: 3.5
+set.seed(42)
+boot_means <- replicate(1000, mean(sample(penny_ages$age, replace = TRUE)))
+ci_lower <- quantile(boot_means, 0.025)
+ci_upper <- quantile(boot_means, 0.975)
+
+boot_df <- data.frame(xbar = boot_means)
+
+ggplot(boot_df, aes(x = xbar)) +
+  geom_histogram(aes(fill = xbar >= ci_lower & xbar <= ci_upper),
+                 binwidth = 0.1, color = "white", show.legend = FALSE) +
+  scale_fill_manual(values = c("TRUE" = COL_BLUE, "FALSE" = COL_GRAY)) +
+  geom_vline(xintercept = ci_lower, linetype = "dashed", linewidth = 0.7) +
+  geom_vline(xintercept = ci_upper, linetype = "dashed", linewidth = 0.7) +
+  annotate("text", x = ci_lower, y = Inf, label = paste0("2.5th %ile\n", round(ci_lower, 1)),
+           vjust = 1.3, size = 3.5, fontface = "bold") +
+  annotate("text", x = ci_upper, y = Inf, label = paste0("97.5th %ile\n", round(ci_upper, 1)),
+           vjust = 1.3, size = 3.5, fontface = "bold") +
+  labs(x = "Bootstrap sample mean (years)", y = "Count",
+       title = "95% Bootstrap CI for mean penny age")
+```
+
+The 95% bootstrap confidence interval for the mean penny age is approximately (`r round(ci_lower, 1)`, `r round(ci_upper, 1)`) years.
+
+## Interpreting a confidence interval {#sec-ci-interpretation}
+
+::: {.definition}
+A **confidence interval** is a range of plausible values for the population parameter. A **95% confidence interval** is constructed using a procedure that, when applied repeatedly to many different samples, captures the true parameter in approximately 95% of all intervals produced.
+:::
+
+::: {.important}
+**What "95% confident" means**: If we repeated the entire study many times — collecting a new sample each time and computing a new 95% confidence interval — approximately 95% of those intervals would contain the true population parameter. Any single interval either contains the parameter or it doesn't; the 95% refers to the long-run success rate of the *procedure*.
+:::
+
+To illustrate the coverage concept, imagine we could treat our 648 pennies as if they were the entire population (with true mean $\mu \approx 10.4$ years). We then draw 25 smaller random samples of 50 pennies each and build a bootstrap CI from each one. This lets us check whether each interval captures the "true" mean — something we can never do with real data, because we don't know the true parameter.
+
+```{r}
+#| label: fig-ci-concept
+#| fig-cap: "Twenty-five 95% confidence intervals from 25 different random samples of pennies. The true population mean is shown as a vertical dashed line. Approximately 95% of intervals capture the true mean; a few (shown in red) miss it. [Open in StatLens]({{< var tool-url >}}/conceptual/ci-coverage/?dataset=penny_ages&n=50){.open-in-statlens target='_blank' aria-label='Explore confidence interval coverage with penny ages data in StatLens'}"
+#| fig-alt: "Twenty-five horizontal line segments arranged vertically, each representing a 95 percent confidence interval from a different random sample. A vertical gray dashed line marks the true population mean at approximately 10.4 years. Most intervals are blue and cross the dashed line, meaning they captured the true mean. One or two intervals are red and fall entirely to one side of the dashed line, meaning they missed. A dot at the center of each interval marks the sample mean."
+#| fig-width: 7
+#| fig-height: 5.5
+set.seed(314)
+true_mu <- mean(penny_ages$age)
+n_ci <- 25
+ci_results <- data.frame(sample_id = 1:n_ci, lower = NA, upper = NA, captured = NA)
+
+for (i in 1:n_ci) {
+  samp <- sample(penny_ages$age, size = 50, replace = FALSE)
+  boots <- replicate(500, mean(sample(samp, replace = TRUE)))
+  ci_results$lower[i] <- quantile(boots, 0.025)
+  ci_results$upper[i] <- quantile(boots, 0.975)
+  ci_results$captured[i] <- ci_results$lower[i] <= true_mu & ci_results$upper[i] >= true_mu
+}
+
+ggplot(ci_results, aes(y = sample_id)) +
+  geom_vline(xintercept = true_mu, linetype = "dashed", color = COL_GRAY, linewidth = 0.8) +
+  geom_segment(aes(x = lower, xend = upper, yend = sample_id,
+                   color = captured), linewidth = 0.8) +
+  geom_point(aes(x = (lower + upper) / 2, color = captured), size = 2) +
+  scale_color_manual(values = c("TRUE" = COL_BLUE, "FALSE" = COL_RED),
+                     labels = c("TRUE" = "Captured μ", "FALSE" = "Missed μ"),
+                     name = NULL) +
+  annotate("text", x = true_mu, y = n_ci + 1.5,
+           label = paste0("True μ ≈ ", round(true_mu, 1)),
+           fontface = "bold", size = 4) +
+  labs(x = "Penny age (years)", y = "Sample number") +
+  scale_y_continuous(breaks = seq(5, 25, 5)) +
+  theme(legend.position = "bottom")
+```
+
+Each horizontal line in @fig-ci-concept represents a 95% CI from a different sample. Most intervals (blue) capture the true mean, but a few (red) miss it entirely. Over many samples, roughly 95% of the intervals succeed. This is the meaning of "95% confidence."
+
+::: {.statlens}
+**See it in action.** Open the [CI Coverage demo]({{< var tool-url >}}/conceptual/ci-coverage/?dataset=penny_ages&n=50){target="_blank"} and keep drawing 95% confidence intervals from fresh samples of 50 pennies. Watch how most intervals (blue) capture the true mean while a few (red) miss --- and how the running coverage rate settles near 95% as you accumulate more intervals. The moving image *is* the "95% confidence" concept in a way a static figure cannot be.
+:::
+
+::: {.caution}
+**Common misinterpretation**: "There is a 95% probability that the true mean is in this interval." This statement treats the population mean as random and the interval as fixed. In fact, the population mean is fixed (we just don't know it) and the interval is random (it depends on which sample we happened to collect).
+:::
+
+::: {.guidedpractice}
+A 95% bootstrap CI for the mean age of pennies in circulation is (9.7, 11.1). Which of the following interpretations is correct?
+
+a. 95% of all pennies in circulation have ages between 9.7 and 11.1 years.
+b. There is a 95% probability that the true mean penny age is between 9.7 and 11.1.
+c. We are 95% confident that the true mean age of all pennies in circulation is between 9.7 and 11.1 years.
+
+
+<details>
+<summary>Show answer</summary>
+Only (c) is correct. Statement (a) describes individual penny ages, not the mean. Statement (b) assigns a probability to the fixed parameter, which is incorrect. Statement (c) correctly describes confidence in the procedure.
+</details>
+:::
+
+## The percentile method {#sec-percentile-method}
+
+The approach we've used is called the **percentile method** for bootstrap confidence intervals.
+
+::: {.definition}
+For a $(1 - \alpha) \times 100\%$ confidence interval using the percentile method:
+
+- **Lower bound** = the $(\alpha/2) \times 100$th percentile of the bootstrap distribution
+- **Upper bound** = the $(1 - \alpha/2) \times 100$th percentile of the bootstrap distribution
+
+For a 95% CI ($\alpha = 0.05$): use the 2.5th and 97.5th percentiles.
+For a 90% CI ($\alpha = 0.10$): use the 5th and 95th percentiles.
+For a 99% CI ($\alpha = 0.01$): use the 0.5th and 99.5th percentiles.
+:::
+
+::: {.guidedpractice}
+If you increase the confidence level from 95% to 99%, what happens to the width of the confidence interval? Why?
+
+<details>
+<summary>Show answer</summary>
+The interval gets wider. A 99% CI must capture the true parameter more often than a 95% CI, so it must cast a wider net. The 0.5th percentile is farther from the center than the 2.5th percentile.
+</details>
+:::
+
+## The standard error method {#sec-se-method}
+
+The percentile method reads the confidence interval directly off the two tails of the bootstrap distribution. A second approach --- the **standard error method** --- instead summarizes the bootstrap distribution by its *spread*. It is the bridge to the formula-based confidence intervals we develop with the normal and $t$ distributions in Unit 3.
+
+::: {.definition}
+The **bootstrap standard error** (SE) is the standard deviation of the bootstrap distribution. When the bootstrap distribution is roughly symmetric and bell-shaped, an approximate 95% confidence interval is
+
+$$\text{point estimate} \pm 2 \times SE.$$
+:::
+
+The multiplier 2 comes from the normal model: about 95% of a bell-shaped distribution falls within two standard deviations of its center. (The more precise multiplier is 1.96, which we begin using in Unit 3.)
+
+```{r}
+#| label: boot-se-method
+#| echo: false
+set.seed(42)
+boot_means <- replicate(1000, mean(sample(penny_ages$age, replace = TRUE)))
+estimate <- mean(penny_ages$age)
+boot_se  <- sd(boot_means)
+se_lower <- estimate - 2 * boot_se
+se_upper <- estimate + 2 * boot_se
+```
+
+For the penny ages, the observed sample mean is `r round(estimate, 1)` years and the bootstrap standard error --- the standard deviation of the 1,000 bootstrap means --- is `r round(boot_se, 2)` years. The standard error 95% confidence interval is
+
+$$`r round(estimate, 1)` \pm 2(`r round(boot_se, 2)`) = (`r round(se_lower, 1)`, \ `r round(se_upper, 1)`) \text{ years}.$$
+
+This is essentially the same interval we found with the percentile method --- as we should expect, because the bootstrap distribution of the mean penny age is nearly symmetric.
+
+::: {.important}
+**Two methods, usually one answer.** For a symmetric, bell-shaped bootstrap distribution, the percentile method and the standard error method give almost identical intervals. They can disagree when the bootstrap distribution is **skewed** --- there the percentile method, which follows the actual shape of the distribution, is the safer choice. The standard error method matters because it connects directly to the formula-based confidence intervals of Unit 3, where the standard error comes from a formula instead of from resampling.
+:::
+
+## Medical consultant case study {#sec-medical-consultant}
+
+People providing an organ for donation sometimes seek the help of a special medical consultant. These consultants assist the patient in all aspects of the surgery, with the goal of reducing the possibility of complications during the medical procedure and recovery.
+
+One consultant tried to attract patients by noting the average complication rate for liver donor surgeries in the US is about 10%, but her clients have had only 3 complications in the 62 liver donor surgeries she has facilitated. She claims this is strong evidence that her work reduces complications.
+
+We estimate the true complication rate $p$ using the sample proportion: $\hat{p} = 3/62 = 0.048$ (4.8%).
+
+::: {.workedexample}
+Is it possible to assess the consultant's claim — that the *reduction* in complications is *due to her work* — using these data?
+
+No. The claim is causal, but the data are observational. Patients who can afford a medical consultant may also afford better medical care overall, which could lead to a lower complication rate. We cannot establish causation here. But we *can* estimate the consultant's true complication rate using a confidence interval.
+:::
+
+To build a bootstrap CI for a proportion, we treat the 62 patients as marbles in a bag: 3 orange (complication) and 59 blue (no complication). We draw 62 marbles with replacement, compute $\hat{p}^*_{boot}$, and repeat 10,000 times.
+
+```{r}
+#| label: fig-med-consultant-boot
+#| fig-cap: "Bootstrap distribution of 10,000 resampled complication rates. The 95% CI extends from the 2.5th percentile to the 97.5th percentile. Because the interval includes 10%, we cannot conclude the consultant's rate is lower than the national average. [Open in StatLens]({{< var tool-url >}}/simulate/bootstrap-prop/?dataset=medical_consultant&success=complication){.open-in-statlens target='_blank' aria-label='Explore medical consultant bootstrap distribution in StatLens'}"
+#| fig-alt: "A histogram of 10,000 bootstrapped complication rates. The distribution is roughly bell-shaped and centered near 0.048. The middle 95 percent of bars are shaded blue, with gray tails. Dashed vertical lines mark the 2.5th and 97.5th percentiles at approximately 0.0 and 0.10. A solid red vertical line marks the national average complication rate of 10 percent, which falls right at the upper boundary of the interval."
+#| fig-width: 7
+#| fig-height: 3.5
+set.seed(42)
+bsprop_med <- data.frame(
+  phat = rbinom(10000, size = 62, prob = 3/62) / 62
+)
+q025 <- quantile(bsprop_med$phat, 0.025)
+q975 <- quantile(bsprop_med$phat, 0.975)
+
+ggplot(bsprop_med, aes(x = phat)) +
+  geom_histogram(aes(fill = phat >= q025 & phat <= q975),
+                 binwidth = 1/62, color = "white", show.legend = FALSE) +
+  scale_fill_manual(values = c("TRUE" = COL_BLUE, "FALSE" = COL_GRAY)) +
+  geom_vline(xintercept = q025, linetype = "dashed", linewidth = 0.7) +
+  geom_vline(xintercept = q975, linetype = "dashed", linewidth = 0.7) +
+  geom_vline(xintercept = 0.10, linetype = "solid", color = COL_RED, linewidth = 0.8) +
+  annotate("text", x = q025 - 0.005, y = Inf, label = paste0("2.5th\n", round(q025, 3)),
+           vjust = 1.3, hjust = 1, size = 3.3, fontface = "bold") +
+  annotate("text", x = q975 + 0.005, y = Inf, label = paste0("97.5th\n", round(q975, 3)),
+           vjust = 1.3, hjust = 0, size = 3.3, fontface = "bold") +
+  annotate("text", x = 0.10, y = Inf, label = "National\navg (10%)",
+           vjust = 1.3, hjust = -0.1, size = 3.3, color = COL_RED, fontface = "bold") +
+  labs(x = "Bootstrapped complication rate", y = "Count",
+       title = "Bootstrap distribution: Medical consultant complication rate")
+```
+
+The 95% bootstrap CI is approximately (`r round(q025, 3)`, `r round(q975, 3)`). The national average of 10% is right near the upper boundary of this interval — a borderline case. We certainly don't have strong evidence that the consultant's rate is lower than the national average. The sample is small ($n = 62$) and the CI is wide, so complication rates anywhere from 0% up to around 10% are plausible.
+
+::: {.note}
+Because there are only 62 patients and each is either "complication" or "no complication," the bootstrap proportions can only take values that are multiples of $1/62$ (0, 1/62, 2/62, ...). This **discreteness** means the CI boundary can only land on one of these values — it can't fall smoothly between them. You may notice the CI upper bound jump between 6/62 $\approx$ 0.097 and 7/62 $\approx$ 0.113 depending on how many resamples you generate. This is normal with small-sample proportion data and is one reason why borderline conclusions should be stated cautiously. It also means the interval's actual confidence level may differ from the nominal 95% — here, the true coverage is closer to 99% because the discrete boundaries force the interval to be wider than intended.
+:::
+
+::: {.statlens}
+**Predict → Do → Explain.** Open the [Medical Consultant Activity]({{< var tool-url >}}/simulate/bootstrap-prop/?dataset=medical_consultant&seed=ch8med&activity=medical-consultant.json){target="_blank"} --- the gated activity opens with a **Predict** step (commit to whether the 95% CI will include 10%, how discreteness will bite, and what changes when $n$ triples), walks you through bootstrapping the consultant's data at $n = 62$ and then at larger $n$ with the discreteness made visible at each stage, and closes with an **Explain** step where you articulate what "the CI includes 10%" does and does not let us conclude. Your predictions and explanation save locally in the tool, so you can leave the activity and return to your work on the same device.
+:::
+
+::: {.guidedpractice}
+Suppose the consultant had facilitated 620 surgeries (instead of 62) with the same complication rate of 4.8% (about 30 complications). How would the bootstrap CI change? Would the conclusion change?
+
+<details>
+<summary>Show answer</summary>
+With 10 times as much data, the bootstrap distribution would be much narrower. The 95% CI would likely fall entirely below 10%, providing strong evidence that the consultant's rate is lower. Larger samples give more precise estimates.
+</details>
+:::
+
+## Tappers and listeners case study {#sec-tappers-listeners}
+
+A Stanford University graduate student named Elizabeth Newton conducted an experiment using a simple game: one person (the "tapper") taps out a well-known song on a desk, and another person (the "listener") tries to guess the song. About 50% of tappers expected the listener would guess correctly.
+
+In Newton's study, only 3 out of 120 listeners ($\hat{p} = 3/120 = 0.025$) guessed the tune correctly. What is the true proportion of listeners who can guess the song?
+
+```{r}
+#| label: fig-tappers-boot
+#| fig-cap: "Bootstrap distribution for the proportion of listeners who guessed correctly. The 95% CI is far below the tappers' expected success rate of 50%, providing very convincing evidence against the tappers' expectation."
+#| fig-alt: "A histogram of 10,000 bootstrapped proportions of listeners who guessed the tapped tune correctly. The distribution is centered near 0.025 and spans from 0 to about 0.07. The middle 95 percent of bars are shaded blue. Dashed lines mark the 2.5th and 97.5th percentiles, both far below 0.10. The tappers' expected value of 0.50 is completely off the chart to the right."
+#| fig-width: 7
+#| fig-height: 3.5
+set.seed(42)
+bsprop_tap <- data.frame(
+  phat = rbinom(10000, size = 120, prob = 3/120) / 120
+)
+tq025 <- quantile(bsprop_tap$phat, 0.025)
+tq975 <- quantile(bsprop_tap$phat, 0.975)
+
+ggplot(bsprop_tap, aes(x = phat)) +
+  geom_histogram(aes(fill = phat >= tq025 & phat <= tq975),
+                 binwidth = 1/120, color = "white", show.legend = FALSE) +
+  scale_fill_manual(values = c("TRUE" = COL_BLUE, "FALSE" = COL_GRAY)) +
+  geom_vline(xintercept = tq025, linetype = "dashed", linewidth = 0.7) +
+  geom_vline(xintercept = tq975, linetype = "dashed", linewidth = 0.7) +
+  annotate("text", x = tq025 - 0.003, y = Inf, label = paste0("2.5th\n", round(tq025, 3)),
+           vjust = 1.3, hjust = 1, size = 3.3, fontface = "bold") +
+  annotate("text", x = tq975 + 0.003, y = Inf, label = paste0("97.5th\n", round(tq975, 3)),
+           vjust = 1.3, hjust = 0, size = 3.3, fontface = "bold") +
+  labs(x = "Bootstrapped proportion of correct guesses", y = "Count",
+       title = "Bootstrap distribution: Tappers and listeners")
+```
+
+The 95% bootstrap CI is approximately (`r round(tq025, 3)`, `r round(tq975, 3)`). The tappers' expectation of 50% is nowhere near this interval — it provides **very convincing evidence** that listeners are far worse at guessing than tappers expect. This is an example of the "curse of knowledge": once you know something, it's hard to imagine not knowing it.
+
+::: {.guidedpractice}
+Do the data provide convincing evidence against the claim that 50% of listeners can guess the tapper's tune?
+
+<details>
+<summary>Show answer</summary>
+Yes, very convincing evidence. The value 50% (0.50) is far outside the 95% CI, and even far from the largest bootstrapped proportion. The data strongly suggest that the true success rate is much lower than 50%.
+</details>
+:::
+
+## What affects the width of a CI? {#sec-ci-width}
+
+Three factors control how wide a confidence interval is:
+
+1. **Sample size ($n$)**: Larger samples → narrower intervals (more information about the population)
+2. **Variability in the data**: More spread → wider intervals (less precision)
+3. **Confidence level**: Higher confidence → wider intervals (more certainty requires a wider net)
+
+```{r}
+#| label: fig-sample-size-effect
+#| fig-cap: "The effect of sample size on the bootstrap distribution. Larger samples produce narrower bootstrap distributions, leading to narrower confidence intervals. All three panels use the same population of penny ages. [Open in StatLens]({{< var tool-url >}}/simulate/bootstrap-mean/?dataset=penny_ages){.open-in-statlens target='_blank' aria-label='Vary sample size on the penny ages bootstrap in StatLens'}"
+#| fig-alt: "Three histograms stacked vertically showing bootstrap distributions for sample sizes n = 15, n = 50, and n = 200, all from the penny ages data. All three are centered near the same value, marked by a red dashed line. The n = 15 panel has the widest spread, ranging from about 7 to 14 years. The n = 50 panel is noticeably narrower. The n = 200 panel is very concentrated, spanning only about 9.5 to 11.5 years."
+#| fig-width: 9
+#| fig-height: 4.5
+set.seed(42)
+
+boot_n15  <- replicate(1000, mean(sample(penny_ages$age, size = 15,  replace = TRUE)))
+boot_n50  <- replicate(1000, mean(sample(penny_ages$age, size = 50,  replace = TRUE)))
+boot_n200 <- replicate(1000, mean(sample(penny_ages$age, size = 200, replace = TRUE)))
+
+df_size <- rbind(
+  data.frame(xbar = boot_n15,  n = "n = 15"),
+  data.frame(xbar = boot_n50,  n = "n = 50"),
+  data.frame(xbar = boot_n200, n = "n = 200")
+)
+df_size$n <- factor(df_size$n, levels = c("n = 15", "n = 50", "n = 200"))
+
+ggplot(df_size, aes(x = xbar)) +
+  geom_histogram(binwidth = 0.3, fill = COL_BLUE, color = "white") +
+  facet_wrap(~n, ncol = 1, scales = "free_y") +
+  geom_vline(xintercept = mean(penny_ages$age), color = COL_RED, linetype = "dashed", linewidth = 0.7) +
+  labs(x = "Bootstrap sample mean (years)", y = "Count") +
+  theme(strip.text = element_text(face = "bold", size = 13))
+```
+
+As sample size increases, the bootstrap distribution becomes tighter around the sample mean. This is why large studies produce more precise estimates than small ones.
+
+::: {.statlens}
+**Predict → Do → Explain.** Open the [Confidence Level Activity]({{< var tool-url >}}/simulate/bootstrap-mean/?dataset=penny_ages&seed=ch8explore&activity=ci-level.json&expert=true){target="_blank"} --- the gated activity opens with a **Predict** step (commit to the direction, magnitude, and trade-off as you move the confidence level from 90% to 95% to 99%), walks you through those three intervals on the same bootstrap distribution with each frozen for direct width comparison, and closes with an **Explain** step where you articulate what "95% confident" means and why a wider net earns higher confidence. Your predictions and explanation save locally in the tool, so you can leave the activity and return to your work on the same device.
+:::
+
+## When does bootstrapping work? {#sec-bootstrap-conditions}
+
+Bootstrapping is remarkably flexible, but it does require some conditions to produce reliable intervals:
+
+1. **Independence**: The observations in the sample should be independent of one another. This is usually satisfied when data come from a random sample or a randomized experiment.
+
+2. **Representative sample**: The sample should be reasonably representative of the population. If the sample is biased (e.g., only volunteers), the bootstrap CI will reflect that bias.
+
+3. **Sufficient sample size**: Very small samples (e.g., $n < 10$) may not contain enough information about the population's shape. With small $n$, the bootstrap distribution can be unreliable.
+
+::: {.important}
+Bootstrapping does **not** require the population to follow a bell-shaped (normal) distribution. This is one of its greatest strengths compared to traditional formula-based methods, which often do require normality. The penny ages data are clearly right-skewed (@fig-original-sample), yet the bootstrap procedure works perfectly well. The bootstrap lets the data "speak for themselves."
+:::
+
+::: {.guidedpractice}
+A researcher surveys 8 of her friends about their study hours and computes a bootstrap CI. What condition is most clearly violated?
+
+<details>
+<summary>Show answer</summary>
+Two conditions are violated: (1) the sample is a convenience sample of friends, not a random sample, so it may not be representative of the population, and (2) $n = 8$ is quite small, making the bootstrap distribution potentially unreliable.
+</details>
+:::
+
+::: {.caution}
+**When neither bootstrap CI is enough.** The two methods this chapter teaches --- the **percentile** interval and the **standard-error** interval (statistic $\pm z^{*} \cdot SE_{\text{boot}}$) --- are both starter tools, and they can go wrong in different ways. Be skeptical of *either* interval when:
+
+- **Sample size is small** (below about 15–20). The bootstrap distribution can be lumpy and miss the shape of the true sampling distribution.
+- **The parameter sits near a boundary** --- a proportion near 0 or 1, a variance, an extreme quantile.
+- **The statistic is unusual** --- ratios, correlations, mins/maxes.
+
+The two methods also have method-specific failure modes:
+
+- The **standard-error method** assumes the bootstrap distribution is roughly symmetric and bell-shaped. When it isn't, the formula forces symmetry the data don't have and can push endpoints outside the parameter space (a negative bound for a proportion, for example).
+- The **percentile method** respects skew but can under-cover the parameter on the "long-tail" side of a strongly skewed bootstrap distribution.
+
+When any of these apply, professional practice reaches past both methods --- most commonly to the **BCa** (bias-corrected and accelerated) interval, which corrects for both bias and skew in the bootstrap distribution. BCa is available in StatLens under **expert mode** and in R via `boot::boot.ci(..., type = "bca")`. Hesterberg's ["What Teachers Should Know About the Bootstrap"](https://arxiv.org/abs/1411.5279) (*The American Statistician*, 2015) is the readable reference for when each method applies.
+
+For this course we stay with these two methods --- they are the simplest defensible tools that keep the simulation logic in view. Recognize their limits: they are starters, not the final word.
+:::
+
+## Bootstrap CI for other statistics {#sec-bootstrap-other}
+
+The beauty of bootstrapping is its **generality**. The same resampling logic works for *any* statistic, not just the mean:
+
+- **Median**: Resample → compute median → repeat → percentile CI
+- **Proportion**: Resample → compute proportion → repeat → percentile CI
+- **Standard deviation**: Resample → compute SD → repeat → percentile CI
+- **Difference in means**: Resample from each group → compute difference → repeat → percentile CI
+
+This is a powerful advantage. Many statistics (like the median or the difference in medians) don't have convenient formulas for their standard error. Bootstrapping handles them all the same way.
+
+::: {.statlens}
+**See it in action.** Open the [Bootstrap CI tool with penny ages]({{< var tool-url >}}/simulate/bootstrap-mean/?dataset=penny_ages&expert=true){target="_blank"} and switch the statistic dropdown between the mean, median, standard deviation, Q1, and Q3. Same data, same resampling procedure --- different summaries. Notice which statistics produce narrow, symmetric bootstrap distributions and which produce wide or skewed ones.
+:::
+
+## Chapter review {#sec-bootstrap-ci-review}
+
+### Summary
+
+- The **bootstrap** constructs a confidence interval by resampling with replacement from the original sample.
+- The **bootstrap distribution** approximates the sampling distribution of the statistic.
+- The **percentile method** uses the middle $(1 - \alpha) \times 100\%$ of the bootstrap distribution as the CI.
+- The **standard error method** uses point estimate $\pm\, 2 \times SE$, where the SE is the standard deviation of the bootstrap distribution; it agrees with the percentile method for symmetric distributions and bridges to the formula-based intervals of Unit 3.
+- A **95% confidence interval** means that if we repeated the study many times, about 95% of the resulting intervals would capture the true parameter.
+- CI width depends on sample size, data variability, and confidence level.
+- Bootstrap CIs work for any statistic — means, medians, proportions, differences, and more.
+- Bootstrapping requires independent observations from a representative sample with sufficient sample size, but does **not** require the population to be bell-shaped (normal).
+
+### Key terms
+
+- Bootstrap resample
+- Bootstrap statistic
+- Bootstrap distribution
+- Confidence interval
+- Confidence level
+- Percentile method
+- Standard error method
+- Bootstrap standard error
+- Point estimate
+- Parameter
+- Sampling with replacement
+
+## Exercises {.exercises}
+
+The **StatLens Exercises** (1--14) use interactive simulation tools --- open the provided links and explore.
+The **Practice Exercises** (15--22) use static figures for additional practice.
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-bootstrap-ci) at the back of the book.
+
+{{< include ../exercises/_bootstrap-ci-exercises.qmd >}}
+
+{{< include ../exercises/_bootstrap-ci-statlens-exercises.qmd >}}

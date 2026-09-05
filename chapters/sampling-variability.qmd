@@ -1,0 +1,380 @@
+---
+title: "Sampling Variability"
+id: sec-sampling-variability
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+```{r}
+#| include: false
+set.seed(42)
+options(digits = 3)
+library(ggplot2)
+
+COL_BLUE  <- COL_BLUE
+COL_PINK  <- COL_PINK
+COL_RED   <- COL_RED
+COL_GREEN <- COL_GREEN
+COL_GRAY  <- "#6C6C6C"
+
+theme_set(theme_minimal(base_size = 14))
+update_geom_defaults("bar", list(fill = COL_BLUE, color = "white"))
+update_geom_defaults("col", list(fill = COL_BLUE, color = "white"))
+```
+
+::: {.chapterintro}
+So far in this course, you have learned how to collect data, visualize it, and compute summary statistics. But statistics is about more than describing the data you have --- it is about using data to learn about a larger population. The central challenge is this: **every sample is different**. If you took another sample from the same population, you would get different results. This chapter introduces the foundational ideas that make statistical inference possible: the distinction between parameters and statistics, the concept of a sampling distribution, and the standard error as a measure of how much sample statistics vary. These ideas are the bridge from describing data to drawing conclusions about the world.
+:::
+
+::: {.statlens}
+**Two quick warmups: how good is your intuition about randomness?**
+
+- [**Are You Psychic?**]({{< var tool-url >}}/explore/psychic/){target="_blank"} --- predict a series of coin flips, see your score, then watch the tool simulate hundreds of random guessers. How impressive is *your* result compared to pure chance?
+- [**Stump the Chump**]({{< var tool-url >}}/explore/random-sequence/){target="_blank"} --- type an H/T sequence you think "looks random," then compare it to a truly random sequence. Run lengths, alternation rates, and the longest run will tell you whether human-generated "randomness" is too even.
+
+Both are short interactive demos that motivate the rest of this chapter: real random samples vary more than people expect, and that variability has a predictable shape.
+:::
+
+## Parameters vs. statistics {#sec-parameters-vs-statistics}
+
+When we collect data, we typically have a larger group in mind. A political poll surveys 1,000 likely voters, but the real interest is in all voters. A quality engineer measures 50 widgets from an assembly line, but the real interest is in all widgets the line produces. The larger group is the **population**; the subset we actually observe is the **sample**.
+
+::: {.definition}
+A **population parameter** is a numerical summary of the entire population. It is a fixed number, but it is almost always unknown because we cannot observe the whole population.
+
+A **sample statistic** (also called a **point estimate**) is a numerical summary computed from sample data. It is our best guess at the population parameter. Because the statistic is computed from a sample, it is known --- but it changes from sample to sample.
+:::
+
+We use specific notation to distinguish parameters from statistics:
+
+| Quantity | Parameter (population) | Statistic (sample) |
+|:---------|:----------------------:|:-------------------:|
+| Proportion | $p$ | $\hat{p}$ |
+| Mean | $\mu$ | $\bar{x}$ |
+| Standard deviation | $\sigma$ | $s$ |
+| Difference in proportions | $p_1 - p_2$ | $\hat{p}_1 - \hat{p}_2$ |
+| Difference in means | $\mu_1 - \mu_2$ | $\bar{x}_1 - \bar{x}_2$ |
+
+The "hat" notation ($\hat{p}$) is a common convention: it signals that we are estimating the corresponding parameter.
+
+::: {.workedexample}
+A medical consultant has facilitated 62 liver donor surgeries, and 3 of her patients experienced complications. She uses this track record to attract new patients.
+
+Let $p$ represent the true complication rate for liver donors working with this consultant. What is the point estimate $\hat{p}$?
+
+---
+
+The sample proportion is $\hat{p} = 3/62 = 0.048$. That is, about 4.8% of her patients experienced complications. This is our point estimate of the true complication rate $p$.
+:::
+
+::: {.guidedpractice}
+A Stanford University graduate student recruited 120 tappers and 120 listeners for a study on communication. Only 3 out of 120 listeners were able to guess the tune being tapped. What is the point estimate $\hat{p}$ for the true proportion of listeners who can guess correctly?
+
+<details>
+<summary>Show answer</summary>
+The point estimate is $\hat{p} = 3/120 = 0.025$, or 2.5%. This is our best single estimate of the true proportion $p$ of listeners who can guess the tune.
+</details>
+:::
+
+::: {.workedexample}
+In a study of sex discrimination, 48 male bank supervisors each reviewed a personnel file and decided whether the candidate should be promoted. The files were identical except that half listed the candidate as male and half as female. The results are summarized below:
+
+|  | Promoted | Not promoted | Total |
+|:---|:---:|:---:|:---:|
+| Male | 21 | 3 | 24 |
+| Female | 14 | 10 | 24 |
+| Total | 35 | 13 | 48 |
+
+What is the point estimate for the difference in promotion rates between male and female candidates?
+
+---
+
+The promotion rate for male candidates is $\hat{p}_M = 21/24 = 0.875$ and for female candidates is $\hat{p}_F = 14/24 = 0.583$. The point estimate of the difference is:
+
+$$\hat{p}_M - \hat{p}_F = 0.875 - 0.583 = 0.292$$
+
+The observed difference is 29.2 percentage points in favor of male candidates.
+:::
+
+::: {.important}
+A point estimate is almost never exactly equal to the population parameter. This is not because we did anything wrong --- it is an inherent consequence of working with a subset of the population. The critical question is: *how far off might the estimate be?*
+:::
+
+## Sampling distributions {#sec-sampling-distributions}
+
+To understand how far a statistic might be from its parameter, we need to understand what happens when we take **many samples** from the same population.
+
+Imagine a large bowl containing thousands of beads, 60% red and 40% white. The proportion of red beads in the bowl is the population parameter: $p = 0.60$. Now suppose you reach in and scoop out a sample of $n = 50$ beads. You count 28 red beads, giving $\hat{p} = 28/50 = 0.56$. Your friend scoops a different sample of 50 and counts 32 red, giving $\hat{p} = 32/50 = 0.64$. Another friend gets 30 red for $\hat{p} = 0.60$.
+
+Each person got a different sample proportion. No one did anything wrong --- this is **sampling variability** in action.
+
+Now imagine hundreds of people each scooping their own sample of 50 beads. If we recorded every $\hat{p}$ and made a histogram of all those values, we would see the **sampling distribution** of $\hat{p}$.
+
+```{r}
+#| label: fig-sampling-dist-buildup
+#| fig-cap: "Building a sampling distribution. Each dot represents the proportion of red beads from one sample of n = 50. With more samples, the bell-shaped pattern centered at p = 0.60 becomes clear. [↗ Try this live](https://learnlens.org/statlens/conceptual/sampling-lab/?type=prop&p=0.60&n=50) — draw your own samples in the Sampling Distribution Lab and watch the picture fill in."
+#| fig-alt: "Three histograms stacked vertically, labeled 10 samples, 100 samples, and 1,000 samples. Each shows sample proportions from 0 to 1 on the x-axis. With 10 samples the bars are sparse and irregular. With 100 samples a rough mound shape appears. With 1,000 samples a clear bell-shaped distribution emerges, centered at the red dashed line marking p = 0.60."
+#| fig-width: 9
+#| fig-height: 6
+set.seed(42)
+p_true <- 0.60
+n_samp <- 50
+
+samps_10  <- rbinom(10,  size = n_samp, prob = p_true) / n_samp
+samps_100 <- rbinom(100, size = n_samp, prob = p_true) / n_samp
+samps_1000 <- rbinom(1000, size = n_samp, prob = p_true) / n_samp
+
+df_build <- rbind(
+  data.frame(phat = samps_10,   k = "10 samples"),
+  data.frame(phat = samps_100,  k = "100 samples"),
+  data.frame(phat = samps_1000, k = "1,000 samples")
+)
+df_build$k <- factor(df_build$k, levels = c("10 samples", "100 samples", "1,000 samples"))
+
+ggplot(df_build, aes(x = phat)) +
+  geom_histogram(binwidth = 0.02, fill = COL_BLUE, color = "white") +
+  facet_wrap(~k, ncol = 1, scales = "free_y") +
+  geom_vline(xintercept = p_true, color = COL_RED, linetype = "dashed", linewidth = 0.8) +
+  annotate("text", x = p_true + 0.02, y = Inf, label = "p = 0.60",
+           vjust = 1.5, hjust = 0, color = COL_RED, fontface = "bold", size = 4) +
+  labs(x = expression(hat(p)~"(sample proportion)"), y = "Count") +
+  theme(strip.text = element_text(face = "bold", size = 13))
+```
+
+::: {.definition}
+The **sampling distribution** of a statistic is the distribution of all possible values of that statistic computed from all possible samples of a given size from a given population.
+
+A sampling distribution is *not* the distribution of individual data values. It is the distribution of a *summary statistic* (like $\hat{p}$ or $\bar{x}$) across many hypothetical samples.
+:::
+
+::: {.important}
+**Key properties of sampling distributions.** For many common statistics, the sampling distribution has three important features:
+
+1. **Center**: The sampling distribution is centered at the population parameter. On average, the sample statistic equals the parameter.
+2. **Spread**: The sampling distribution has a measurable spread that decreases as sample size increases. Larger samples give more precise estimates.
+3. **Shape**: For many statistics, the sampling distribution is approximately bell-shaped (normal) when the sample size is large enough.
+:::
+
+Here is an analogy that may help. You want to know the average depth of a lake.
+
+- **One boat, one sample.** Send a single boat out to measure the depth at 10 random locations on the lake. The captain reports back the 10 individual depths. Plotting those 10 numbers gives you a snapshot of the *data distribution* --- how depth varies from spot to spot on this lake. If you sent that same boat out again to 10 new random spots, you would get 10 different numbers, but the shape of the picture would look similar. The **average** of the 10 measurements is one estimate of the true mean depth --- a single sample statistic.
+- **A fleet of boats, a sampling distribution.** Now send a fleet of 100 boats out, each to its own 10 random locations. Each captain reports back only the **average** of their 10 depths --- one number per boat. Plotting the 100 averages gives you the *sampling distribution of the mean*. It is centered at the true lake depth, but it is much narrower than the data distribution, because averaging pulls in the extremes.
+
+The data distribution and the sampling distribution describe fundamentally different things: how single depths vary across the lake versus how sample means vary across repeated samples of size 10. Notice too that a single boat that stays in one bay all day is *not* a random sample from the lake --- the 10 depths it reports would be a **cluster sample**, and averaging them would give a systematically biased picture of the whole lake. A proper sampling distribution comes from imagining many *random* samples, not many *convenient* ones.
+
+The two distributions are fundamentally different:
+
+- The **data distribution** shows how individual observations vary.
+- The **sampling distribution** shows how a *statistic* (like the mean) varies from sample to sample.
+
+## Variability of sample statistics {#sec-variability-statistics}
+
+Different samples from the same population produce different statistics. This variability is not a flaw --- it is a fundamental feature of sampling that we must understand and quantify.
+
+::: {.workedexample}
+Suppose the true proportion of all US adults who support a particular policy is $p = 0.52$. Three polling organizations each take a random sample of $n = 1{,}000$ adults and compute $\hat{p}$. Their results might look like:
+
+| Poll | Sample proportion $\hat{p}$ |
+|:-----|:---:|
+| Poll A | 0.49 |
+| Poll B | 0.54 |
+| Poll C | 0.51 |
+
+All three polls were conducted correctly, yet they produced different results. Poll A even shows less than 50% support! This is sampling variability: the unavoidable variation that occurs when we estimate a population parameter from a sample.
+:::
+
+::: {.guidedpractice}
+If the three polls above each used a sample of $n = 10{,}000$ instead of $n = 1{,}000$, would you expect the three $\hat{p}$ values to be closer together or farther apart? Why?
+
+<details>
+<summary>Show answer</summary>
+We would expect them to be closer together. Larger samples contain more information about the population, so the statistic is more precise --- meaning less variability from sample to sample.
+</details>
+:::
+
+### What determines how much a statistic varies?
+
+Two factors control how much a sample statistic bounces around from sample to sample:
+
+1. **Sample size ($n$)**: Larger samples produce statistics that are closer to the parameter. This is intuitive --- a sample of 1,000 tells you more about the population than a sample of 10.
+
+2. **Population variability**: If the population is very homogeneous (everyone is similar), then any sample will look like any other sample, and the statistic won't vary much. If the population is very heterogeneous (lots of individual differences), then different samples can look quite different, and the statistic will vary more.
+
+Of these two, sample size is the one we can control, and it turns out to be very powerful. Quadrupling the sample size cuts the variability of most statistics roughly in half.
+
+```{r}
+#| label: fig-sample-size-comparison
+#| fig-cap: "Sampling distributions of the sample proportion for three different sample sizes. All three are centered at p = 0.60, but the spread decreases dramatically as the sample size increases. [↗ Try this live](https://learnlens.org/statlens/conceptual/sampling-lab/?type=prop&p=0.60) — drive the $n$ slider yourself in the Sampling Distribution Lab and watch the spread shrink as $n$ grows."
+#| fig-alt: "Three histograms stacked vertically for sample sizes n = 25, n = 100, and n = 400. All are centered at the red dashed line at p = 0.60. The n = 25 histogram spreads from about 0.35 to 0.85. The n = 100 histogram is noticeably narrower, spanning roughly 0.48 to 0.72. The n = 400 histogram is very tight, concentrated between about 0.55 and 0.65."
+#| fig-width: 9
+#| fig-height: 5
+set.seed(42)
+p_true <- 0.60
+
+samps_25  <- rbinom(1000, size = 25,  prob = p_true) / 25
+samps_100 <- rbinom(1000, size = 100, prob = p_true) / 100
+samps_400 <- rbinom(1000, size = 400, prob = p_true) / 400
+
+df_ss <- rbind(
+  data.frame(phat = samps_25,  n = "n = 25"),
+  data.frame(phat = samps_100, n = "n = 100"),
+  data.frame(phat = samps_400, n = "n = 400")
+)
+df_ss$n <- factor(df_ss$n, levels = c("n = 25", "n = 100", "n = 400"))
+
+ggplot(df_ss, aes(x = phat)) +
+  geom_histogram(binwidth = 0.02, fill = COL_BLUE, color = "white") +
+  facet_wrap(~n, ncol = 1, scales = "free_y") +
+  geom_vline(xintercept = p_true, color = COL_RED, linetype = "dashed", linewidth = 0.8) +
+  labs(x = expression(hat(p)~"(sample proportion)"), y = "Count") +
+  theme(strip.text = element_text(face = "bold", size = 13))
+```
+
+@fig-sample-size-comparison shows this dramatically: with $n = 25$, individual sample proportions range from about 0.35 to 0.85. With $n = 400$, they are tightly clustered between 0.55 and 0.65.
+
+::: {.statlens}
+**Predict → Do → Explain.** The three properties above --- center, spread, and shape --- hold for *any* statistic. Open the [Sampling Distribution Lab]({{< var tool-url >}}/conceptual/sampling-lab/?activity=sampling-distribution-mean.json){target="_blank"} to build the sampling distribution of the **sample mean** from a right-skewed population. The gated activity opens with a **Predict** step (commit to the distribution's shape, center, and how the spread changes as $n$ grows *before* you draw), walks you through drawing at $n = 5$ vs. $n = 30$ with a reality-check gate at each stage, and closes with an **Explain** step where you articulate why the sampling distribution ends up centered at $\mu$ and roughly bell-shaped even when the population is not. Two distinctions the lab is designed to make crisp: **more samples fills in the same distribution**, but **larger $n$ produces a different, narrower one**. Your predictions and explanation save locally in the tool, so you can return to your work on the same device.
+
+::: {.callout-note collapse="true"}
+## Self-check
+
+At $n = 5$ the sampling distribution is still somewhat right-skewed and fairly wide; by $n = 30$ it is noticeably narrower and nearly symmetric --- a first glimpse of the **Central Limit Theorem**: averages of independent draws become approximately normal as $n$ grows, even when the population is not. The center stays put at the population mean because averaging is unbiased --- no amount of skew shifts it. The spread shrinks because $\sigma/\sqrt{n}$ shrinks: quadrupling $n$ cuts the standard error roughly in half.
+:::
+:::
+
+## Standard error {#sec-standard-error}
+
+We need a single number that quantifies how much a statistic varies from sample to sample. That number is the **standard error**.
+
+::: {.definition}
+The **standard error** (SE) of a statistic is the standard deviation of its sampling distribution. It measures the typical distance between a sample statistic and the population parameter.
+
+A small standard error means the statistic tends to fall close to the parameter (precise estimate). A large standard error means the statistic could plausibly fall far from the parameter (imprecise estimate).
+:::
+
+::: {.important}
+Do not confuse the standard error with the standard deviation of the data:
+
+- The **standard deviation** ($s$ or $\sigma$) measures how much *individual observations* vary around the mean.
+- The **standard error** (SE) measures how much a *sample statistic* varies around the population parameter from sample to sample.
+
+The standard error is always smaller than the standard deviation (for samples larger than $n = 1$) because averaging reduces variability.
+:::
+
+```{r}
+#| label: fig-sd-vs-se
+#| fig-cap: "Comparing the data distribution (top) with the sampling distribution of the mean (bottom). Both are centered near the same value, but the sampling distribution is much narrower — its spread is the standard error, not the standard deviation. [↗ Try this live](https://learnlens.org/statlens/conceptual/sampling-lab/?type=mean&mu=170&sigma=8&n=30) — regenerate this side-by-side comparison and vary $n$ to watch the sampling distribution narrow further."
+#| fig-alt: "Two histograms stacked vertically. The top panel shows individual heights ranging from about 150 to 190 cm with a wide bell shape labeled SD approximately 8 cm. The bottom panel shows sample means of 30 observations ranging from about 165 to 175 cm with a much narrower bell shape labeled SE approximately 1.5 cm. Both are centered near 170 cm, marked by a red dashed line. The bottom histogram is dramatically narrower than the top."
+#| fig-width: 8
+#| fig-height: 5
+set.seed(42)
+pop_mean <- 170
+pop_sd <- 8
+n_obs <- 30
+
+# Simulate one sample (data distribution)
+one_sample <- rnorm(500, mean = pop_mean, sd = pop_sd)
+# Simulate sampling distribution of the mean
+samp_means <- replicate(1000, mean(rnorm(n_obs, mean = pop_mean, sd = pop_sd)))
+
+df_compare <- rbind(
+  data.frame(value = one_sample,  type = paste0("Individual heights (SD ≈ ", pop_sd, " cm)")),
+  data.frame(value = samp_means, type = paste0("Sample means, n = 30 (SE ≈ ", round(pop_sd / sqrt(n_obs), 1), " cm)"))
+)
+df_compare$type <- factor(df_compare$type, levels = unique(df_compare$type))
+
+ggplot(df_compare, aes(x = value)) +
+  geom_histogram(binwidth = 1, fill = COL_BLUE, color = "white") +
+  facet_wrap(~type, ncol = 1, scales = "free_y") +
+  geom_vline(xintercept = pop_mean, color = COL_RED, linetype = "dashed", linewidth = 0.7) +
+  labs(x = "Height (cm)", y = "Count") +
+  theme(strip.text = element_text(face = "bold", size = 12))
+```
+
+In @fig-sd-vs-se, the top panel shows how individual heights vary (SD $\approx 8$ cm), while the bottom panel shows how sample means vary (SE $\approx `r round(pop_sd / sqrt(n_obs), 1)`$ cm). Both are centered near $\mu = `r pop_mean`$, but the sampling distribution of the mean is much narrower.
+
+::: {.workedexample}
+In the medical consultant example, $\hat{p} = 3/62 = 0.048$. If we could take many samples of 62 patients from this consultant's true patient population and compute $\hat{p}$ each time, the standard deviation of all those $\hat{p}$ values would be the standard error of $\hat{p}$.
+
+While we usually cannot literally take repeated samples, simulation methods (which we will explore in the randomization tests and bootstrap confidence intervals chapters) allow us to approximate the standard error. In this case, bootstrap simulations suggest that the standard error of $\hat{p}$ is approximately 0.027. This means that if we could repeat the study many times, the sample complication rate would typically differ from the true complication rate by about 2.7 percentage points.
+:::
+
+### Why the standard error matters
+
+The standard error is the engine of statistical inference. Here is why:
+
+- **Confidence intervals** are built by going a certain number of standard errors above and below the point estimate. A rough 95% confidence interval is:
+
+  $$\text{statistic} \pm 2 \times SE$$
+
+- **Hypothesis tests** compare an observed statistic to what we would expect under the null hypothesis. The comparison is made in units of standard errors: "Is the observed result more than 2 standard errors from the null value?"
+
+- **Sample size planning** uses the standard error to determine how many observations are needed to achieve a desired level of precision.
+
+In the coming chapters, we will use simulation to *estimate* the standard error. In later chapters (Unit 3), we will use mathematical formulas to *calculate* it directly.
+
+::: {.guidedpractice}
+Two researchers both estimate the proportion of college students who prefer online textbooks. Researcher A surveys 100 students and finds $\hat{p}_A = 0.62$ with $SE_A = 0.049$. Researcher B surveys 400 students and finds $\hat{p}_B = 0.58$ with $SE_B = 0.025$.
+
+(a) Whose estimate is more precise? How do you know?
+(b) Why is Researcher B's standard error smaller?
+
+<details>
+<summary>Show answer</summary>
+(a) Researcher B's estimate is more precise because the standard error is smaller (0.025 < 0.049), meaning the sample statistic is expected to be closer to the true parameter. (b) Researcher B surveyed four times as many students, and increasing the sample size reduces the standard error.
+</details>
+:::
+
+## Looking ahead {#sec-sampling-variability-looking-ahead}
+
+This chapter has established the core vocabulary and ideas that drive all of statistical inference:
+
+- We want to know about **parameters** but can only observe **statistics**.
+- Statistics vary from sample to sample --- this is **sampling variability**.
+- The pattern of this variation is described by the **sampling distribution**.
+- The **standard error** quantifies the typical amount of sampling variability.
+
+The fundamental question of inference is: *Given the sampling variability we expect, is the pattern in our data real, or could it have happened by chance?*
+
+In the next three chapters, we will answer this question using three different approaches --- all rooted in simulation:
+
+- **Randomization Tests**: Shuffle the data to see what differences look like when there is no real effect. If the observed difference is extreme compared to the shuffled results, we have evidence of a real effect.
+- **Bootstrap Confidence Intervals**: Resample from the data to approximate the sampling distribution, and use it to construct a range of plausible values for the parameter.
+- **Sampling Distributions via Simulation**: Connect the simulation results from the randomization tests and bootstrap confidence intervals chapters to mathematical theory, setting the stage for the formula-based methods in Unit 3.
+
+The goal of Unit 2 is to build your *intuition* for inference. The formulas will come later; the ideas come first.
+
+## Chapter review {#sec-sampling-variability-review}
+
+### Summary
+
+- A **population parameter** is a fixed but unknown numerical summary of the population. A **sample statistic** (point estimate) is computed from data and serves as our best guess of the parameter.
+- Different samples from the same population yield different statistics. This is **sampling variability** --- it is not a mistake, but a fundamental feature of working with samples.
+- The **sampling distribution** of a statistic describes how the statistic varies across all possible samples of a given size. It is typically centered at the parameter, and its spread decreases as sample size increases.
+- The **standard error** is the standard deviation of the sampling distribution. It measures the precision of the statistic as an estimate of the parameter.
+- The standard error is not the same as the standard deviation of the data. The standard deviation measures variability of individual observations; the standard error measures variability of a statistic.
+- Larger samples produce smaller standard errors, meaning more precise estimates.
+
+### Key terms
+
+| Term | Definition |
+|:-----|:-----------|
+| Population parameter | A fixed numerical summary of the entire population (e.g., $p$, $\mu$) |
+| Sample statistic | A numerical summary computed from sample data (e.g., $\hat{p}$, $\bar{x}$) |
+| Point estimate | Another name for sample statistic; our best guess at the parameter |
+| Sampling variability | The fact that different samples produce different statistics |
+| Sampling distribution | The distribution of a statistic over all possible samples of a given size |
+| Standard error (SE) | The standard deviation of the sampling distribution |
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-sampling-variability) at the back of the book.
+
+{{< include ../exercises/_sampling-variability-exercises.qmd >}}
+
+{{< include ../exercises/_sampling-variability-statlens-exercises.qmd >}}

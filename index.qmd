@@ -1,0 +1,64 @@
+---
+pagetitle: "Introduction to Statistics: A Simulation-First Approach"
+---
+
+# Welcome {.unnumbered .welcome}
+
+This is an open educational resource (OER) for introductory statistics, built on a **simulation-first** pedagogy. Students develop statistical reasoning through hands-on simulation before encountering formal mathematical theory.
+
+::: {.callout-note}
+## 📝 Help improve this book — leave feedback in the margin
+
+This textbook is a **work in progress**, and your feedback makes it better. You can comment **right on the page** — nothing to install.
+
+1. Click the **`<` tab** on the right edge of any page to open the annotation sidebar (powered by a free tool called [Hypothesis](https://web.hypothes.is/)). The first time, create a free account.
+2. **Select any text** in the book, click **Annotate**, and type your comment — it stays pinned to that exact sentence.
+3. **Reviewers:** if you were invited to the **145 Textbook Review** group, pick it at the top of the sidebar (instead of "Public") so your notes reach the author.
+
+Anything helps — unclear explanations, notation you'd change, examples that fall flat, or plain typos.
+:::
+
+## Why simulation first?
+
+Traditional introductory statistics courses begin with probability rules and distribution theory, then use those tools to build confidence intervals and hypothesis tests. Students memorize formulas without understanding *why* they work.
+
+This textbook reverses that order:
+
+1. **Explore data** — See patterns, describe distributions, visualize relationships.
+2. **Simulate inference** — Use resampling (bootstrap, permutation) to understand *what inference is* and *why it works*.
+3. **Approximate with theory** — Learn that the normal and $t$-distributions are mathematical shortcuts for what simulation does directly.
+4. **Formalize probability** — Study probability rules and random variables *after* students already have deep intuition about randomness.
+5. **Model relationships** — Apply all inference tools to regression and categorical data.
+
+By the time students encounter the Central Limit Theorem, they have already *built* sampling distributions hundreds of times. The theorem becomes an elegant confirmation of what they've seen, not an abstract declaration to accept on faith.
+
+## How to use this book
+
+::: {.statlens}
+Throughout this text, **StatLens** activities invite you to explore statistical concepts interactively. Look for boxes like this one. Each activity links to a browser-based simulation tool — no software installation required.
+
+[Launch StatLens](https://learnlens.org/statlens/){target="_blank"} to explore all available tools.
+:::
+
+**Guided Practice** exercises appear throughout each chapter with solutions in footnotes — try them before peeking.
+
+**Worked Examples** walk through complete analyses step by step.
+
+**Definitions** highlight key statistical vocabulary.
+
+## About this book
+
+This textbook remixes material from two outstanding open-source statistics textbooks:
+
+- [Introduction to Modern Statistics](https://openintro-ims.netlify.app/) (2nd edition) by Mine Çetinkaya-Rundel and Johanna Hardin
+- [OpenIntro Statistics](https://www.openintro.org/book/os/) by David Diez, Mine Çetinkaya-Rundel, and Christopher Barr
+
+Both are licensed under [Creative Commons BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/), and this remix is shared under the same license.
+
+Interactive simulations are powered by [StatLens](https://learnlens.org/statlens/), an open-source statistics visualization toolkit developed at the University of Wisconsin-La Crosse.
+
+## License {.unnumbered}
+
+This work is licensed under a [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
+
+You are free to share and adapt this material for any purpose, even commercially, as long as you give appropriate credit and distribute your contributions under the same license.

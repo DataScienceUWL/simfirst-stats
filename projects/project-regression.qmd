@@ -1,0 +1,109 @@
+# Project: Fitting and Testing a Regression Line {#sec-project-regression .unnumbered}
+
+::: {.project-meta}
+**Project — Linear Regression.** Carry out the analysis in **Jamovi** (or **R**) and **communicate** the result. The graded skills are framing the relationship, fitting and *interpreting* the line, testing whether the slope is real, and not over-trusting the model.
+:::
+
+## The question {#sec-project-regression-question}
+
+Field biologists often need to estimate an animal's overall size from a part that's easy to measure. For brushtail possums, the tail is simple to measure in the field.
+
+> **Can we predict a possum's total body length from its tail length, and is the relationship real?**
+
+## The data {#sec-project-regression-data}
+
+The `possum` dataset records 104 brushtail possums. You'll use `tail_l` (tail length, cm) as the explanatory variable and `total_l` (total body length, cm) as the response.
+
+## Plan it first {#sec-project-regression-plan}
+
+a.  **Variables.** Identify the explanatory and response variables (both numerical).
+b.  **Display.** What plot shows the relationship between two numerical variables?
+c.  **Procedure.** To predict one numerical variable from another and test whether the association is real → **linear regression** with a **t-test on the slope**.
+d.  **Hypotheses.** State $H_0$ and $H_A$ for the slope. What does the slope being 0 mean?
+
+## Do the analysis {#sec-project-regression-do}
+
+::: {.panel-tabset}
+
+### Jamovi
+
+1.  Open `possum.csv`.
+2.  **Regression → Linear Regression.** Dependent variable: `total_l`; Covariate: `tail_l`.
+3.  Request the **model coefficients** (estimate, t, p), **$R^2$**, and a **scatterplot with the fitted line**; check the **residual** plots.
+4.  Read off the slope, its p-value, and $R^2$.
+
+*(Jamovi screenshots to be added.)*
+
+### R
+
+```{r}
+#| label: project-regression-r
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-cap: "Total body length vs. tail length for 104 brushtail possums, with the least-squares line."
+#| fig-alt: "A scatterplot of total length against tail length showing a positive linear trend, with an upward-sloping fitted line."
+
+library(infer)
+library(dplyr)
+library(ggplot2)
+library(openintro)
+data(possum)
+
+# Fit the least-squares line (intercept and slope)
+possum |> specify(total_l ~ tail_l) |> fit()
+
+# Correlation and R^2 (for simple regression, R^2 = r^2)
+r <- cor(possum$tail_l, possum$total_l)
+cat("r =", round(r, 3), " R^2 =", round(r^2, 3), "\n")
+
+# Permutation test for the slope: is it discernibly different from 0?
+obs_fit <- possum |> specify(total_l ~ tail_l) |> fit()
+
+set.seed(145)
+null_fits <- possum |>
+  specify(total_l ~ tail_l) |>
+  hypothesize(null = "independence") |>
+  generate(reps = 1000, type = "permute") |>
+  fit()
+
+null_fits |>
+  get_p_value(obs_stat = obs_fit, direction = "two-sided") |>
+  filter(term == "tail_l")
+
+ggplot(possum, aes(tail_l, total_l)) +
+  geom_point(alpha = 0.6, color = "#3E5496") +
+  geom_smooth(method = "lm", se = TRUE, color = "#C7254E") +
+  labs(x = "Tail length (cm)", y = "Total length (cm)") +
+  theme_minimal(base_size = 13)
+```
+
+:::
+
+::: {.callout-note}
+**Reading the permutation p-value.** The relationship is strong enough that *none* of the shuffled slopes reaches the observed slope, so the simulation returns a p-value of **0**. Report that honestly as **p < 0.001** (smaller than $1/\text{reps}$) — very strong evidence — not literally zero.
+:::
+
+## Your deliverable {#sec-project-regression-deliverable}
+
+Submit a short report containing **all** of:
+
+a.  **Graphic** — a labeled scatterplot of `total_l` vs. `tail_l` with the fitted line.
+b.  **Numerical result** — the regression equation (intercept and slope), the slope's p-value, and $R^2$.
+c.  **Interpret the slope** — one sentence in context: how much does predicted total length change per extra cm of tail?
+d.  **Conclusion in context** — 3–4 sentences: is the slope **discernibly** different from 0? How strong is the relationship ($R^2$)? Would you trust a prediction for a tail length far outside the observed range (**extrapolation**)?
+e.  **One limitation** — e.g., one species/region; correlation here is descriptive, not causal.
+
+### How it's graded
+
+| Criterion | What we look for |
+|---|---|
+| Appropriate, labeled graphic | scatterplot with fitted line, axes labeled |
+| Procedure & conditions | regression + slope test identified; residuals considered |
+| Correct numerical result | equation, slope p-value, $R^2$ reported correctly |
+| Conclusion **in context** | slope interpreted; discernibility; no extrapolation |
+| Communication | clear, correct interpretation |
+
+::: {.statlens}
+**Warm up first.** Fit a line by eye and see the residuals in the [Regression explorer]({{< var tool-url >}}/explore/regression/){target="_blank"} before writing your report.
+:::

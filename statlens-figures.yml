@@ -1,0 +1,93 @@
+# StatLens Figure Registry
+#
+# Maps figure IDs to StatLens URLs for the screenshot pipeline.
+# The screenshot script (scripts/statlens-screenshots.py) reads this file,
+# visits each URL with ?embed=true&static=true, executes actions,
+# scrapes document.title, and saves a PNG screenshot.
+#
+# Fields:
+#   tool:     StatLens tool path (relative to base URL)
+#   params:   URL parameters (merged with embed=true&static=true)
+#   actions:  List of {click, waitFor} steps to execute before screenshot
+#   chapter:  Textbook chapter this figure belongs to
+#   caption:  Author-written figure caption (goes under the figure)
+#   viewport: Optional {width, height} override (default: 800x500)
+
+# ─── Chapter 8: Bootstrap Confidence Intervals ──────────────────────
+
+ch08-bootstrap-ci:
+  tool: simulate/bootstrap-mean/
+  params:
+    dataset: penny_ages
+    seed: ch8fig3
+    ci: 95
+  actions:
+    - click: "button.gen-btn[data-count='1000']"
+      waitFor: ".result-banner"
+  chapter: ch08
+  caption: "Bootstrap distribution of 1,000 resampled means from the penny ages data. The middle 95% is shaded to show the confidence interval."
+
+ch08-med-consultant-boot:
+  tool: simulate/bootstrap-prop/
+  params:
+    dataset: medical_consultant
+    seed: ch8fig5
+    ci: 95
+  actions:
+    - click: "button.gen-btn[data-count='1000']"
+      waitFor: ".result-banner"
+  chapter: ch08
+  caption: "Bootstrap distribution of 1,000 resampled complication rates for the medical consultant data."
+
+ch08-ci-concept:
+  tool: conceptual/ci-coverage/
+  params:
+    seed: ch8fig4
+  actions:
+    - click: "button.gen-btn[data-count='25']"
+      waitFor: "#n-cis"
+  chapter: ch08
+  caption: "Twenty-five confidence intervals from 25 different samples. Intervals that captured the true mean are shown in blue; those that missed are shown in red."
+
+# ─── Chapter 7: Randomization Tests ──────────────────────────────────
+
+ch07-randomization-null:
+  tool: simulate/randomization-diff-props/
+  params:
+    dataset: sex_discrimination
+    seed: ch7fig1
+    direction: greater
+  actions:
+    - click: "button.gen-btn[data-count='1000']"
+      waitFor: ".result-banner"
+  chapter: ch07
+  caption: "Null distribution of the difference in promotion rates from 1,000 randomization resamples."
+
+# ─── Chapter 10: Normal Approximation ────────────────────────────────
+
+ch10-normal-left-tail:
+  tool: distribution/normal/
+  params:
+    mu: 0
+    sigma: 1
+    tail: left
+  chapter: ch10
+  caption: "Standard normal distribution with left tail shaded."
+
+ch10-normal-right-tail:
+  tool: distribution/normal/
+  params:
+    mu: 0
+    sigma: 1
+    tail: right
+  chapter: ch10
+  caption: "Standard normal distribution with right tail shaded."
+
+ch10-normal-between:
+  tool: distribution/normal/
+  params:
+    mu: 0
+    sigma: 1
+    tail: middle
+  chapter: ch10
+  caption: "Standard normal distribution with middle area shaded."

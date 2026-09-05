@@ -1,0 +1,31 @@
+<!-- StatLens Interactive Exercises — Sample Size Determination -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: solving for n given target       -->
+<!-- power, ME, or precision; reading the $n$ slider on the Power Visualizer. -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Solve for $n$ from a target power.** A clinical trial seeks to detect a small-to-moderate effect ($\delta/\sigma = 0.4$) at $\alpha = 0.05$ (one-sided) with 80% power.
+
+    a.  Open the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/?alpha=0.05&n=30&delta=0.4&sigma=1&tail=right){target="_blank"} and slide $n$ up from 30 until the power readout crosses 0.80. What $n$ achieves it?
+    b.  What $n$ achieves 90% power at the same settings? Why does going from 80% to 90% cost more "extra" $n$ than going from 70% to 80%?
+    c.  How does the required $n$ change if the true effect is **bigger** ($\delta/\sigma = 0.8$)?
+    d.  Why is "what $n$ do I need?" a question that **always** requires assuming an effect size? What can a researcher do if she has no good prior estimate?
+
+
+2.  **Sample size for a desired margin of error.** A pollster wants to estimate a population proportion with a 95% CI margin of error no larger than 0.03.
+
+    a.  Using the formula $n = (z^*/ME)^2 \cdot p^*(1-p^*)$, what $n$ guarantees ME $\le 0.03$ no matter what $p^*$ turns out to be? (Hint: which $p^*$ maximizes $p^*(1-p^*)$?)
+    b.  If the pollster knows $p \approx 0.6$, what $n$ achieves ME $= 0.03$? How much smaller than (a)?
+    c.  Why is using $p^* = 0.5$ a "conservative" (safe) choice in (a)?
+    d.  A pollster says: "Halving the ME requires doubling $n$." True or false?
+
+
+3.  **Sample size for two-group comparisons.** A randomized trial compares two treatments and wants to detect a difference of $\delta = 0.5$ standard deviations (a "medium" effect by Cohen's rule) with 80% power at $\alpha = 0.05$ (two-sided).
+
+    a.  Using the formula $n_{\text{per group}} = 2 \cdot (2.8 \cdot \sigma / \delta)^2$ (an approximation for $\alpha = 0.05$, 80% power, two-sided), what $n$ per group is required for $\delta/\sigma = 0.5$?
+    b.  Verify your answer by sliding $n$ on the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/?alpha=0.05&n=64&delta=0.5&sigma=1&tail=both){target="_blank"} until power crosses 0.80.
+    c.  If attrition is expected to be 20% (1 in 5 participants drops out), how many should you **enroll** to end up with the target $n$ per group?
+    d.  A study reports "$n = 30$ per group" for a small effect ($\delta/\sigma = 0.3$). What power did this study likely have? Should you trust a non-result?
+

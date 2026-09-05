@@ -1,0 +1,94 @@
+<!-- StatLens Interactive Exercises — Chapter 4 -->
+<!-- These exercises use StatLens tools for hands-on exploration. -->
+
+### StatLens Exercises {.unnumbered}
+
+The following exercises use [StatLens]({{< var tool-url >}}){target="_blank"}, an interactive statistics tool. Each exercise includes a link that opens a pre-loaded dataset — explore, interact, and answer the questions.
+
+\vfill
+
+1. **Does binning change the story?**
+    Open the [US county poverty rates]({{< var tool-url >}}/explore/descriptive/?dataset=county_poverty){.open-in-statlens target="_blank" aria-label="Explore county poverty data in StatLens"} in StatLens. This dataset contains poverty rates (%) for 3,137 US counties.
+
+    a.  Describe the shape of the distribution with the default number of bins. Is it symmetric, left-skewed, or right-skewed? Is it unimodal?
+
+    b.  Use the **Bins** control to reduce the number of bins to about 5–6. Does your conclusion about the shape change? What detail is lost?
+
+    c.  Now increase the bins to 30–40. Does your shape conclusion change? What new detail (if any) becomes visible?
+
+    d.  Based on your exploration, explain in your own words why two histograms of the same data can look somewhat different yet tell the same story.
+
+
+\vfill
+\clearpage
+
+\vfill
+
+2. **What do box plots hide?**
+    Open the [email character counts]({{< var tool-url >}}/explore/descriptive/?dataset=email50_num_char&labels=names){.open-in-statlens target="_blank" aria-label="Explore email data in StatLens"} in StatLens. This dataset records the number of characters (in thousands) in 50 emails. Numeric labels are hidden so you can focus on visual patterns.
+
+    a.  View the data as a **histogram**. Describe the shape. Are there any gaps or clusters that stand out?
+
+    b.  Switch to a **dotplot**. With only 50 observations, can you see individual emails? Identify approximately how many emails have more than 25,000 characters.
+
+    c.  Now switch to a **boxplot**. Can you still tell whether the distribution has one peak or two? Can you identify the same gaps or clusters you saw in the histogram?
+
+    d.  A classmate claims "box plots and histograms show the same information, just in different ways." Do you agree? Use what you observed to explain why or why not.
+
+
+\vfill
+\clearpage
+
+\vfill
+
+3. **Choosing the right chart for the question.**
+    Open the [US county population data]({{< var tool-url >}}/explore/descriptive/?dataset=county_pop){.open-in-statlens target="_blank" aria-label="Explore county population data in StatLens"} in StatLens. This dataset contains the 2017 population of 3,137 US counties.
+
+    For each question below, state which chart type (**histogram**, **dotplot**, or **boxplot**) would be most useful, then switch to that chart type to answer it.
+
+    a.  What is the approximate median county population? Which chart type shows this most directly?
+
+    b.  Are there counties with populations over 5 million? How many? Which chart type makes this easiest to determine?
+
+    c.  Is the distribution symmetric, left-skewed, or right-skewed? Which chart type makes the skewness most visually obvious?
+
+    d.  Try increasing the number of histogram bins to 50 or more. What happens? Why does this dataset pose a challenge for histograms?
+
+
+\vfill
+\clearpage
+
+\vfill
+
+4. **Mean vs. median: which tells the truth?**
+    Open the [NBA player heights]({{< var tool-url >}}/explore/descriptive/?dataset=nba_heights){.open-in-statlens target="_blank" aria-label="Explore NBA heights in StatLens"} in StatLens, then answer parts (a)–(b). Next, open the [Ames home sale prices]({{< var tool-url >}}/explore/descriptive/?dataset=ames_price){.open-in-statlens target="_blank" aria-label="Explore Ames home prices in StatLens"} and answer parts (c)–(d).
+
+    a.  For the NBA heights data, view the **histogram** and describe the shape. Now look at the **mean** and **median** in the summary statistics panel. Are they close together or far apart?
+
+    b.  Would it matter much whether you reported the mean or the median as the "typical" NBA player height? Why or why not?
+
+    c.  For the Ames home prices, view the **histogram** and describe the shape. Look at the mean and median. How far apart are they? Which is larger?
+
+    d.  A real estate agent wants to tell a client what a "typical" home costs in Ames. Should the agent report the mean or the median? Explain, using the shape of the distribution to support your answer.
+
+
+\vfill
+\clearpage
+
+\vfill
+
+5. **Checking the empirical rule.**
+    Open the [NBA player heights]({{< var tool-url >}}/explore/descriptive/?dataset=nba_heights){.open-in-statlens target="_blank" aria-label="Explore NBA heights in StatLens"} in StatLens. Heights of professional basketball players are approximately bell-shaped.
+
+    a.  Record the **mean** and **standard deviation** from the summary statistics panel.
+
+    b.  Compute the interval for "within 1 standard deviation of the mean": $(\bar{x} - s, \ \bar{x} + s)$. According to the empirical rule, about what percentage of players should have heights in this range?
+
+    c.  Look at the histogram. Estimate (roughly) whether about 68% of the data appears to fall within the interval you computed. Does the empirical rule seem to hold?
+
+    d.  Now compute the interval for "within 2 standard deviations": $(\bar{x} - 2s, \ \bar{x} + 2s)$. According to the empirical rule, about what percentage should fall in this range? Looking at the histogram, does nearly all the data fall within this interval?
+
+    e.  Would you expect the empirical rule to work as well for the Ames home price data? Why or why not? (Hint: think about the shape.)
+
+
+\vfill

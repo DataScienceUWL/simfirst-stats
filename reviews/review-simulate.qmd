@@ -1,0 +1,128 @@
+# Simulate — Unit Review {.unnumbered}
+
+::: {.chapterintro}
+Unit 2 built **simulation-based inference** from the ground up. This review pulls
+the five chapters together: one idea — *use the computer to imitate chance* —
+applied two ways, to **test** a claim and to **estimate** a quantity, wrapped in a
+framework for the **errors** any decision can make. Nothing here is new; it is a
+map of what you should now be able to do, and how the pieces fit.
+:::
+
+## The big picture {#sec-review-simulate-bigpicture}
+
+Every method in this part rests on **[sampling variability](../chapters/sampling-variability.qmd)**: a statistic computed from a sample is just one draw from a distribution of values it *could* have taken. Simulation lets you build that distribution by hand instead of assuming a formula for it.
+
+You used that one idea in two directions:
+
+- **To test a claim** — a **[randomization test](../chapters/randomization-tests.qmd)**. Imitate a world in which the null hypothesis is true (by *shuffling* the group labels), and see how surprising your real result would be in that world. The answer is a **p-value**.
+- **To estimate a quantity with uncertainty** — a **[bootstrap confidence interval](../chapters/bootstrap-ci.qmd)**. Imitate drawing new samples (by *resampling your one sample with replacement*), and watch how much the estimate bounces around. The answer is a **confidence interval**.
+
+**[Decision errors](../chapters/decision-errors.qmd)** gave you the language for what a test can get wrong, and **[sampling distributions](../chapters/sampling-distributions.qmd)** showed that these simulated distributions have predictable shapes — the bridge to the formula-based methods of Unit 3.
+
+## Two engines, one idea: randomization vs. bootstrap {#sec-review-simulate-compare}
+
+The two simulation methods are easy to confuse because both "shuffle the data and recompute" thousands of times. They answer *different questions* and manipulate the data in *different ways*:
+
+| | **Randomization test** | **Bootstrap interval** |
+|---|---|---|
+| **Question it answers** | *Is there an effect?* (test) | *How big is it?* (estimate) |
+| **You start by assuming…** | the null hypothesis is **true** | nothing — you trust your sample |
+| **What you do to the data** | **shuffle / relabel** (sample *without* replacement) | **resample *with* replacement**, same $n$ |
+| **The simulated distribution is…** | the **null distribution** of the statistic | the **sampling distribution** of the estimate |
+| **What you read off** | a **p-value** (how extreme is the observed statistic?) | a **confidence interval** (percentile or SE method) |
+| **Conclusion sounds like** | "discernible / no discernible evidence of an effect" | "we're 95% confident the value is between ___ and ___" |
+
+::: {.important}
+The tell: **a test shuffles labels to break the link** between groups; **a bootstrap resamples with replacement to imitate re-sampling the population.** If the question has the word *significant/discernible* or *evidence*, you are testing. If it asks *how much* or *what is the value*, you are estimating.
+:::
+
+## Which simulation do I run? {#sec-review-simulate-decision}
+
+1. **What is the question?**
+   - "Is there a difference / an effect / evidence against a claim?" → **randomization test → p-value.**
+   - "What is the value, and how precise is my estimate?" → **bootstrap → confidence interval.**
+2. **How many groups?** One group vs. a fixed claim, or two groups compared.
+3. **What kind of variable?** A **proportion** (categorical outcome) or a **mean** (numerical outcome).
+
+Those three answers name the exact procedure (e.g. *two groups + proportion + "is there an effect" → randomization test for a difference in proportions*).
+
+## Key ideas to carry forward {#sec-review-simulate-vocab}
+
+**Sampling distribution** · **null distribution** · **p-value** · **discernibility level** ($\alpha$) · **Type I error** (rejecting a true null) · **Type II error** (missing a real effect) · **power** · **confidence level** · **bootstrap** · **percentile method** · **standard-error method**.
+
+## Common pitfalls {#sec-review-simulate-pitfalls}
+
+- **The p-value is not the probability the null is true.** It is the probability of data this extreme *if* the null were true.
+- **A confidence interval is a statement about the procedure, not this one interval.** "95% confident" means 95% of intervals built this way would capture the truth — not a 95% probability for these particular endpoints.
+- **"Fail to reject" is not "prove the null."** Absence of discernible evidence is not evidence of absence.
+- **Randomization shuffles *without* replacement; the bootstrap resamples *with* replacement.** Mixing these up is the most common Unit 2 error.
+- **$\alpha$ is chosen before you see the data.** It *is* the Type I error rate you are willing to tolerate.
+- **Bigger samples** give narrower bootstrap intervals and more power — same data-generating reality, sharper picture.
+
+## Exercises {#sec-review-simulate-exercises}
+
+The most important Unit 2 skill is **choosing the right simulation before you run anything**. These exercises drill that decision. Answers are provided so you can check your work.
+
+1.  **Bootstrap or randomization test — and which one?** For each scenario, state **(i)** whether the goal is to *test* a claim or *estimate* a quantity, and **(ii)** the **specific procedure** (for example, "randomization test for a difference in proportions" or "bootstrap interval for one mean").
+
+    a.  A nutritionist wants to estimate the proportion of cafeteria meals that meet a calorie guideline, with a margin of error.
+    b.  Researchers ask whether a new store layout changes the *average* time shoppers spend in the store, comparing a treatment store to a control store.
+    c.  A team estimates *how much higher* the average tip percentage is for servers who write a thank-you note versus those who don't.
+    d.  A factory checks whether the defect rate on a line differs from the company target of 2%.
+    e.  A pollster estimates the average number of hours students sleep, with uncertainty.
+    f.  A trial asks whether the recovery rate (recovered: yes/no) is higher under a new drug than under a placebo.
+    g.  Analysts estimate the difference in the proportion of repeat customers between two store designs.
+    h.  A coach asks whether the team's mean sprint time is *faster than* the league benchmark of 12.0 seconds.
+
+    <details><summary>Show answer</summary>
+    | | Goal | Procedure |
+    |--|--|--|
+    | a | estimate | **bootstrap** interval for **one proportion** |
+    | b | test | **randomization test** for a **difference in means** |
+    | c | estimate | **bootstrap** interval for a **difference in means** |
+    | d | test | **randomization test** for **one proportion** (vs. 0.02) |
+    | e | estimate | **bootstrap** interval for **one mean** |
+    | f | test | **randomization test** for a **difference in proportions** |
+    | g | estimate | **bootstrap** interval for a **difference in proportions** |
+    | h | test | **randomization test** for **one mean** (vs. 12.0) |
+
+    The tell: *estimate / how much / with a margin* → **bootstrap**; *is there a difference / higher / changes* → **randomization test**. Then "one group vs. two groups" and "proportion vs. mean" pin down the exact version.
+    </details>
+
+2.  **What would you shuffle or resample?** For scenarios (b), (d), and (g) above, describe the *mechanical* step the simulation repeats thousands of times.
+
+    <details><summary>Show answer</summary>
+    **(b)** Randomization test — pool all shoppers' times, **shuffle the store labels** (treatment/control), and recompute the difference in mean times; repeat to build the null distribution. **(d)** Randomization test for one proportion — simulate samples of the same size *assuming* $p = 0.02$ (e.g., spin a 2%-defect spinner $n$ times) and record each simulated defect proportion. **(g)** Bootstrap — **resample each store's customers with replacement** at the original group sizes and recompute the difference in repeat-customer proportions; repeat to build the sampling distribution of the difference.
+    </details>
+
+3.  **Spot the mismatch.** A student proposes a **bootstrap interval** to answer: *"Is there evidence that more than half of voters support the measure?"* Is that the right tool? If not, fix it.
+
+    <details><summary>Show answer</summary>
+    **Mismatch.** "Is there evidence that more than half…" is a **test** of a directional claim ($p > 0.5$), not an estimate, so it calls for a **randomization test for one proportion** (against $p = 0.5$), reported as a p-value. (A one-sided bootstrap interval lying entirely above 0.5 *could* support the same conclusion, but the question as posed is a hypothesis test.)
+    </details>
+
+4.  **Which interpretation is correct?** A 95% bootstrap interval for a population mean is $(18.2, 21.6)$ minutes.
+
+    i.   There is a 95% probability the population mean is between 18.2 and 21.6.
+    ii.  About 95% of the data fall between 18.2 and 21.6.
+    iii. If the whole study were repeated many times, about 95% of the intervals built this way would contain the true mean.
+
+    <details><summary>Show answer</summary>
+    **(iii).** Confidence is the long-run success rate of the *procedure*, not a probability about this one fixed interval (i), and not a statement about where individual values fall (ii).
+    </details>
+
+5.  **Interval ⇔ test.** A 90% randomization-based interval for a difference in means is $(-1.5, 4.0)$. Two-sided at $\alpha = 0.10$, would the matched test reject $H_0:$ difference $= 0$?
+
+    <details><summary>Show answer</summary>
+    **No.** The interval **contains 0**, so 0 stays plausible and the matched two-sided test does **not** reject at $\alpha = 0.10$. (A CI excluding the null value ⇔ the matched test rejects, at the corresponding level.)
+    </details>
+
+6.  **Errors in context.** A school will adopt a new reading program only if a test shows **discernible** evidence it beats the current one. Describe a **Type I** and a **Type II** error here, and one real consequence of each.
+
+    <details><summary>Show answer</summary>
+    **Type I:** conclude the new program is better when it truly is not → the school pays to switch for no gain. **Type II:** conclude there is no discernible benefit when the new program truly is better → students miss a real improvement. Choosing $\alpha$ controls the Type I rate; a larger sample lowers the Type II rate (raises power).
+    </details>
+
+::: {.statlens}
+**Revisit the engines.** If any of this feels shaky, re-open the [Randomization Test]({{< var tool-url >}}/simulate/randomization-diff-props/){target="_blank"} and [Bootstrap]({{< var tool-url >}}/simulate/bootstrap-prop/){target="_blank"} tools and watch the null distribution and the sampling distribution form side by side — the contrast in the comparison table above is exactly what those two animations show.
+:::

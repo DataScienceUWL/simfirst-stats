@@ -1,0 +1,52 @@
+<!-- StatLens Interactive Exercises — Randomization Tests -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based -->
+<!-- on purpose; the numbers come from StatLens.                              -->
+
+### StatLens Exercises {.unnumbered}
+
+These exercises focus on the parts of a randomization test a calculator *can't* do for you: **framing the question**, **picking the right shuffling scheme**, **reading the null distribution**, and **interpreting a p-value** without falling into the standard traps. Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic.
+
+1.  **Frame the question.** A trial randomly assigns 90 students to either an online tutoring program or a control group, then measures their final exam scores. The mean score in the tutoring group is 4.2 points higher than in the control group.
+
+    a.  What is the parameter of interest? Describe it in words.
+    b.  Write $H_0$ and $H_A$ for testing whether tutoring *improves* exam scores. Is the test one-sided or two-sided, and why?
+    c.  The randomization test will simulate the "no effect" world by **shuffling group labels** across students. *Why is shuffling labels the right way to simulate $H_0$ here, and what feature of the study design makes shuffling labels valid?*
+
+
+2.  **Choose the procedure.** For each scenario, name the randomization shuffle you would use --- **shuffle group labels** (independent groups), **shuffle paired-difference signs** (paired data), **shuffle the values of one variable** (correlation/independence), or **a Bernoulli null simulation** (one proportion vs. a fixed value).
+
+    a.  Did a coin biased toward heads come up "heads" more than 50% of the time in 100 tosses?
+    b.  Are male and female job applicants offered different mean starting salaries?
+    c.  Do students score higher on a test taken **after** a study skills workshop compared to **before**?
+    d.  Is hours of TV per week associated with hours of sleep per night?
+    e.  Do four different fertilizer brands produce different mean yields?
+
+
+3.  **Read the null distribution.** Open the [Randomization Test --- Difference in Proportions]({{< var tool-url >}}/simulate/randomization-diff-props/?activity=randomization-test-gated.json){target="_blank"} (the gated sex-discrimination walkthrough). Step through it until you have the null distribution of 1000 shuffled differences in front of you.
+
+    a.  Where is the null distribution centered? Why does it have to be centered there, by construction?
+    b.  The observed sample difference is marked on the dotplot. Roughly what proportion of the *shuffled* differences are at least as extreme as the observed one (one-sided)? That proportion *is* the p-value.
+    c.  Suppose the observed difference had landed *near* the middle of the null distribution instead. What would the p-value be approximately, and what would you conclude?
+
+
+4.  **Run it and interpret it (means).** Open the [Randomization Test for Difference in Means]({{< var tool-url >}}/simulate/randomization-diff-means/){target="_blank"} with any two-group numeric dataset.
+
+    a.  Run 1000 shuffles and read off the p-value. State your decision at $\alpha = 0.05$.
+    b.  Write a one-sentence conclusion **in context**.
+    c.  Re-run the test with only 100 shuffles, then with 10000 shuffles. How does the p-value change? Why do we usually report a number that comes from "more shuffles, not fewer"?
+    d.  Which statement is the correct interpretation of a p-value of 0.03?
+
+        i.   There is a 3% probability that the null hypothesis is true.
+        ii.  If the two groups really had the same mean, we would see a difference at least as extreme as ours in about 3% of randomly assigned studies.
+        iii. The probability that the alternative hypothesis is true is 0.97.
+
+
+5.  **Simulation as a sanity check on the normal approximation.** A textbook says: "When the sample sizes are large and the data are not too skewed, the randomization distribution of $\bar{x}_1 - \bar{x}_2$ is approximately normal." You will check this by eye.
+
+    a.  Open any moderate-$n$ two-group numeric dataset in the [randomization test tool]({{< var tool-url >}}/simulate/randomization-diff-means/){target="_blank"} and run 5000 shuffles. Describe the **shape**, **center**, and **spread** of the resulting null distribution.
+    b.  Why does the *spread* of the null distribution tell you the *standard error* of $\bar{x}_1 - \bar{x}_2$ --- and why does that mean a randomization test essentially "discovers" the same SE the $t$-formula computes from $s_1$, $s_2$, $n_1$, $n_2$?
+    c.  Now try the same on a *small*, skewed dataset (say $n_1 = n_2 = 6$, with one outlier). Is the null distribution still approximately normal? If you ran a two-sample $t$-test on this same data, would the $t$ distribution be a good match for the randomization distribution? Where would they disagree?
+    d.  A student claims that the randomization test "only works for large samples." Why is this exactly backwards --- which test works *better* in small samples, the $t$-test or the randomization test, and why?
+

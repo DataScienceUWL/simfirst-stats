@@ -1,0 +1,238 @@
+---
+title: "Multiple Regression"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+::: {.chapterintro}
+The regression models in earlier chapters used a single predictor $x$ to explain a response $y$. Most real datasets carry many potential predictors: the interest rate a lender charges depends on a borrower's income *and* the loan term *and* their credit history; a penguin's body mass depends on flipper length *and* bill length *and* species. **Multiple linear regression** extends the simple regression framework to accommodate two or more predictors at once. This chapter follows the structure of the IMS 2e chapter *Inference for linear regression with multiple predictors* (`inf-model-mlr.qmd`, CC BY-SA 3.0) --- adopting IMS's running loans case study, its coin-dish multicollinearity example, and its conditional hypothesis-testing framing --- while writing the exposition anew for the simulation-first sequence and aligning the material selection to the UWL STAT 145 coursepack (Bingham, ch 18). The coursepack's coverage of cross-validation, formal model-selection procedures, adjusted $R^2$, and the variance inflation factor is intentionally omitted or moved to Extended Content in this chapter.
+:::
+
+::: {.statlens}
+**See it in action.** Open the [Multiple Regression tool]({{< var tool-url >}}/inference/mlr/){target="_blank"} to pick a response and predictors, read the coefficient table, model $F$-test, $R^2$/adjusted $R^2$, and diagnostics (residuals, Cook's distance). The base view shows a **pairwise predictor scatterplot matrix** for spotting collinearity by eye; append `?expert=true` for the **VIF** column (Extended Content). Try [possum with two predictors]({{< var tool-url >}}/inference/mlr/?dataset=possum&predictors=total_l,skull_w&diagnostics=true){target="_blank"} to reproduce this chapter's worked example.
+:::
+
+## From one predictor to many {#sec-mlr-motivation}
+
+::: {.original}
+A single-predictor regression is a starting point, not an ending point. In the real world, a response variable is almost never driven by just one thing. When we ignore other variables that also influence the response, two things can go wrong.
+
+**Confounding can bias the slope estimate.** If we regress interest rate on debt-to-income ratio alone, and borrowers with higher debt-to-income also tend to have shorter loan terms and more credit checks, the fitted slope absorbs the effects of *all three*. Our estimate of "how much does an extra unit of debt-to-income cost, for a comparable borrower?" is contaminated by the unmeasured differences in loan term and credit history.
+
+**Predictive accuracy suffers.** Even when we don't care about causal interpretation, ignoring available predictors leaves signal on the table. A model with three good predictors typically predicts future observations more accurately than a model with one.
+
+Multiple regression solves the first problem by fitting all predictors together in a single model, so each coefficient represents the effect of that predictor *while holding the others fixed*. And it addresses the second by explaining more of the total variability with the additional predictors.
+:::
+
+## The multiple regression model {#sec-mlr-model}
+
+::: {.definition}
+The **multiple linear regression model** with $k$ predictors is
+
+$$y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_k x_k + \varepsilon,$$
+
+where $\beta_0$ is the population intercept, $\beta_1, \dots, \beta_k$ are the population slopes for the $k$ predictors, and $\varepsilon$ is a random error term with mean 0 and constant variance $\sigma^2$.
+
+The fitted model estimated from a sample is
+
+$$\hat{y} = b_0 + b_1 x_1 + b_2 x_2 + \cdots + b_k x_k,$$
+
+with $b_0, b_1, \ldots, b_k$ chosen to minimize the sum of squared residuals $\sum (y_i - \hat{y}_i)^2$ --- the same least-squares criterion used in simple regression.
+:::
+
+Geometrically, a single-predictor regression fits a *line* in a two-dimensional scatterplot; a two-predictor regression fits a *plane* in a three-dimensional cloud. With three or more predictors we lose the ability to draw the picture, but the mathematics generalizes without incident: we are always fitting the flat surface that comes closest to the observed points in the sum-of-squared-residuals sense.
+
+## Reading multiple-regression output: the loans case study {#sec-mlr-loans}
+
+::: {.workedexample}
+**Predicting interest rates.** IMS's running case study uses `loans_full_schema` from the **openintro** R package --- a curated sample of loans made through a peer-to-peer lending platform. The response is the annual **interest rate** charged; predictors include the borrower's **debt-to-income** ratio, the loan **term** (36 or 60 months), and the number of credit **inquiries** in the past 12 months (`credit_checks`).
+
+Fitting the model
+$$E[\texttt{interest\_rate}] = \beta_0 + \beta_1 \cdot \texttt{debt\_to\_income} + \beta_2 \cdot \texttt{term} + \beta_3 \cdot \texttt{credit\_checks}$$
+in software gives the following coefficient table (numbers from IMS 2e):
+
+| Predictor | Estimate | Std. Error | $t$ | p-value |
+|---|---:|---:|---:|---:|
+| (Intercept) | 4.31 | 0.20 | 21.9 | < 0.0001 |
+| debt_to_income | 0.041 | 0.006 | 6.94 | < 0.0001 |
+| term | 0.16 | 0.006 | 24.6 | < 0.0001 |
+| credit_checks | 0.25 | 0.020 | 12.7 | < 0.0001 |
+
+The fitted equation is
+
+$$\widehat{\texttt{interest\_rate}} = 4.31 + 0.041 \cdot \texttt{debt\_to\_income} + 0.16 \cdot \texttt{term} + 0.25 \cdot \texttt{credit\_checks}.$$
+
+Interpret each coefficient in context.
+
+---
+
+- **Intercept.** A hypothetical borrower with debt-to-income 0, term 0, and 0 credit checks would receive an estimated mean interest rate of 4.31%. As is often the case, this hypothetical borrower doesn't exist (a loan can't have a term of 0), so the intercept mostly serves to position the fitted plane, not as a substantively meaningful prediction.
+
+- **debt_to_income.** Holding term and credit checks fixed, each additional unit of debt-to-income ratio is associated with a 0.041 percentage-point increase in the mean interest rate.
+
+- **term.** Holding debt-to-income and credit checks fixed, each additional month of loan term is associated with a 0.16 percentage-point increase in the mean interest rate. (Since term in this dataset takes only the values 36 or 60, the practical interpretation is that the 60-month loans carry a rate about $24 \times 0.16 \approx 3.8$ percentage points higher than the 36-month loans, on average.)
+
+- **credit_checks.** Holding debt-to-income and term fixed, each additional credit inquiry in the past 12 months is associated with a 0.25 percentage-point increase in the mean interest rate.
+
+Each of the four $t$-statistics has a p-value below 0.0001, so each predictor contributes discernibly *above and beyond* the others.
+:::
+
+## Interpreting coefficients "holding others constant" {#sec-mlr-interpretation}
+
+The single most important interpretive habit in multiple regression is the phrase **"holding the other predictors constant."** It appears in every coefficient interpretation, and dropping it turns a correct sentence into a wrong one.
+
+To see why, consider the loans model above. In a simple regression on `debt_to_income` alone, the fitted slope would absorb the effects of *all three* of debt-to-income, term, and credit checks --- because borrowers with higher debt-to-income *tend also* to take out longer-term loans and to have more credit checks. The single-predictor slope estimate would be inflated by that bundle of effects.
+
+The multiple-regression slope $b_1 = 0.041$ isolates the debt-to-income effect from the term and credit-check effects. That is why it can be interpreted as "for each additional unit of debt-to-income, holding term and credit checks fixed." The "holding fixed" is not a philosophical qualifier; it is the *only* way the coefficient makes sense.
+
+::: {.important}
+Every coefficient interpretation in multiple regression should include the phrase **"holding the other predictors constant"** (or an equivalent like "controlling for" or "at fixed values of"). Interpreting $b_j$ *without* that qualifier is one of the most common errors students make with multiple regression output.
+:::
+
+## Testing individual coefficients {#sec-mlr-individual-tests}
+
+Each row of the coefficient table also reports a $t$-statistic and p-value. These test the null hypothesis that a single population slope is zero --- but now the hypothesis is *conditioned* on the other predictors being in the model.
+
+::: {.important}
+**Conditional slope hypotheses.** In a multiple regression with $k$ predictors, the individual $t$-test for predictor $x_j$ tests
+
+$$H_0: \beta_j = 0, \quad \text{given the other } k-1 \text{ predictors are included in the model.}$$
+
+A small p-value provides evidence that $x_j$ contributes to explaining the response *above and beyond* what the other predictors already explain.
+:::
+
+Rejecting $H_0: \beta_j = 0$ tells us that dropping $x_j$ from the model would meaningfully worsen the fit. Failing to reject does *not* tell us that $x_j$ is unrelated to $y$ --- it might be strongly related, but the *unique* piece it contributes above what the other predictors already capture is small. This distinction matters most when predictors are correlated with each other, which is the topic of the multicollinearity section.
+
+## ANOVA for multiple regression {#sec-mlr-anova}
+
+The ANOVA-for-regression framework introduced in the ANOVA-for-Regression chapter carries over to multiple predictors with only two changes.
+
+::: {.definition}
+For a multiple regression with $k$ predictors and $n$ observations, the ANOVA table is:
+
+| Source | df | SS | MS | $F$ |
+|---|:-:|:-:|:-:|:-:|
+| Regression | $k$ | $SSR$ | $MSR = SSR/k$ | $F = MSR/MSE$ |
+| Residual | $n - k - 1$ | $SSE$ | $MSE = SSE/(n-k-1)$ | |
+| Total | $n - 1$ | $SST$ | | |
+:::
+
+Under $H_0: \beta_1 = \beta_2 = \cdots = \beta_k = 0$ (that *no* predictor contributes) and the LINE conditions, the $F$-statistic follows an $F_{k,\,n-k-1}$ distribution. A small p-value indicates that the model as a whole explains a discernible share of the variability in $y$; it does not tell us *which* predictors are responsible. The coefficient-level $t$-tests answer the "which one" question --- with the conditional caveat above.
+
+The interpretation of $R^2 = SSR/SST$ as "the fraction of total variability the model explains" is unchanged from simple regression. The important new fact is that adding *any* predictor to the model --- even a completely useless one --- can only *increase* $R^2$, never decrease it. This is what motivates the Extended Content on adjusted $R^2$ below.
+
+::: {.callout-note appearance="simple" icon=false}
+**Extended Content: adjusted $R^2$.**
+
+Because $R^2$ never decreases when we add predictors, comparing candidate models with different numbers of predictors purely by $R^2$ is unfair to the smaller model. **Adjusted $R^2$** corrects for that unfairness:
+
+$$R^2_{\text{adj}} = 1 - (1 - R^2) \cdot \frac{n - 1}{n - k - 1}.$$
+
+Adding a useless predictor eats up one degree of freedom in the denominator without meaningfully reducing $SSE$, so $R^2_{\text{adj}}$ *decreases* rather than increases. Adjusted $R^2$ is the standard summary to compare models with different numbers of predictors; it is not part of UWL's STAT 145 base track but is retained here for readers who encounter it in later coursework.
+:::
+
+## Multicollinearity: the coin-dish story {#sec-mlr-multicollinearity}
+
+::: {.definition}
+Two predictors in a regression exhibit **multicollinearity** when they are strongly linearly related to *each other*. This is not a problem for prediction, but it is a serious problem for interpreting individual coefficients: when two predictors carry nearly the same information, the fit cannot tell them apart, and the individual $t$-tests may fail to reject even when the joint effect of the pair is strong.
+:::
+
+The classic teaching example (from IMS 2e, ultimately due to Jeff Witmer at Oberlin) is a coin-dish scenario. Suppose we sample 26 students and ask each to report
+
+- the **total amount of money** in their coin dish (dollars),
+- the **total number of coins** in the dish,
+- the **number of low coins** (coins that are not quarters).
+
+::: {.workedexample}
+**Two simple regressions.** Fitting the two simple regressions separately gives (numbers from IMS 2e):
+
+- $\widehat{\text{total\_amount}} = 0.55 + 0.13 \cdot \text{number\_of\_coins}$ --- slope $b_1 = 0.13$, p-value very small.
+- $\widehat{\text{total\_amount}} = 2.28 + 0.02 \cdot \text{number\_of\_low\_coins}$ --- slope $b_1 = 0.02$, p-value large (no discernible relationship).
+
+Interpret the two slopes and, briefly, why they take the values they do.
+
+---
+
+For every additional coin in the dish, the total amount goes up by about \$0.13 on average --- roughly the average value of a US coin, as we'd hope. For every additional *low* coin (a penny, nickel, or dime), the total goes up by only about \$0.02 on average --- which sounds reasonable but is barely discernible from zero, because adding a low coin only adds pennies, nickels, or dimes.
+:::
+
+Now fit the model with *both* predictors together. IMS reports
+
+$$\widehat{\text{total\_amount}} = 0.02 + 0.21 \cdot \text{number\_of\_coins} - 0.16 \cdot \text{number\_of\_low\_coins},$$
+
+both coefficients discernible.
+
+::: {.workedexample}
+Explain what happened. Why is the coefficient on `number_of_low_coins` *negative* in the multi-predictor model when it was slightly *positive* on its own?
+
+---
+
+The reason is the "holding others constant" language. In the multi-predictor model,
+
+- $b_1 = 0.21$ says: for each additional coin *while the number of low coins stays constant*, the total goes up by 21 cents. Increasing "total coins" while keeping "low coins" fixed means adding a *quarter* --- which adds 25 cents on average. So the coefficient makes sense.
+- $b_2 = -0.16$ says: for each additional low coin *while the total number of coins stays constant*, the total goes *down* by 16 cents. Swapping a quarter (25 cents) for a low coin (a few cents) drops the total by roughly that amount. So this coefficient also makes sense.
+
+The two individual slopes are answering *different* questions because they condition on the other variable in different ways. When predictors are strongly related to each other, the multi-predictor coefficients can look very different from the simple-regression slopes --- and *both* interpretations are correct, as long as we honor the "holding others constant" qualifier.
+:::
+
+A telltale sign of multicollinearity is a predictor whose relationship to the response looks strong on a scatterplot yet has an individual $t$-test that fails to reject. The predictor may be redundant with another predictor already in the model, contributing no additional information once the correlated predictor is accounted for.
+
+The most direct diagnostic is to **plot the predictors against each other**. A strong linear pattern between two predictors is evidence that they carry overlapping information. Common responses to strong pairwise associations: **(i) drop one of the collinear predictors**, **(ii) combine them into a single summary variable** (an average or sum, when units allow), or **(iii) accept that individual coefficients cannot be separately interpreted but that the model still predicts well as a whole**.
+
+::: {.callout-note appearance="simple" icon=false}
+**Extended Content: the variance inflation factor.**
+
+Beyond scatterplots, statisticians quantify the severity of multicollinearity with a single number per predictor: the **variance inflation factor (VIF)**. For predictor $x_j$,
+
+$$VIF_j = \frac{1}{1 - R^2_j},$$
+
+where $R^2_j$ is the $R^2$ of a regression of $x_j$ on all the *other* predictors. A predictor uncorrelated with the others has $R^2_j = 0$ and $VIF_j = 1$; a predictor perfectly explained by the others has $R^2_j = 1$ and infinite VIF. **Rules of thumb** (not sharp thresholds): $VIF < 5$ is fine; $5 \le VIF < 10$ warrants caution; $VIF \ge 10$ means individual coefficients are unreliable.
+
+VIF is retained here for readers, instructors, and later coursework that want a formal metric; UWL's STAT 145 sequence detects multicollinearity through the scatterplot approach above and does not require the VIF machinery.
+:::
+
+## Categorical predictors: a brief note {#sec-mlr-indicators}
+
+The models above use numeric predictors only. Multiple regression also accommodates **categorical predictors** by encoding them as **indicator variables** (also called dummy variables). For a two-level categorical variable (say, `verified_income` = yes or no), we create a numeric variable that takes the value 1 when the category is "yes" and 0 otherwise; then this indicator enters the regression like any other numeric predictor. The coefficient on the indicator represents the difference in mean response between the two categories, holding the other predictors fixed. For categorical variables with three or more levels, the same idea applies but requires one indicator variable per non-baseline category.
+
+A full treatment of indicator variables --- including baseline choice, interpretation, and interaction terms --- is beyond the scope of this chapter and belongs in a follow-on course. IMS 2e's `inf-model-mlr.qmd` chapter covers the extension in detail if you want the deeper version.
+
+## Diagnostics for multiple regression {#sec-mlr-diagnostics}
+
+The LINE conditions from the linear regression chapter carry over unchanged to multiple regression, but the checks look slightly different because we no longer have a single predictor's scatterplot to eyeball.
+
+**Linearity.** Plot each predictor against the residuals. A curved pattern in one plot suggests that predictor's relationship with the response is not linear at fixed values of the others.
+
+**Independence.** Same as in simple regression: the design of the study earns this assumption. Random sampling or random assignment protects independence.
+
+**Normality of residuals.** A residual histogram or Q-Q plot works the same as in simple regression.
+
+**Equal variance.** The residual-versus-fitted plot is still the go-to diagnostic. A fan shape suggests the residual spread grows with $\hat{y}$; if so, coefficient standard errors are unreliable and the reported CIs are too narrow.
+
+Add one MLR-specific check:
+
+**Multicollinearity.** Inspect scatterplots of each pair of predictors. Strong pairwise associations flag pairs that carry overlapping information about the response. (Extended-content readers can also inspect the variance inflation factor for a formal quantitative check.)
+
+## Chapter review {#sec-multiple-regression-review}
+
+### Summary
+
+Multiple regression extends the simple regression model to two or more predictors, fit by least squares. The interpretation of each coefficient becomes "the mean change in $y$ per unit change in $x_j$ *holding the other predictors fixed*" --- a qualifier that separates multiple regression's slope from the simple-regression slope that would absorb the other predictors' effects. Software reports coefficient estimates alongside a coefficient table, an ANOVA table with a model-level $F$-test, and the goodness-of-fit statistic $R^2$. Individual $t$-tests for each coefficient are *conditional* on the other predictors being in the model. Multicollinearity --- overlapping information between predictors --- is a new concern that only arises with multiple predictors; the standard check is a scatterplot of each pair of predictors, and the coin-dish example illustrates why interpretations of "simple" and "multiple" slopes can look wildly different when predictors are correlated. Diagnostics for the LINE conditions carry over from simple regression. Categorical predictors extend the framework through indicator variables and are covered in follow-on courses.
+
+### Terms
+
+Multiple linear regression, predictor, response, coefficient table, conditional hypothesis test, "holding others constant," model-level $F$-test, multicollinearity, indicator variable, residual-versus-fitted plot, extrapolation in multi-dimensional predictor space. *(Extended-content only: adjusted $R^2$, variance inflation factor / VIF.)*
+
+### Attribution
+
+This chapter is a remix of the IMS 2e chapter *Inference for linear regression with multiple predictors* (`inf-model-mlr.qmd`, Cetinkaya-Rundel and Hardin, CC BY-SA 3.0). The loans case study, the coin-dish multicollinearity example, and the conditional hypothesis-testing framing are IMS's; the exposition is rewritten. IMS's sections on cross-validation, formal model-selection procedures, adjusted $R^2$, and VIF are omitted or moved to Extended Content in alignment with UWL's STAT 145 coursepack (Bingham, `coursepack/sections/Unit4/ch18-additional-regression.qmd`). Readers who want IMS's cross-validation treatment or the full indicator-variable extension should consult the IMS source directly.
+
+## Exercises {.exercises}
+
+{{< include ../exercises/_multiple-regression-exercises.qmd >}}
+
+{{< include ../exercises/_multiple-regression-statlens-exercises.qmd >}}

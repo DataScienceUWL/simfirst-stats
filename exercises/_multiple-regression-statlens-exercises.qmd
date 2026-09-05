@@ -1,0 +1,49 @@
+<!-- StatLens Interactive Exercises — Multiple Regression (IMS-remix) -->
+<!-- HAND-AUTHORED. Focus on interpreting output, choosing predictors, and    -->
+<!-- the "holding others constant" interpretive habit. VIF is Extended Content -->
+<!-- and lives behind expert mode on the tool.                                -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+*Note.* Exercises 4 and 5 optionally use the **Extended Content** variance inflation factor material, available via **expert mode** on the Multiple Regression tool. The reasoning still works if you substitute "scatterplot showing a strong relationship between predictors" for high VIF and "no strong relationship on the predictor scatterplot" for low VIF.
+
+1.  **Frame the loans question.** A lender wants to build a model to predict a borrower's interest rate from `debt_to_income`, `term`, and `credit_checks` --- the same three predictors the chapter uses.
+
+    a.  Write the multiple regression model in the standard form $y = \beta_0 + \beta_1 x_1 + \cdots$ with all variables clearly labeled.
+    b.  State the null and alternative hypotheses for the **model-level** $F$-test in words.
+    c.  State the null hypothesis for the **individual $t$-test** on `debt_to_income` --- including the "given other predictors are in the model" qualifier. Why is this a different question from the one the $F$-test asks?
+
+
+2.  **Choose predictors thoughtfully.** For each scenario, decide whether to include the new predictor in the model. Options: **include**, **exclude**, or **it depends** (and specify the deciding factor).
+
+    a.  The new predictor's individual $t$-test has p = 0.03; its scatterplot vs. existing predictors shows no strong relationships; residual standard error drops noticeably after adding it.
+    b.  The new predictor's $t$-test has p = 0.42; residual standard error is essentially unchanged.
+    c.  The new predictor's $t$-test has p < 0.001; its scatterplot vs. an existing predictor shows a very strong linear relationship (or, equivalently, its VIF is 14.2).
+    d.  The new predictor has a strong scientific reason to be in the model (a well-established causal driver), $t$-test p = 0.20, no strong scatterplot associations with the other predictors.
+
+
+3.  **Read the coefficient table (possum data).** Open the [Multiple Regression tool]({{< var tool-url >}}/inference/mlr/?dataset=possum){target="_blank"} loaded with the possum data. Select **head length** as the response and both **total length** and **skull width** as predictors.
+
+    a.  Write the fitted equation with numeric coefficients.
+    b.  Interpret each slope in context, using the phrase "holding the other constant."
+    c.  Compare the total-length slope in the two-predictor model to the total-length slope from the *simple* regression in the linear-regression chapter. Are they the same? If they differ, what does that tell you about what the simple slope was actually measuring?
+    d.  Report the model-level $F$-statistic and its p-value. Does the model contribute discernibly?
+
+
+4.  **Multicollinearity via scatterplot (Extended: VIF).** Add a third predictor (say, **tail length**) to the model in Exercise 3.
+
+    a.  Open the **pairwise scatterplot matrix** of the three predictors. Are any pair of predictors visibly related? Which pair?
+    b.  Report the coefficient for total length and its standard error. How does the standard error compare to the two-predictor version? What does the change reflect?
+    c.  Optional (Extended Content, requires expert mode): Report the VIFs for all three predictors. Do the VIF values agree with what the pairwise scatterplot showed?
+    d.  A student says: "adjusted $R^2$ went up, so the third predictor is clearly worth including." Is that always sufficient justification? What else should you check before finalizing the model?
+
+
+5.  **When $F$ and $t$ disagree.** Use the [Multiple Regression tool]({{< var tool-url >}}/inference/mlr/){target="_blank"} to construct or find a dataset where the model-level $F$-test rejects at $\alpha = 0.05$ but *none* of the individual $t$-tests do.
+
+    a.  Report the $F$-statistic, its p-value, and the p-values of the individual $t$-tests. What does this pattern suggest?
+    b.  Inspect the pairwise scatterplot matrix of the predictors. Are any pairs strongly related? *(Optional Extended Content: report the VIFs.)*
+    c.  What does "the model as a whole works, but no individual predictor is discernible" *mean* for the researcher trying to use this model?
+    d.  A student says: "If no individual $t$-test rejects, we should throw out the model." Push back on that argument in one sentence.
+

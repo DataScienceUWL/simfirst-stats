@@ -1,0 +1,97 @@
+# Explore — Unit Review {.unnumbered}
+
+::: {.chapterintro}
+Unit 1 is about *looking before you leap*: understanding what your data are, how
+they were collected, and what an honest summary looks like — long before any
+inference. This review ties the five chapters together and drills the central
+skill: **matching a question to the right display and summary.**
+:::
+
+## The big picture {#sec-review-explore-bigpicture}
+
+Exploring data is a short, repeatable workflow:
+
+1. **Know your data** — [cases and variables](../chapters/intro-to-data.qmd), and each variable's **type** (categorical or numerical). The type decides everything that follows.
+2. **Know where it came from** — [study design](../chapters/study-design.qmd). *How* the data were collected sets the ceiling on what you can conclude: an **experiment** with random assignment can support a cause-and-effect claim; an **observational** study can show association but is vulnerable to confounding. Random *sampling* governs how far results **generalize**.
+3. **Summarize honestly** — one variable at a time ([visualizing distributions](../chapters/data-visualization.qmd), [describing distributions](../chapters/describing-distributions.qmd)) and then [relationships between two](../chapters/relationships.qmd), choosing displays and numbers that fit the variable types and don't mislead.
+
+## Which display and which summary? {#sec-review-explore-compare}
+
+This single table is the heart of Unit 1. The variables you have — how many, and what type — pick the row:
+
+| What you have | Typical display | Numerical summary |
+|---|---|---|
+| **One categorical** | bar chart, pie/waffle | counts, **proportions** |
+| **One numerical** | histogram, dotplot, **boxplot** | **center** (mean/median), **spread** (SD/IQR), shape |
+| **Two categorical** | two-way table, stacked/side-by-side bars | **conditional proportions** |
+| **Categorical + numerical** | side-by-side boxplots | group means/medians |
+| **Two numerical** | **scatterplot** | **correlation** $r$, regression line |
+
+::: {.important}
+**Mean vs. median, SD vs. IQR.** For roughly symmetric data, the **mean** and **standard deviation** describe center and spread well. When the distribution is **skewed or has outliers**, prefer the **median** and **IQR** — they are *resistant* to extreme values.
+:::
+
+## A quick decision guide {#sec-review-explore-decision}
+
+1. **How many variables** are in the question — one or two?
+2. **What type** is each — categorical or numerical?
+3. Read the matching row above for the display, then pick the summary; if a single numerical variable is **skewed**, switch from mean/SD to median/IQR.
+4. Separately ask the *design* question: **experiment or observational?** (causation vs. association) and **how was the sample drawn?** (generalizability).
+
+## Key ideas to carry forward {#sec-review-explore-vocab}
+
+**Case** · **variable** · **categorical vs. numerical** · **explanatory vs. response** · **observational study vs. experiment** · **random assignment** (→ causation) · **random sampling** (→ generalizability) · **confounding** · **distribution** · **center / spread / shape** · **skew** · **outlier** · **conditional proportion** · **correlation**.
+
+## Common pitfalls {#sec-review-explore-pitfalls}
+
+- **Association is not causation** — only a randomized **experiment** licenses a cause-and-effect claim.
+- **A representative sample is about *how it was drawn*, not how big it is** — a huge convenience sample can still be biased.
+- **Pie charts hide comparisons** — bar charts are almost always easier to read.
+- **The mean is pulled toward the tail** — in skewed data it can misrepresent a "typical" value; report the median.
+- **Correlation describes only *linear* association** — a strong curved pattern can have $r$ near 0.
+
+## Exercises {#sec-review-explore-exercises}
+
+The Unit 1 skill is **matching a question to the right display and summary**. Answers are provided so you can check your work.
+
+1.  **Which display and which summary?** For each scenario, name (i) an appropriate **display** and (ii) an appropriate **numerical summary**.
+
+    a.  The distribution of commute times (minutes) for 500 employees.
+    b.  The breakdown of students by major (six categories).
+    c.  Whether passing a course is related to attending a review session (each yes/no).
+    d.  How exam score relates to hours studied.
+    e.  Comparing salaries across three departments.
+
+    <details><summary>Show answer</summary>
+    | | Display | Summary |
+    |--|--|--|
+    | a | histogram or boxplot | median & IQR (commute times are usually right-skewed) |
+    | b | bar chart | counts / proportions per major |
+    | c | two-way table, side-by-side or stacked bars | conditional proportions (pass rate by attendance) |
+    | d | scatterplot | correlation $r$ (and a regression line) |
+    | e | side-by-side boxplots | group medians (or means) and spreads |
+    </details>
+
+2.  **Mean or median? SD or IQR?** A dataset of household incomes is strongly right-skewed with a few very high values. Which measures of center and spread should you report, and why?
+
+    <details><summary>Show answer</summary>
+    Report the **median** and **IQR**. Both are *resistant* to the extreme high incomes; the mean and SD would be inflated by the long right tail and would overstate a "typical" household's income.
+    </details>
+
+3.  **What can you conclude?** A study finds that students who use a tutoring center have higher GPAs than those who don't. Two designs are possible: (A) students *chose* whether to attend (observational); (B) students were *randomly assigned* to attend or not (experiment). For each, state whether a **causal** claim ("tutoring raises GPA") is justified.
+
+    <details><summary>Show answer</summary>
+    **(A) No** — observational; motivated students may both attend tutoring *and* earn higher GPAs (confounding), so only **association** is supported. **(B) Yes** — random assignment balances other factors across groups, so a difference can be attributed to the tutoring itself.
+    </details>
+
+4.  **Spot the misleading choice.** A report uses a **pie chart** to compare the market share of eight competing brands, several of which are close in size. Why is this a poor choice, and what's better?
+
+    <details><summary>Show answer</summary>
+    Human eyes judge **lengths** far better than **angles/areas**, so near-equal slices are almost impossible to rank in a pie chart — especially with eight categories. A **bar chart** (ordered by size) makes the comparison immediate.
+    </details>
+
+5.  **Scope of inference.** A campus survey is collected by polling students as they leave the gym one afternoon. To what population, if any, do the results generalize?
+
+    <details><summary>Show answer</summary>
+    This is a **convenience sample** of gym-goers at one time — not a random sample of all students. Results may describe these respondents but **do not reliably generalize** to the whole student body (gym-goers likely differ systematically). Sample size doesn't fix this; the sampling *method* does.
+    </details>

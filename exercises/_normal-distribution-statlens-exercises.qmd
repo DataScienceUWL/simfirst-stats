@@ -1,0 +1,47 @@
+<!-- StatLens Interactive Exercises — Normal Distribution -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: standardizing, finding tail      -->
+<!-- areas, inverse-normal calculations, and the empirical rule.              -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **The empirical rule, checked against the actual normal.** Open the [Normal tool]({{< var tool-url >}}/distribution/normal/?mu=0&sigma=1&tail=middle){target="_blank"} preset to $\mu = 0, \sigma = 1$.
+
+    a.  Set the middle-region boundaries to $\pm 1$. What is the area? Is it 68%?
+    b.  Now $\pm 2$. Is it 95%?
+    c.  Now $\pm 3$. Is it 99.7%?
+    d.  The empirical rule says "68--95--99.7." Where do the exact percentages come from --- the rule or the curve?
+
+
+2.  **Standardizing across different normals.** Adult resting heart rates are approximately $N(\mu = 72, \sigma = 12)$ beats per minute. Adult body temperatures are approximately $N(\mu = 98.6, \sigma = 0.7)$ °F.
+
+    a.  A patient has a heart rate of 90. What is her $z$-score?
+    b.  A patient has a body temperature of 99.6 °F. What is his $z$-score?
+    c.  Which patient is *more* unusual relative to their respective population? Why does the $z$-score answer this even though the two measurements are in different units?
+    d.  Use the standard normal $z$ tool to find the percentile rank of each patient (the area to the left of their $z$-score). Are they in roughly the same percentile?
+
+
+3.  **Inverse-normal (working backward).** A standardized test has scores $\sim N(500, 100)$.
+
+    a.  What score corresponds to the **top 10%** of test-takers? Use the normal tool to set the right-tail area to 0.10 and read off the boundary.
+    b.  What score is at the **25th percentile**? Use the left-tail area of 0.25.
+    c.  What is the **interquartile range** of the score distribution?
+    d.  A scholarship is offered to students scoring above the **90th percentile**. The college says: "Half of our applicants miss out by 50 points or fewer." Is this surprising, given the distribution?
+
+
+4.  **Within vs. between normals --- a common confusion.** A factory measures the diameters of bolts. The population of individual diameters is $N(\mu = 10.0\text{ mm}, \sigma = 0.05\text{ mm})$. The quality team measures samples of $n = 25$ bolts at a time and computes the sample mean diameter $\bar{x}$.
+
+    a.  Find $P(\text{individual bolt} > 10.10\text{ mm})$ using the [normal tool at $\mu = 10, \sigma = 0.05$]({{< var tool-url >}}/distribution/normal/?mu=10&sigma=0.05&tail=right){target="_blank"}.
+    b.  Find $P(\bar{x} > 10.10\text{ mm})$ using the [normal tool at the *sampling-distribution* parameters]({{< var tool-url >}}/distribution/normal/?mu=10&sigma=0.01&tail=right){target="_blank"} ($\mu = 10$, $\sigma_{\bar{x}} = 0.05/\sqrt{25} = 0.01$).
+    c.  Which is smaller, and by how much? Why does the same threshold (10.10 mm) become much more "extreme" for $\bar{x}$ than for an individual bolt?
+    d.  A quality engineer says: "We never see sample means above 10.10 mm --- the process is in control." How would you push back if the **individual-bolt** rate of "above 10.10" is 2%?
+
+
+5.  **The normal distribution as a model --- not reality.** Heights of adult males are *approximately* normal. Hourly wages in a population are *not*.
+
+    a.  Why is **height** well-modeled by a normal --- and what feature of the data-generating process makes it so?
+    b.  Why are **hourly wages** typically *not* well-modeled by a normal? Sketch the shape you'd expect.
+    c.  Suppose you use a normal model anyway to predict wage percentiles. What kind of errors are you likely to make?
+    d.  When does the normal still help, even when the underlying variable isn't normal? (Hint: think back to the sampling distributions chapter.)
+

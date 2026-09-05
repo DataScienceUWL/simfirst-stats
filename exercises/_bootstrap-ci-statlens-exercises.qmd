@@ -1,0 +1,59 @@
+<!-- StatLens Interactive Exercises — Bootstrap CIs -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based -->
+<!-- on purpose; the numbers come from StatLens.                              -->
+
+### StatLens Exercises {.unnumbered}
+
+These exercises focus on the parts of bootstrap inference a calculator *can't* do for you: **framing the question**, **picking the right resampling scheme**, **reading the bootstrap distribution**, and **interpreting** a confidence interval without falling into the standard traps. Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic.
+
+1.  **Frame the question.** A coffee shop wants to estimate the **median** wait time at its drive-through. The owner records a random sample of $n = 80$ wait times in seconds.
+
+    a.  What is the parameter of interest? Describe it in words and give a symbol.
+    b.  Why is a **bootstrap** confidence interval especially well-suited to the median compared to the mean?
+    c.  Should the resulting bootstrap CI be **percentile-based** or **standard-error-based**, and how would you choose between them?
+
+
+2.  **Choose the resampling scheme.** For each scenario, name the resampling --- **resample with replacement from one sample** (one mean/median/SD/proportion), **resample within each group** (two means/proportions, independent groups), **resample paired-difference values** (paired data), or **the bootstrap doesn't apply here** (and why).
+
+    a.  Estimate the mean weight of a single bag of coffee from 30 weighed bags.
+    b.  Estimate the difference in mean delivery time between two couriers based on 25 deliveries each.
+    c.  Estimate the difference in the proportion of customers who return for a second visit after two different welcome promotions (random assignment).
+    d.  Estimate the standard deviation of completion times in a single sample of 60 jobs.
+    e.  Estimate the maximum age in a population from a random sample of 50 people.
+
+
+3.  **Read the bootstrap distribution.** Open the [Bootstrap CI for One Proportion]({{< var tool-url >}}/simulate/bootstrap-prop/?dataset=medical_consultant){target="_blank"} with the medical consultant data (62 patients, 3 complications, $\hat{p} \approx 0.048$). Generate 10000 resamples.
+
+    a.  Describe the **shape**, **center**, and **spread** of the bootstrap distribution. What feature of the data (small $\hat{p}$) is responsible for the shape?
+    b.  Read off the 95% percentile interval. Does it contain the national average of 0.10?
+    c.  If you instead built a **symmetric** 95% interval as $\hat{p} \pm 2 \cdot \text{SE}_{\text{boot}}$, what would go wrong? Sketch what that interval would look like next to the percentile interval.
+
+
+4.  **Run it and interpret it.** Open any one-variable numeric dataset in the [Bootstrap CI for One Mean tool]({{< var tool-url >}}/simulate/bootstrap-mean/){target="_blank"} and generate 5000 resamples at 95% confidence.
+
+    a.  Report the 95% percentile interval StatLens gives you.
+    b.  Write a one-sentence conclusion **in context**, naming the population and the units.
+    c.  Which statement is the correct interpretation of the interval?
+
+        i.   There is a 95% probability that the true mean lies in this interval.
+        ii.  If the study were repeated many times, about 95% of the intervals built this way would contain the true mean.
+        iii. 95% of the observations in our sample fall within this interval.
+        iv.  95% of the bootstrap resamples have means in this interval.
+
+    d.  Change the confidence level to 99% and re-run. Does the interval get **wider** or **narrower**? Why?
+
+
+5.  **Simulation vs. analytic --- where the bootstrap shines.** The normal-approximation formula and the bootstrap are two routes to the same confidence interval. Sometimes they nearly coincide; sometimes they don't.
+
+    First a well-behaved case. Open a moderately large, roughly symmetric numeric dataset in both the [Bootstrap CI for One Mean]({{< var tool-url >}}/simulate/bootstrap-mean/){target="_blank"} and the [One-Sample $t$ tool]({{< var tool-url >}}/inference/one-mean/){target="_blank"}.
+
+    a.  Record the 95% interval from each. How close are they?
+
+    Now the troublesome case. Pick a *small*, *skewed* dataset (you can paste in your own).
+
+    b.  Report the 95% intervals from each tool. Are they as close as in (a)? Where do they differ --- in the **midpoint**, the **width**, or both?
+    c.  Explain the pattern. Why do the bootstrap percentile interval and the $t$-interval agree on well-behaved data but diverge on small skewed data? Tie your explanation to (i) the symmetry of the $t$-interval and (ii) the bootstrap's ability to follow the shape of the sampling distribution.
+    d.  A student says: "The $t$-interval and the bootstrap interval disagree, so one of them must be wrong." Why is that the wrong framing? Which interval should you *trust more* when they disagree, and why?
+

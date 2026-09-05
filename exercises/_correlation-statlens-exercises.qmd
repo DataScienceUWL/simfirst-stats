@@ -1,0 +1,51 @@
+<!-- StatLens Interactive Exercises — Correlation -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based.-->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Calibrate your eye.** Open [Guess the Correlation]({{< var tool-url >}}/practice/correlation/){target="_blank"} and play one round of at least 10 scatterplots.
+
+    a.  What is your score? How well did you do on the *strong* correlations ($|r| > 0.7$) versus the *weak* ones ($|r| < 0.3$)?
+    b.  Were you more often *over*- or *under*-estimating $|r|$? Why might that be? (Hint: most people see a slight pattern and call it $r = 0.6$ when it's actually around $r = 0.3$.)
+    c.  Two scatterplots can have the same $r$ but tell very different stories --- e.g., a clean line and a curve might both register the same $r$. What does this say about *only* reporting $r$ without also showing the scatterplot?
+
+
+2.  **Choose the procedure.** For each scenario, name the most appropriate procedure --- **Pearson correlation $r$**, **randomization test for $\rho = 0$**, **two-sample $t$-test**, or **not a correlation problem**.
+
+    a.  Is there a linear association between hours studied and exam score?
+    b.  Test whether the population correlation between two variables differs from zero.
+    c.  Is the *mean* exam score different for students who study with music vs. without?
+    d.  Visualize whether one variable tends to go up as another goes up.
+    e.  Test whether the *median* income is higher in one region than another.
+
+
+3.  **Check the conditions before you trust $r$.** Open the [Regression Explorer]({{< var tool-url >}}/explore/regression/){target="_blank"} with any two-quantitative-variable dataset.
+
+    a.  What three features of the scatterplot would make you uneasy about reporting $r$?
+    b.  Suppose the scatter shows a strong **curved** pattern but $r$ comes out near 0. What's the right report --- "no association" or "no *linear* association"?
+    c.  Suppose two outliers in the upper-right corner inflate $r$ from 0.1 (without them) to 0.6 (with them). What should you do --- report both? Trust one? Remove the outliers and not mention it?
+
+
+4.  **Run the test for $\rho = 0$.** Open the [Randomization Correlation tool]({{< var tool-url >}}/simulate/randomization-correlation/){target="_blank"} with any two-quantitative dataset.
+
+    a.  Report the observed $r$ and the simulation p-value (after shuffling $y$ many times).
+    b.  Write a one-sentence conclusion **in context**, naming both variables.
+    c.  Why does shuffling **only $y$** (or equivalently shuffling only $x$, but not both) simulate the world where $\rho = 0$?
+    d.  Which statement is the correct interpretation of a p-value of 0.04?
+
+        i.   The probability that the variables are unrelated is 4%.
+        ii.  If the variables were unrelated, we'd see a correlation at least as extreme as ours about 4% of the time by chance.
+        iii. The correlation has only a 4% chance of being a real effect.
+
+
+5.  **Correlation, causation, and confounders.** A study reports a strong positive correlation between **ice-cream sales** and **drowning deaths** in summer months across U.S. cities.
+
+    a.  Could ice-cream sales *cause* drowning deaths? Could drowning deaths *cause* ice-cream sales? Name a likely **confounder** that makes both variables move together.
+    b.  Suppose a new study controls for that confounder and finds that ice-cream sales and drowning deaths are *uncorrelated* once the confounder is held constant. What does the original $r$ now mean?
+    c.  In general, what kind of **study design** would let you draw a causal conclusion from a correlation? (Open the [Regression Slope tool]({{< var tool-url >}}/inference/slope/){target="_blank"} if it helps to think about regression and randomization together.)
+    d.  A news article reports "Coffee Linked to Lower Risk of Death" from an *observational* study. List two specific reasons you should not take this as a causal claim.
+

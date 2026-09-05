@@ -1,0 +1,57 @@
+<!-- StatLens Interactive Exercises — Inference for Proportions -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based -->
+<!-- on purpose; the numbers come from StatLens.                              -->
+
+### StatLens Exercises {.unnumbered}
+
+These exercises focus on the parts of inference a calculator *can't* do for you: **framing the question**, **choosing the right procedure**, **checking conditions**, and **interpreting** what a tool reports. Where a link is given, let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic and spend your effort on the reasoning.
+
+1.  **Frame the question.** A campus newspaper claims that *more than* 60% of students skip breakfast. A pollster surveys a random sample of 150 students and finds 99 who skip breakfast.
+
+    a.  What is the parameter of interest? Describe it in words and give its symbol.
+    b.  Write the null and alternative hypotheses in symbols. Is this a one-sided or two-sided test, and why?
+    c.  Check the success–failure condition for using a normal-approximation $z$-procedure here.
+
+
+2.  **Choose the procedure.** For each scenario, name the procedure you would use — **one-proportion** $z$ (test or interval), **two-proportion** $z$ (test or interval), or **not a proportion problem**. You do *not* need to carry anything out; the skill here is matching the question to the method.
+
+    a.  Is the proportion of defective parts from one assembly line different from the company's 2% target?
+    b.  Do a higher fraction of patients recover on a new drug than on the standard drug?
+    c.  Is the *average* recovery time on the new drug shorter than on the standard drug?
+    d.  In a single survey, estimate the percentage of voters who support a ballot measure, with a margin of error.
+
+
+3.  **Check conditions before you trust the test.** A medical consultant says her surgery patients have a *lower* complication rate than the national rate of 10%. Open the [Medical Consultant data]({{< var tool-url >}}/inference/one-prop/?dataset=medical_consultant){.open-in-statlens target="_blank" aria-label="Open the medical consultant data in the one-proportion z-test tool"} in the One-Proportion $z$-Test tool.
+
+    a.  State $H_0$ and $H_A$ for the consultant's claim.
+    b.  The tool reports the sample size and the number of complications. Using $p_0 = 0.10$, compute $np_0$ and $n(1-p_0)$. Is the success–failure condition met?
+    c.  Based on (b), is the normal-approximation $z$-test trustworthy here? Connect your answer to why we used a **bootstrap** confidence interval for this same dataset earlier in the course.
+
+
+4.  **Run it and interpret it (two proportions).** A randomized trial tested whether a malaria vaccine changes the infection rate. Open the [Malaria vaccine trial data]({{< var tool-url >}}/inference/two-props/?dataset=malaria){.open-in-statlens target="_blank" aria-label="Open the malaria vaccine trial data in the two-proportion z-test tool"} in the Two-Proportion $z$-Test tool.
+
+    a.  Identify the explanatory and response variables, and define the parameter $p_1 - p_2$ in words.
+    b.  State the hypotheses for testing whether the vaccine changes the infection rate.
+    c.  Run the test. Report the 95% confidence interval for $p_1 - p_2$ that the tool gives. Does the interval contain 0?
+    d.  Write a one-sentence conclusion **in context**, and say whether your confidence interval and your hypothesis test lead to the same decision.
+    e.  Which statement is the correct interpretation of the interval in (c)?
+
+        i.   There is a 95% probability that $p_1 - p_2$ lies in this interval.
+        ii.  If the trial were repeated many times, about 95% of the intervals built this way would contain the true difference $p_1 - p_2$.
+        iii. 95% of vaccinated people fall within this interval.
+
+
+5.  **Simulation vs. analytic — when do they agree?** The normal-approximation $z$-procedure and a simulation (bootstrap) are two routes to the *same* confidence interval. Sometimes they land in nearly the same place; sometimes they don't. You will compare them on two datasets and figure out *why*.
+
+    First the well-behaved case. Open the [Stent study data]({{< var tool-url >}}/inference/one-prop/?dataset=stent30){.open-in-statlens target="_blank" aria-label="Open the stent study data in the one-proportion z-test tool"} in the **analytic** One-Proportion $z$ tool, then open the *same* dataset in the [bootstrap tool]({{< var tool-url >}}/simulate/bootstrap-prop/?dataset=stent30){.open-in-statlens target="_blank" aria-label="Open the stent study data in the bootstrap proportion tool"}.
+
+    a.  Record the 95% confidence interval from each tool. How close are the two intervals?
+
+    Now the troublesome case from Exercise 3. Open the [Medical Consultant data]({{< var tool-url >}}/inference/one-prop/?dataset=medical_consultant){.open-in-statlens target="_blank" aria-label="Open the medical consultant data in the one-proportion z-test tool"} in the analytic tool, then the [same data in the bootstrap tool]({{< var tool-url >}}/simulate/bootstrap-prop/?dataset=medical_consultant){.open-in-statlens target="_blank" aria-label="Open the medical consultant data in the bootstrap proportion tool"}.
+
+    b.  Record the 95% interval from each tool for this dataset. Are they as close as they were for the stent data? In particular, look at the *shape*: is the bootstrap distribution roughly symmetric, or is it skewed?
+    c.  Explain the pattern. Why do the analytic and simulation intervals nearly coincide for the stent data but diverge for the medical-consultant data? Use the success–failure counts ($n\hat{p}$ and $n(1-\hat{p})$) from each dataset in your answer.
+    d.  A student concludes, "Simulation and the formula disagree, so one of them must be wrong." Why is this the wrong takeaway? Which method should you *trust more* when they disagree, and why?
+

@@ -1,0 +1,56 @@
+---
+title: "StatLens Quick Reference"
+---
+
+[StatLens](https://learnlens.org/statlens/) is a free, browser-based statistics toolkit used throughout this textbook. Every chapter has links to the specific tools it needs.
+
+**Browse all tools.** The full up-to-date tool index lives at [learnlens.org/statlens](https://learnlens.org/statlens/) --- distribution calculators, simulation tools, guided activities, and conceptual demos. That is the authoritative catalog. This appendix collects only the two things you may want offline: keyboard shortcuts and the URL parameters used to build reproducible links.
+
+## Keyboard shortcuts
+
+Every StatLens page supports the same keyboard shortcuts. Handy in a lecture demo where you want to advance a simulation without your hand leaving the keyboard.
+
+| Key | Action |
+|:---:|:-------|
+| `1` | Generate +1 sample or resample |
+| `2` | Generate +10 |
+| `3` | Generate +100 |
+| `4` | Generate +1000 |
+| `0` | Reset the simulation |
+| `Space` | Play / pause an animation |
+| `?` | Show the keyboard help overlay |
+| `Esc` | Close a dialog or overlay |
+
+## URL parameters
+
+StatLens URLs accept query-string parameters so a link can pre-load a dataset, seed the RNG, or set the confidence level. Instructors use this to build reproducible in-class demos and homework links whose answers are gradeable against a known seed.
+
+::: {.callout-tip}
+## Reproducible seeded links
+
+The `seed` parameter uses the same PRNG (sfc32) as StatLens's internal generator, so two viewers loading the same seeded link see the *exact* same sequence of draws. This is what makes seeded homework problems in MyOpenMath auto-gradeable: the assignment engine picks a seed, pre-computes the expected result, then grades the student's answer against it.
+:::
+
+Common parameters (not every tool accepts every parameter; each tool's page documents which ones apply):
+
+| Parameter | Example | Meaning |
+|:----------|:--------|:--------|
+| `seed` | `?seed=42` | Deterministic PRNG seed |
+| `dataset` | `?dataset=diamonds` | Load a named built-in dataset |
+| `data` | `?data=1,2,3,4,5` | Load inline comma-separated data |
+| `n` | `?n=30` | Set sample size |
+| `p` | `?p=0.5` | Set a probability parameter |
+| `mu` | `?mu=100` | Set a mean |
+| `sigma` | `?sigma=15` | Set a standard deviation |
+| `ci` | `?ci=95` | Set confidence level (percent) |
+| `alt` | `?alt=greater` | Alternative-hypothesis direction (`less`, `greater`, `two-sided`) |
+| `plot` | `?plot=only` | Show only the plot (hide controls) --- useful for embedding |
+| `cutlines` | `?cutlines=ci` or `?cutlines=tail` | Draggable cut-lines: CI bounds or tail-area |
+
+Combine parameters with `&`:
+
+```
+https://learnlens.org/statlens/simulate/bootstrap-mean/?dataset=diamonds&seed=42&ci=95
+```
+
+For the authoritative parameter list per tool, see the docs at [learnlens.org/statlens/docs/url-api.md](https://github.com/DataScienceUWL/statlens/blob/main/docs/url-api.md).

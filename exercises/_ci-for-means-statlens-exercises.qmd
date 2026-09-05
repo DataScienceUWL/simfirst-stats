@@ -1,0 +1,61 @@
+<!-- StatLens Interactive Exercises — CIs for Means -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based -->
+<!-- on purpose; the numbers come from StatLens.                              -->
+
+### StatLens Exercises {.unnumbered}
+
+These exercises focus on the parts of inference a calculator *can't* do for you: **framing the question**, **choosing the right procedure**, **checking conditions**, and **interpreting** what a tool reports. Where a link is given, let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic and spend your effort on the reasoning.
+
+1.  **Frame the question.** A nutrition researcher wants to estimate the *mean* daily caffeine intake (in mg) among undergraduates at a large university. She collects a random sample of $n = 48$ students and records each one's daily intake.
+
+    a.  What is the parameter of interest? Describe it in words and give its symbol.
+    b.  Should the resulting confidence interval be **one-sided** or **two-sided**, and why?
+    c.  Why is the **sample standard deviation** $s$ used in the $t$-procedure here, and not the **population standard deviation** $\sigma$?
+
+
+2.  **Choose the procedure.** For each scenario, name the procedure you would use --- **one-sample** $t$ (test or interval), **two-sample** $t$ (independent groups), **paired** $t$ (matched pairs), or **not a means problem**. You do *not* need to carry anything out; the skill here is matching the question to the method.
+
+    a.  Estimate the mean fuel economy (mpg) of a new car model from a sample of 25 test drives.
+    b.  Compare the mean recovery time of patients on Drug A vs. Drug B, where each patient was randomly assigned to *one* drug.
+    c.  Measure each runner's 5K time before and after a 6-week training program; ask whether the program lowers times on average.
+    d.  Estimate the **proportion** of voters in a district who support a ballot measure.
+    e.  Compare the *median* household income in two counties.
+
+
+3.  **Check conditions before you trust the interval.** A small clinical study reports the resting heart rates of $n = 12$ adults after an experimental intervention. Open the data in the [One-Sample $t$ tool]({{< var tool-url >}}/inference/one-mean/){target="_blank"} (pick any small numeric dataset, or paste in a small sample of your own) and inspect the distribution.
+
+    a.  What two conditions does the one-sample $t$-interval require? State each in plain language.
+    b.  With only $n = 12$, how would you decide whether the normality condition is reasonable? What feature of the dotplot or histogram would make you uneasy?
+    c.  If the histogram shows a clear right skew with one extreme outlier, is the $t$-interval still trustworthy? What would you do instead?
+
+
+4.  **Run it and interpret it (two means).** A study compared mean reaction times (ms) between a caffeinated group and a placebo group. Open a two-group dataset of your choice in the [Two-Sample $t$ tool]({{< var tool-url >}}/inference/two-means/){target="_blank"}.
+
+    a.  Identify the explanatory and response variables, and define the parameter $\mu_1 - \mu_2$ in words.
+    b.  Run the tool. Report the 95% confidence interval for $\mu_1 - \mu_2$. Does the interval contain 0?
+    c.  Write a one-sentence conclusion **in context**, and say whether your confidence interval and a two-sided hypothesis test at $\alpha = 0.05$ would lead to the same decision.
+    d.  Which statement is the correct interpretation of the interval in (b)?
+
+        i.   There is a 95% probability that $\mu_1 - \mu_2$ lies in this interval.
+        ii.  If the experiment were repeated many times, about 95% of the intervals built this way would contain the true difference $\mu_1 - \mu_2$.
+        iii. 95% of caffeinated participants fall within this interval.
+
+
+5.  **Paired vs. independent --- choose carefully, then compare.** Twelve runners each ran a 5K race **before** and **after** a 6-week training program; you also have a separate sample of 12 *different* runners who did not train, run at the same point in the season.
+
+    a.  If you want to know whether the *program* lowered 5K times, why is the paired-sample analysis (on the within-runner differences) almost always more informative than treating the before-times and after-times as two independent groups?
+    b.  Open the [Paired $t$ tool]({{< var tool-url >}}/inference/paired/){target="_blank"} with any paired dataset. Record the 95% CI for the mean difference. Then re-analyze the *same* numbers in the [Two-Sample $t$ tool]({{< var tool-url >}}/inference/two-means/){target="_blank"} as if they were independent groups. What is different about the standard error and the width of the CI?
+    c.  Now consider the *untrained* sample. To estimate the program's effect against a no-training baseline, what would you compare, and which procedure would you use? Why is matching impossible here?
+    d.  A student says: "Paired is just a special case of two-sample." Why is this misleading, even though both end up using the $t$ distribution?
+
+
+6.  **Compute-unit capstone --- write conclusions across every procedure you have learned so far.** By this point you have worked with the one-proportion $z$, the two-proportion $z$, the one-sample $t$, the two-sample $t$, and the paired $t$. The last skill --- taking a test result and *writing what it means in context* --- is one that gets rusty quickly if you don't practice across procedures.
+
+    Open [Conclusion Practice --- Compute scope]({{< var tool-url >}}/practice/conclusions/?scope=compute){target="_blank"}. This link filters the scenario pool to just the five procedures from Part III (no chi-square, ANOVA, or regression --- those come later). Each round gives you a randomized scenario with the test output already computed; your job is to assemble a **formal** conclusion (about the parameter, at the stated $\alpha$) and a **practical** conclusion (what a non-statistician stakeholder should take away). The tool scores you.
+
+    a.  Play at least **5 rounds**. Aim for a passing score in each. Do you notice any pattern in the mistakes you make --- do they cluster around a particular procedure, or a particular pitfall (misinterpreting p, misinterpreting the CI, over-claiming causation, etc.)?
+    b.  Which is harder for you: writing the **formal** conclusion, or writing the **practical** one? Why?
+    c.  Reflect: from the perspective of "what makes an inference class valuable," which mattered more --- computing p-values (which StatLens did for you) or writing correct conclusions (which you had to do)? What does this suggest about how you should split your study time going forward?
+

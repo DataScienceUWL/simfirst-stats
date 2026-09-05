@@ -1,0 +1,584 @@
+---
+title: "Normal Approximation"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+::: {.chapterintro}
+In the randomization tests and bootstrap confidence intervals chapters, we used simulation-based methods to make inferences about population parameters. Those methods are powerful and flexible, but they share a limitation: every new problem requires running thousands of simulations. In this chapter, we introduce the **normal distribution**, a mathematical model that describes the bell-shaped pattern we keep seeing in our sampling distributions. When certain conditions are met, the normal distribution lets us calculate probabilities and construct confidence intervals using formulas instead of simulations. This is not a replacement for simulation-based thinking -- it is a complement. The normal model provides the theoretical justification for *why* those simulations work the way they do.
+:::
+
+
+## The normal distribution {#sec-normal-dist}
+
+Among all the distributions encountered in statistics, one is overwhelmingly the most common. The symmetric, unimodal, bell-shaped curve is so ubiquitous that it goes by many names: the **normal curve**, the **normal model**, or the **normal distribution**.
+
+::: {.definition}
+The **normal distribution** is a symmetric, unimodal, bell-shaped distribution described by two **parameters**: the mean $\mu$ (which determines the center) and the standard deviation $\sigma$ (which determines the spread). We write the distribution in shorthand as $N(\mu, \sigma)$.
+:::
+
+```{r}
+#| label: fig-two-normal-curves
+#| fig-cap: "Two normal distributions with different parameters. The left curve has μ = 0 and σ = 1; the right curve has μ = 19 and σ = 4. Changing μ shifts the curve left or right; changing σ stretches or compresses it. [↗ Try this live](https://learnlens.org/statlens/conceptual/normal-distribution/) — vary μ and σ and watch the curve slide and rescale."
+#| fig-alt: "Two bell-shaped normal distribution curves side by side. The left curve is centered at 0 with a narrow spread (standard deviation 1). The right curve is centered at 19 with a wider spread (standard deviation 4). Both curves are symmetric and unimodal."
+
+library(ggplot2)
+
+x1 <- seq(-4, 4, length.out = 300)
+x2 <- seq(19 - 4 * 4, 19 + 4 * 4, length.out = 300)
+
+df <- data.frame(
+  x = c(x1, x2),
+  y = c(dnorm(x1, 0, 1), dnorm(x2, 19, 4)),
+  Distribution = rep(c("N(0, 1)", "N(19, 4)"), each = 300)
+)
+
+ggplot(df, aes(x = x, y = y, color = Distribution, fill = Distribution, linetype = Distribution)) +
+  geom_line(linewidth = 1) +
+  geom_area(alpha = 0.2, position = "identity") +
+  scale_color_manual(values = c("N(0, 1)" = COL_BLUE, "N(19, 4)" = COL_PINK)) +
+  scale_fill_manual(values = c("N(0, 1)" = COL_BLUE, "N(19, 4)" = COL_PINK)) +
+  scale_linetype_manual(values = c("N(0, 1)" = "solid", "N(19, 4)" = "dashed")) +
+  labs(x = NULL, y = NULL) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "top")
+```
+
+Key properties of the normal distribution:
+
+- The curve is perfectly symmetric about the mean $\mu$.
+- The total area under the curve is exactly 1 (representing 100% of observations). We can interpret any area under the curve as a **proportion** — and, equivalently, as the **probability** of a randomly selected observation falling in that range.
+- The tails extend infinitely in both directions but get very close to zero far from the center.
+- Changing $\mu$ shifts the entire curve left or right without changing its shape.
+- Increasing $\sigma$ makes the curve wider and shorter; decreasing $\sigma$ makes it narrower and taller.
+
+::: {.important}
+**Normal distribution facts.** Many variables are *nearly* normal, but none are *exactly* normal. The normal distribution, while not perfect for any single problem, is extremely useful for a wide variety of problems. Variables like SAT scores, adult heights, and blood pressure measurements closely follow the normal distribution.
+:::
+
+### The standard normal distribution
+
+The normal distribution with mean $\mu = 0$ and standard deviation $\sigma = 1$ is called the **standard normal distribution**, written $N(0, 1)$. It serves as a reference distribution that we will use throughout the course.
+
+::: {.workedexample}
+Write down the shorthand for a normal distribution with each set of parameters.
+
+a. Mean 5 and standard deviation 3
+b. Mean $-100$ and standard deviation 10
+c. Mean 2 and standard deviation 9
+
+---
+
+a. $N(\mu = 5, \sigma = 3)$
+b. $N(\mu = -100, \sigma = 10)$
+c. $N(\mu = 2, \sigma = 9)$
+:::
+
+## The 68-95-99.7 rule {#sec-68-95-997}
+
+One of the most useful facts about the normal distribution is how observations spread out around the mean. This relationship is captured by the **68-95-99.7 rule** (sometimes called the **empirical rule**).
+
+::: {.definition}
+**The 68-95-99.7 rule.** For any normal distribution $N(\mu, \sigma)$:
+
+- About **68%** of observations fall within **1 standard deviation** of the mean: between $\mu - \sigma$ and $\mu + \sigma$.
+- About **95%** of observations fall within **2 standard deviations** of the mean: between $\mu - 2\sigma$ and $\mu + 2\sigma$.
+- About **99.7%** of observations fall within **3 standard deviations** of the mean: between $\mu - 3\sigma$ and $\mu + 3\sigma$.
+:::
+
+```{r}
+#| label: fig-68-95-997
+#| fig-cap: "The 68-95-99.7 rule on a normal curve. About 68% of the area lies within μ ± σ, 95% within μ ± 2σ, and 99.7% within μ ± 3σ. Each labeled arrow bar spans exactly the region its percentage measures. [↗ Try this live](https://learnlens.org/statlens/conceptual/normal-distribution/) — drag the cutlines to see the 68-95-99.7 boundaries live."
+#| fig-alt: "A normal distribution curve with three nested shaded regions. The innermost region within one standard deviation of the mean is labeled 68 percent. The middle region within two standard deviations is spanned by a pink two-headed arrow labeled 95 percent. The outermost region within three standard deviations is spanned by a red two-headed arrow labeled 99.7 percent. The horizontal axis is labeled at mu minus three sigma through mu plus three sigma."
+
+par(mar = c(4, 1, 3.5, 1))
+x <- seq(-4, 4, length.out = 500)
+y <- dnorm(x)
+plot(x, y, type = "n", axes = FALSE, xlab = "", ylab = "",
+     ylim = c(0, 0.50))
+
+# Shaded regions (outer to inner so inner draws on top)
+polygon(c(-3, x[x >= -3 & x <= 3], 3), c(0, y[x >= -3 & x <= 3], 0),
+        col = "#E9758330", border = NA)
+polygon(c(-2, x[x >= -2 & x <= 2], 2), c(0, y[x >= -2 & x <= 2], 0),
+        col = "#E9758360", border = NA)
+polygon(c(-1, x[x >= -1 & x <= 1], 1), c(0, y[x >= -1 & x <= 1], 0),
+        col = "#569BBD90", border = NA)
+
+# Curve
+lines(x, y, lwd = 2, col = "gray20")
+
+# Axis
+axis(1, at = -3:3,
+     labels = expression(mu - 3*sigma, mu - 2*sigma, mu - sigma,
+                          mu, mu + sigma, mu + 2*sigma, mu + 3*sigma),
+     cex.axis = 0.9)
+
+# Labels
+text(0, 0.18, "68%", font = 2, cex = 1.3, col = "gray20")
+arrows(-2, 0.32, 2, 0.32, code = 3, length = 0.08, lwd = 1.5, col = COL_PINK)
+text(0, 0.34, "95%", font = 2, cex = 1.1, col = COL_PINK, pos = 3)
+arrows(-3, 0.40, 3, 0.40, code = 3, length = 0.08, lwd = 1.5, col = COL_RED)
+text(0, 0.42, "99.7%", font = 2, cex = 1.0, col = COL_RED, pos = 3)
+```
+
+This rule gives quick, approximate answers without needing a calculator or software.
+
+::: {.workedexample}
+SAT scores closely follow the normal distribution with mean $\mu = 1500$ and standard deviation $\sigma = 300$.
+
+a. About what percent of test takers score between 1200 and 1800?
+b. About what percent score between 1500 and 2100?
+
+---
+
+a. 1200 is one standard deviation below the mean ($1500 - 300 = 1200$), and 1800 is one standard deviation above the mean ($1500 + 300 = 1800$). By the 68-95-99.7 rule, about **68%** of test takers score between 1200 and 1800.
+
+b. The range from 900 to 2100 covers $\mu \pm 2\sigma$, which contains about 95% of scores. Since the normal distribution is symmetric, the range from 1500 to 2100 (the upper half) contains about $\frac{95\%}{2} = 47.5\%$ of scores.
+:::
+
+::: {.guidedpractice}
+Adult male heights in the US follow approximately a normal distribution with mean 70 inches and standard deviation 3.3 inches. Using the 68-95-99.7 rule, approximately what percentage of adult males are between 63.4 and 76.6 inches tall?
+
+<details>
+<summary>Show answer</summary>
+63.4 inches is $70 - 2(3.3) = 63.4$ and 76.6 inches is $70 + 2(3.3) = 76.6$. These are each 2 standard deviations from the mean, so by the 68-95-99.7 rule, approximately 95% of adult males have heights in this range.
+</details>
+:::
+
+::: {.guidedpractice}
+Continuing with SAT scores ($\mu = 1500$, $\sigma = 300$), about what percent of test takers score above 2100?
+
+<details>
+<summary>Show answer</summary>
+2100 is 2 standard deviations above the mean. By the 68-95-99.7 rule, about 95% of scores are within 2 standard deviations, leaving about 5% outside. Since the distribution is symmetric, about 2.5% are above 2100.
+</details>
+:::
+
+## Z-scores and standardizing {#sec-z-scores}
+
+When comparing observations from different distributions, raw values are not directly comparable. A score of 1800 on the SAT and a score of 24 on the ACT look very different, but we need a common scale to determine which performance is better relative to other test takers. The solution is **standardizing** the observations.
+
+::: {.definition}
+The **Z-score** of an observation $x$ from a distribution with mean $\mu$ and standard deviation $\sigma$ is the number of standard deviations it falls above or below the mean:
+
+$$Z = \frac{x - \mu}{\sigma}$$
+
+- Positive Z-scores indicate observations **above** the mean.
+- Negative Z-scores indicate observations **below** the mean.
+- A Z-score of 0 means the observation equals the mean.
+:::
+
+::: {.important}
+If the observation $x$ comes from a normal distribution $N(\mu, \sigma)$, then its Z-score follows the standard normal distribution $N(0, 1)$. Standardizing shifts the center to 0 and rescales the spread to 1, but preserves the normal shape.
+:::
+
+::: {.workedexample}
+SAT scores follow $N(\mu = 1500, \sigma = 300)$ and ACT scores follow $N(\mu = 21, \sigma = 5)$. Nel scored 1800 on the SAT and Sian scored 24 on the ACT. Who performed better relative to other test takers?
+
+---
+
+We compute Z-scores for each student.
+
+Nel's Z-score: $Z_{\text{Nel}} = \frac{1800 - 1500}{300} = \frac{300}{300} = 1.00$
+
+Sian's Z-score: $Z_{\text{Sian}} = \frac{24 - 21}{5} = \frac{3}{5} = 0.60$
+
+Nel is 1 standard deviation above the SAT mean, while Sian is only 0.6 standard deviations above the ACT mean. Nel performed better relative to other test takers.
+:::
+
+::: {.guidedpractice}
+Head lengths of brushtail possums follow a nearly normal distribution with mean 92.6 mm and standard deviation 3.6 mm. Compute the Z-scores for possums with head lengths of 95.4 mm and 85.8 mm. Which possum has the more unusual head length?
+
+<details>
+<summary>Show answer</summary>
+For $x_1 = 95.4$ mm: $Z_1 = \frac{95.4 - 92.6}{3.6} = \frac{2.8}{3.6} = 0.78$. For $x_2 = 85.8$ mm: $Z_2 = \frac{85.8 - 92.6}{3.6} = \frac{-6.8}{3.6} = -1.89$. The second possum has a more unusual head length because $|{-1.89}| > |0.78|$.
+</details>
+:::
+
+::: {.workedexample}
+Let $X$ represent a value drawn at random from $N(\mu = 3, \sigma = 2)$, and suppose we observe $x = 5.19$.
+
+a. Find the Z-score.
+b. How many standard deviations above or below the mean is this observation?
+
+---
+
+a. $Z = \frac{x - \mu}{\sigma} = \frac{5.19 - 3}{2} = \frac{2.19}{2} = 1.095$
+
+b. The observation is 1.095 standard deviations *above* the mean. We know it is above because the Z-score is positive.
+:::
+
+## Finding probabilities from the normal distribution {#sec-normal-probs}
+
+One of the most important skills in statistics is finding the probability that a normally distributed variable falls in a specified range. The idea is straightforward: **area under the curve equals probability**. You've already been doing this intuitively — in the randomization tests and bootstrap confidence intervals chapters, every time you counted "what fraction of simulated statistics were this extreme?" you were estimating a probability by looking at proportions in a distribution. The normal model just gives us a formula for the curve, so we can compute the area exactly instead of simulating it.
+
+::: {.important}
+**Strategy for normal probability problems.** Always follow these steps:
+
+1. **Draw a picture.** Sketch the normal curve, mark the mean, and shade the area you want to find.
+2. **Find the Z-score.** Standardize the value(s) of interest using $Z = \frac{x - \mu}{\sigma}$.
+3. **Look up the area.** Use a normal probability table, statistical software, or the StatLens Normal Distribution Explorer to find the area to the **left** of the Z-score.
+4. **Adjust if needed.** If you need a right-tail area, subtract the left-tail area from 1. For an area between two values, subtract the smaller left-tail area from the larger.
+:::
+
+### Left-tail probabilities (percentiles)
+
+The area to the left of a value on the normal curve gives the **percentile** -- the proportion of observations that fall below that value.
+
+::: {.definition}
+The **percentile** of an observation is the percentage of values in the distribution that fall at or below that observation.
+:::
+
+::: {.workedexample}
+Nel scored 1800 on the SAT ($Z = 1.00$). What percentile is this?
+
+---
+
+We need the area to the left of $Z = 1.00$ on the standard normal curve.
+
+```{r}
+#| label: fig-normal-left-tail-z1
+#| fig-cap: "The standard normal curve with the area to the left of Z = 1.00 shaded. This area represents Nel's percentile. [↗ Try this live](https://learnlens.org/statlens/conceptual/normal-distribution/) — drag the cutline to any Z value and read off the left-tail area."
+#| fig-alt: "A standard normal distribution curve with the area to the left of z equals 1 shaded in blue. The shaded area represents approximately 84 percent of the distribution."
+
+x <- seq(-4, 4, length.out = 500)
+y <- dnorm(x)
+base_df <- data.frame(x = x, y = y)
+shade_df <- data.frame(x = x[x <= 1], y = dnorm(x[x <= 1]))
+
+ggplot(base_df, aes(x = x, y = y)) +
+  geom_area(data = shade_df, aes(x = x, y = y), fill = COL_BLUE, alpha = 0.5) +
+  geom_line(linewidth = 1, color = COL_GREEN) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = COL_RED) +
+  annotate("text", x = 1, y = -0.015, label = "Z = 1.00", size = 4, color = COL_RED) +
+  annotate("text", x = -0.5, y = 0.15, label = "0.8413", size = 5, fontface = "bold", color = COL_BLUE) +
+  labs(x = "Z", y = NULL) +
+  theme_minimal(base_size = 14)
+```
+
+Using a normal probability table or software, the area to the left of $Z = 1.00$ is **0.8413**. Nel is at the **84th percentile** -- 84.13% of SAT takers scored lower.
+:::
+
+### Right-tail probabilities
+
+::: {.workedexample}
+Shannon is a randomly selected SAT taker. What is the probability Shannon scores at least 1630?
+
+---
+
+**Step 1: Draw a picture.** We shade the area above 1630 on the $N(1500, 300)$ curve.
+
+```{r}
+#| label: fig-normal-right-tail-1630
+#| fig-cap: "A normal curve with mean 1500 and standard deviation 300. The area to the right of 1630 is shaded. [↗ Try this live](https://learnlens.org/statlens/conceptual/normal-distribution/) — set μ, σ, and the cutline to reproduce this area."
+#| fig-alt: "A normal distribution curve centered at 1500 with a standard deviation of 300. The area to the right of 1630 is shaded, representing the probability of scoring at least 1630."
+
+x <- seq(1500 - 4 * 300, 1500 + 4 * 300, length.out = 500)
+y <- dnorm(x, 1500, 300)
+base_df <- data.frame(x = x, y = y)
+shade_df <- data.frame(x = x[x >= 1630], y = dnorm(x[x >= 1630], 1500, 300))
+
+ggplot(base_df, aes(x = x, y = y)) +
+  geom_area(data = shade_df, aes(x = x, y = y), fill = COL_PINK, alpha = 0.5) +
+  geom_line(linewidth = 1, color = COL_GREEN) +
+  geom_vline(xintercept = 1630, linetype = "dashed", color = COL_RED) +
+  annotate("text", x = 1630, y = -0.00002, label = "1630", size = 4, color = COL_RED) +
+  annotate("text", x = 1900, y = 0.0003, label = "0.3336", size = 5, fontface = "bold", color = COL_PINK) +
+  labs(x = "SAT Score", y = NULL) +
+  theme_minimal(base_size = 14)
+```
+
+**Step 2: Find the Z-score.**
+
+$$Z = \frac{1630 - 1500}{300} = \frac{130}{300} = 0.43$$
+
+**Step 3: Look up the left-tail area.** The area to the left of $Z = 0.43$ is 0.6664.
+
+**Step 4: Adjust.** The area to the *right* is $1 - 0.6664 = 0.3336$.
+
+The probability Shannon scores at least 1630 is **0.3336**, or about 33.4%.
+:::
+
+::: {.guidedpractice}
+If the probability of Shannon scoring at least 1630 is 0.3336, what is the probability Shannon scores *less than* 1630?
+
+<details>
+<summary>Show answer</summary>
+The probability of scoring less than 1630 is the area to the left: 0.6664, or about 66.6%. The left-tail and right-tail areas always sum to 1.
+</details>
+:::
+
+### Probabilities between two values
+
+::: {.workedexample}
+Adult male heights follow $N(\mu = 70, \sigma = 3.3)$ inches. What is the probability that a randomly selected adult male is between 5'9" (69 inches) and 6'2" (74 inches)?
+
+---
+
+**Step 1: Draw a picture.** Shade the area between 69 and 74 on the normal curve.
+
+```{r}
+#| label: fig-normal-between-69-74
+#| fig-cap: "A normal curve centered at 70 with standard deviation 3.3. The area between 69 and 74 is shaded. [↗ Try this live](https://learnlens.org/statlens/conceptual/normal-distribution/) — drag the two cutlines to shade any interval between them."
+#| fig-alt: "A normal distribution curve centered at 70 inches with standard deviation 3.3 inches. The area between 69 and 74 inches is shaded, representing the probability of being between those two heights."
+
+x <- seq(70 - 4 * 3.3, 70 + 4 * 3.3, length.out = 500)
+y <- dnorm(x, 70, 3.3)
+base_df <- data.frame(x = x, y = y)
+shade_df <- data.frame(x = x[x >= 69 & x <= 74], y = dnorm(x[x >= 69 & x <= 74], 70, 3.3))
+
+ggplot(base_df, aes(x = x, y = y)) +
+  geom_area(data = shade_df, aes(x = x, y = y), fill = COL_BLUE, alpha = 0.5) +
+  geom_line(linewidth = 1, color = COL_GREEN) +
+  geom_vline(xintercept = c(69, 74), linetype = "dashed", color = COL_RED) +
+  annotate("text", x = 69, y = -0.003, label = "69", size = 4, color = COL_RED) +
+  annotate("text", x = 74, y = -0.003, label = "74", size = 4, color = COL_RED) +
+  annotate("text", x = 71.5, y = 0.05, label = "0.5048", size = 5, fontface = "bold", color = COL_BLUE) +
+  labs(x = "Height (inches)", y = NULL) +
+  theme_minimal(base_size = 14)
+```
+
+**Step 2: Find both Z-scores.**
+
+$$Z_1 = \frac{69 - 70}{3.3} = -0.30 \qquad Z_2 = \frac{74 - 70}{3.3} = 1.21$$
+
+**Step 3: Look up both left-tail areas.**
+
+- Area to the left of $Z_1 = -0.30$: 0.3821
+- Area to the left of $Z_2 = 1.21$: 0.8869
+
+**Step 4: Subtract.**
+
+$$P(69 < X < 74) = 0.8869 - 0.3821 = 0.5048$$
+
+About **50.5%** of adult males are between 5'9" and 6'2".
+:::
+
+::: {.guidedpractice}
+What percent of SAT takers score between 1500 and 2000? (SAT scores follow $N(1500, 300)$.)
+
+<details>
+<summary>Show answer</summary>
+First find the Z-scores: $Z_1 = \frac{1500 - 1500}{300} = 0.00$ and $Z_2 = \frac{2000 - 1500}{300} = 1.67$. The left-tail areas are 0.5000 and 0.9525. The area between them is $0.9525 - 0.5000 = 0.4525$, so about 45.25% score between 1500 and 2000.
+</details>
+:::
+
+### Finding values from percentiles
+
+Sometimes we want to work backwards: given a percentile, find the observation.
+
+::: {.workedexample}
+Adult male heights follow $N(70, 3.3)$. Yousef's height is at the 40th percentile. How tall is Yousef?
+
+---
+
+**Step 1: Draw a picture.** The 40th percentile means 40% of the area is to the left.
+
+**Step 2: Find the Z-score for the 40th percentile.** Using a normal probability table (look for 0.40 in the body of the table) or software, $Z = -0.25$.
+
+**Step 3: Solve for $x$.** Using the Z-score formula:
+
+$$-0.25 = \frac{x - 70}{3.3}$$
+
+$$x = 70 + (-0.25)(3.3) = 70 - 0.825 = 69.2 \text{ inches}$$
+
+Yousef is approximately 69.2 inches (about 5'9") tall.
+:::
+
+::: {.guidedpractice}
+What is the 95th percentile for SAT scores?
+
+<details>
+<summary>Show answer</summary>
+The Z-score for the 95th percentile is $Z = 1.645$. Then $x = 1500 + 1.645 \times 300 = 1500 + 493.5 = 1993.5$. The 95th percentile for SAT scores is approximately 1994.
+</details>
+:::
+
+### The normal probability table
+
+A **normal probability table** (also called a Z-table) lists areas to the left of Z-scores for the standard normal distribution. The table is organized with the ones and tenths digits of the Z-score in the rows, and the hundredths digit in the columns.
+
+**Common Z-scores and areas worth remembering:**
+
+| Z-score | Left-tail area | Interpretation |
+|---------|---------------|----------------|
+| $-1.96$ | 0.0250 | 2.5th percentile |
+| $-1.645$ | 0.0500 | 5th percentile |
+| $-1.00$ | 0.1587 | 15.87th percentile |
+| $0.00$ | 0.5000 | 50th percentile (the mean) |
+| $1.00$ | 0.8413 | 84.13th percentile |
+| $1.645$ | 0.9500 | 95th percentile |
+| $1.96$ | 0.9750 | 97.5th percentile |
+| $2.576$ | 0.9950 | 99.5th percentile |
+
+: Commonly used Z-scores and their corresponding left-tail areas. {.striped}
+
+::: {.statlens}
+**See it in action.** Open the [Normal Distribution Explorer]({{< var tool-url >}}/distribution/normal/){target="_blank"} to verify entries in the table above --- enter a Z-score, check the shaded area, then work backwards from a percentile.
+:::
+
+## The normal approximation to sampling distributions {#sec-normal-approx-sampling}
+
+In the sampling distributions chapter, we used simulation to explore sampling distributions -- the distributions of sample statistics computed from many repeated samples. A striking pattern emerged: regardless of whether we were looking at sample means, sample proportions, or differences in means or proportions, the sampling distributions tended to be **bell-shaped and symmetric**. This is not a coincidence.
+
+### The Central Limit Theorem
+
+::: {.definition}
+**The Central Limit Theorem (CLT).** When observations are independent and the sample size is sufficiently large, the sampling distribution of many common statistics (sample means, sample proportions, and their differences) is approximately normal, regardless of the shape of the population distribution.
+
+Specifically:
+
+- The sampling distribution of $\bar{x}$ is approximately $N\!\left(\mu, \frac{\sigma}{\sqrt{n}}\right)$.
+- The sampling distribution of $\hat{p}$ is approximately $N\!\left(p, \sqrt{\frac{p(1-p)}{n}}\right)$.
+:::
+
+The CLT is one of the most remarkable results in all of mathematics. It explains why simulation-based null distributions and bootstrap distributions looked bell-shaped: they were approximating the normal distribution all along.
+
+::: {.important}
+**Two conditions for the CLT to apply:**
+
+1. **Independence.** The observations must be independent of one another. This is satisfied when data come from a random sample or a randomized experiment.
+2. **Sample size.** The sample must be large enough. What counts as "large enough" depends on the context:
+   - For **proportions**: at least 10 expected successes and 10 expected failures ($np \geq 10$ and $n(1-p) \geq 10$). This is called the **success-failure condition**.
+   - For **means**: $n \geq 30$ is a common guideline, though smaller samples can work if the population is not strongly skewed.
+:::
+
+### Standard error: quantifying the variability of a statistic
+
+The CLT tells us the sampling distribution is approximately normal. But how wide is that normal distribution? The answer is given by the **standard error**.
+
+::: {.definition}
+The **standard error (SE)** of a statistic is the standard deviation of its sampling distribution. It measures how much the statistic varies from sample to sample.
+:::
+
+The standard error depends on the parameter of interest:
+
+| Parameter | Point estimate | Standard error |
+|-----------|---------------|----------------|
+| Population mean $\mu$ | $\bar{x}$ | $SE = \frac{s}{\sqrt{n}}$ |
+| Population proportion $p$ | $\hat{p}$ | $SE = \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$ |
+| Difference in means $\mu_1 - \mu_2$ | $\bar{x}_1 - \bar{x}_2$ | $SE = \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}$ |
+| Difference in proportions $p_1 - p_2$ | $\hat{p}_1 - \hat{p}_2$ | $SE = \sqrt{\frac{\hat{p}_1(1-\hat{p}_1)}{n_1} + \frac{\hat{p}_2(1-\hat{p}_2)}{n_2}}$ |
+
+: Standard error formulas for common parameters. {.striped}
+
+::: {.important}
+**Margin of error.** The distance $z^* \times SE$ is called the **margin of error**. For a 95% confidence interval, $z^* = 1.96$ (often rounded to 2), giving a margin of error of approximately $2 \times SE$. This is directly connected to the 68-95-99.7 rule: 95% of sample statistics fall within about 2 standard errors of the true parameter value.
+:::
+
+### Connecting simulation and normal approximation
+
+::: {.original}
+Let's see the connection between simulation-based methods and the normal approximation in a concrete example. As a quick reminder from the [randomization tests chapter](randomization-tests.qmd), a hypothesis test weighs the **null hypothesis** $H_0$ ("no effect") against the **alternative** $H_A$ ("real effect"), computes a **p-value** (probability of the observed data or more extreme under $H_0$), and **rejects** $H_0$ when the p-value falls below the discernibility level $\alpha$.
+
+In the randomization tests chapter, we tested whether opportunity cost reminders reduce spending. We simulated 10,000 randomization samples and found a null distribution that was bell-shaped with a center of 0 and a spread described by $SE \approx 0.078$. The observed difference was 0.20.
+
+**Simulation approach:** Count how many of the 10,000 simulated differences were at least as extreme as 0.20. The proportion gives the p-value: approximately 0.006.
+
+**Normal approximation approach:** Model the null distribution as $N(0, 0.078)$. Compute the Z-score:
+
+$$Z = \frac{0.20 - 0}{0.078} = 2.56$$
+
+The area to the right of $Z = 2.56$ is 0.0052.
+
+Both approaches give nearly the same p-value (0.006 vs. 0.0052) and the same conclusion: reject $H_0$. The normal approximation works because the conditions are met -- independent observations and a sufficiently large sample.
+:::
+
+### Confidence intervals using the normal model
+
+The normal approximation also lets us build confidence intervals without bootstrapping.
+
+::: {.important}
+**General confidence interval formula.** When the sampling distribution of a statistic is approximately normal with standard error $SE$, a confidence interval takes the form:
+
+$$\text{point estimate} \pm z^* \times SE$$
+
+where $z^*$ is chosen based on the desired confidence level:
+
+| Confidence level | $z^*$ |
+|-----------------|-------|
+| 90% | 1.645 |
+| 95% | 1.960 |
+| 99% | 2.576 |
+
+: Critical values $z^*$ for common confidence levels. {.striped}
+:::
+
+::: {.workedexample}
+A study examined whether stents reduce stroke risk. The observed difference in 30-day stroke rates (treatment minus control) was $\hat{p}_T - \hat{p}_C = 0.090$, with $SE = 0.028$. Construct a 95% confidence interval.
+
+---
+
+The conditions for the normal model have been verified. Using $z^* = 1.96$:
+
+$$0.090 \pm 1.96 \times 0.028 = 0.090 \pm 0.055 = (0.035, 0.145)$$
+
+We are 95% confident that implanting a stent increased the 30-day stroke rate by between 3.5 and 14.5 percentage points. Since the interval does not contain 0, we have evidence of a real difference.
+:::
+
+## When does the normal model apply -- and when doesn't it? {#sec-normal-when}
+
+The normal distribution is powerful but not universal. Here we summarize when it is and is not appropriate.
+
+::: {.important}
+**When the normal model is a good approximation:**
+
+- Sample proportions $\hat{p}$, when the success-failure condition is met ($np \geq 10$ and $n(1-p) \geq 10$).
+- Sample means $\bar{x}$, when the sample size is at least 30 or the population is approximately normal (we will use the $t$-distribution for means -- see the confidence intervals for means chapter).
+- Differences in proportions or means, when both groups satisfy the above conditions.
+
+**When the normal model is NOT a good approximation:**
+
+- Small samples with a skewed population distribution.
+- Proportions near 0 or 1 with small sample sizes (the success-failure condition fails).
+- Data with strong dependence between observations.
+:::
+
+::: {.workedexample}
+A medical consultant claims that only 3 of their 62 liver transplant clients had complications, compared to the national rate of 10%. Is it appropriate to use the normal approximation to test whether this consultant's rate is lower?
+
+---
+
+Under the null hypothesis ($p_0 = 0.10$), we check the success-failure condition:
+
+- Expected successes (complications): $np_0 = 62 \times 0.10 = 6.2$
+- Expected failures (no complications): $n(1 - p_0) = 62 \times 0.90 = 55.8$
+
+Since the expected number of successes (6.2) is less than 10, the **success-failure condition is not met**. The normal approximation would underestimate the variability and give an inaccurate p-value. A simulation-based approach (as in the randomization tests chapter) would be more appropriate here.
+:::
+
+::: {.caution}
+**When conditions fail, use simulation.** If the success-failure condition is not met or the sample size is too small for the normal approximation, we should fall back on the simulation-based methods from the randomization tests and bootstrap confidence intervals chapters. The bootstrap and randomization approaches work well even when the normal model does not. This is one of the great advantages of simulation-based inference: it is more broadly applicable.
+:::
+
+## Chapter review {#sec-normal-approximation-review}
+
+### Summary
+
+This chapter introduced the normal distribution, the most commonly encountered distribution in statistics. Key concepts include:
+
+- The normal distribution is described by two parameters: the mean $\mu$ (center) and standard deviation $\sigma$ (spread), written as $N(\mu, \sigma)$.
+- The **68-95-99.7 rule** provides quick estimates: about 68%, 95%, and 99.7% of observations fall within 1, 2, and 3 standard deviations of the mean.
+- A **Z-score** standardizes an observation by measuring how many standard deviations it lies from the mean: $Z = \frac{x - \mu}{\sigma}$.
+- Normal probabilities are found by computing Z-scores and looking up areas under the standard normal curve using tables, software, or StatLens.
+- The **Central Limit Theorem** guarantees that sampling distributions of means and proportions are approximately normal when the sample is large enough and observations are independent.
+- The **standard error** measures how much a statistic varies from sample to sample and is the key ingredient in confidence intervals and hypothesis tests.
+- The normal approximation and simulation-based methods give similar results when conditions are met, but simulation is more flexible when conditions fail.
+
+### Key terms
+
+Normal distribution, standard normal distribution, parameters (μ and σ), 68-95-99.7 rule, Z-score, standardizing, percentile, Central Limit Theorem (CLT), standard error (SE), margin of error, success-failure condition.
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-normal-approximation) at the back of the book.
+
+{{< include ../exercises/_normal-approximation-exercises.qmd >}}
+
+{{< include ../exercises/_normal-approximation-statlens-exercises.qmd >}}

@@ -1,0 +1,595 @@
+---
+title: "Introduction to Data"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+::: {.chapterintro}
+Scientists seek to answer questions using rigorous methods and careful observations. These observations --- collected from the likes of field notes, surveys, and experiments --- form the backbone of a statistical investigation and are called **data**. Statistics is the study of how best to collect, analyze, and draw conclusions from data. In this first chapter, we focus on both the properties of data and on the collection of data. We will introduce the building blocks of statistical thinking: observations, variables, data frames, and the types of questions that statistics can help us answer.
+:::
+
+## Case study: Using stents to prevent strokes {#sec-case-stents}
+
+In this section we introduce a classic challenge in statistics: evaluating the efficacy of a medical treatment. The terms and ideas introduced here will be revisited throughout the course. For now, the goal is simply to get a sense of the role statistics can play in practice.
+
+A stent is a small mesh tube that is placed inside a narrow or weak artery to assist in patient recovery after cardiac events and reduce the risk of an additional heart attack or death. Many doctors have hoped that there would be similar benefits for patients at risk of stroke. This leads to the principal question the researchers hoped to answer:
+
+> Does the use of stents reduce the risk of stroke?
+
+The researchers who asked this question conducted an experiment with 451 at-risk patients.^[Chimowitz MI, Lynn MJ, Derdeyn CP, et al. 2011. Stenting versus Aggressive Medical Therapy for Intracranial Arterial Stenosis. *New England Journal of Medicine* 365:993--1003.] Each volunteer patient was randomly assigned to one of two groups:
+
+- **Treatment group.** Patients in the treatment group received a stent and medical management. The medical management included medications, management of risk factors, and help in lifestyle modification.
+- **Control group.** Patients in the control group received the same medical management as the treatment group, but they did not receive stents.
+
+Researchers randomly assigned 224 patients to the treatment group and 227 to the control group. In this study, the control group provides a reference point against which we can measure the medical impact of stents in the treatment group.
+
+### Examining the data
+
+Researchers studied the effect of stents at two time points: 30 days after enrollment and 365 days after enrollment. Patient outcomes were recorded as "stroke" or "no event," representing whether the patient had a stroke during that time period.
+
+It would be difficult to answer the research question by looking at individual patient records one at a time. Instead, we organize the results into a summary table that lets us quickly compare the two groups.
+
+| | 30 days: Stroke | 30 days: No event | 365 days: Stroke | 365 days: No event |
+|:-------------|------:|------:|------:|------:|
+| Treatment    |    33 |   191 |    45 |   179 |
+| Control      |    13 |   214 |    28 |   199 |
+| **Total**    |    46 |   405 |    73 |   378 |
+
+: Descriptive statistics for the stent study. {#tbl-stent-summary}
+
+::: {.guidedpractice}
+Of the 224 patients in the treatment group, 45 had a stroke by the end of the first year. Using these two numbers, compute the proportion of patients in the treatment group who had a stroke by the end of their first year. (Note: answers to all Guided Practice exercises are provided in footnotes!)
+
+<details>
+<summary>Show answer</summary>
+The proportion of the 224 patients who had a stroke within 365 days: $45/224 = 0.20 = 20\%$.
+</details>
+:::
+
+### Drawing conclusions from the data
+
+We can compute **summary statistics** from @tbl-stent-summary to give us a better idea of how the impact of the stent treatment differed between the two groups.
+
+::: {.definition}
+A **summary statistic** is a single number that summarizes data from a sample. Summary statistics condense a large amount of information into a form that is easy to digest and compare.
+:::
+
+For instance, the primary results of the study after one year could be described by two summary statistics: the proportion of people who had a stroke in the treatment and control groups.
+
+- Proportion who had a stroke in the treatment (stent) group: $45/224 = 0.20 = 20\%$.
+- Proportion who had a stroke in the control group: $28/227 = 0.12 = 12\%$.
+
+These two summary statistics are useful in looking for differences between the groups, and we are in for a surprise: an additional 8% of patients in the treatment group had a stroke! This is important for two reasons. First, it is contrary to what doctors expected, which was that stents would *reduce* the rate of strokes. Second, it leads to a statistical question: do the data show a "real" difference between the groups?
+
+This second question is subtle. Suppose you flip a coin 100 times. While the chance a coin lands heads in any given coin flip is 50%, we probably will not observe exactly 50 heads. This type of variation is part of almost any type of data generating process. It is possible that the 8% difference in the stent study is due to this natural variation. However, the larger the difference we observe (for a particular sample size), the less believable it is that the difference is due to chance. So what we are really asking is the following: if in fact stents have no effect, how unlikely is it that we would observe such a large difference?
+
+While we do not yet have the statistical tools to fully address this question on our own, we can state the conclusion of the published analysis: there was compelling evidence of harm by stents in this study of stroke patients.
+
+::: {.caution}
+**Be careful about overgeneralizing.** Do not generalize the results of this study to all patients and all stents. This study looked at patients with very specific characteristics who volunteered to be part of the study and who may not be representative of all stroke patients. In addition, there are many types of stents, and this study considered only the self-expanding Wingspan stent (Boston Scientific). However, the study does leave us with an important lesson: we should keep our eyes open for surprises.
+:::
+
+::: {.guidedpractice}
+Does this study prove that stents *cause* strokes? What features of the study design might strengthen or weaken this conclusion?
+
+<details>
+<summary>Show answer</summary>
+Because patients were *randomly assigned* to treatment and control groups, this is a randomized experiment. Random assignment helps ensure the groups are similar in all respects except the treatment itself. This strengthens the case for a causal conclusion. However, we should still ask: could the difference (20% vs. 12%) have arisen by chance alone? We will develop tools to answer this question rigorously later in the course.
+</details>
+:::
+
+::: {.original}
+This case study highlights a key principle that will guide much of our work in this course: **a single study's results can be surprising, and statistics gives us the tools to evaluate whether an observed result is real or could be due to random chance**. We will return to this idea again and again as we develop the tools of statistical inference.
+:::
+
+
+## Data basics {#sec-data-basics}
+
+Effective presentation and description of data is a first step in most analyses. This section introduces one structure for organizing data as well as some terminology that will be used throughout the course.
+
+### Observations, variables, and data matrices {#sec-observations-variables}
+
+::: {.definition}
+An **observation** (also called a **case** or **unit of observation**) is a single entity in a dataset --- one person, one county, one transaction. A **variable** is a characteristic that is measured or recorded for each observation. A **data frame** (or **data matrix**) organizes observations as rows and variables as columns. Each cell holds a single value.
+:::
+
+Consider data for 50 randomly sampled loans offered through a peer-to-peer lending company. Each row in the table represents a single loan --- that is the observation, or unit of observation. The columns represent characteristics of each loan, and each column is a variable. For example, the first row might represent a loan of \$22,000 with an interest rate of 10.90%, where the borrower is based in New Jersey (NJ) and has an income of \$59,000.
+
+| | loan_amount | interest_rate | term | grade | state | total_income | homeownership |
+|---:|------:|------:|---:|:---:|:---:|------:|:---:|
+| 1 | 22,000 | 10.90 | 60 | B | NJ | 59,000 | rent |
+| 2 | 6,000 | 9.92 | 36 | B | CA | 60,000 | rent |
+| 3 | 25,000 | 26.30 | 36 | E | SC | 75,000 | mortgage |
+| 4 | 6,000 | 9.92 | 36 | B | CA | 75,000 | rent |
+| 5 | 25,000 | 9.43 | 60 | B | OH | 254,000 | mortgage |
+| 6 | 6,400 | 9.92 | 36 | B | IN | 67,000 | mortgage |
+
+: Six observations from a loan dataset. {#tbl-loan50-df}
+
+In practice, it is especially important to ask clarifying questions to ensure important aspects of the data are understood. For instance, it is always important to be sure we know what each variable means and its units of measurement. @tbl-loan50-variables describes each variable in the loan dataset.
+
+| Variable | Description |
+|:---------|:------------|
+| loan_amount | Amount of the loan received, in US dollars. |
+| interest_rate | Interest rate on the loan, in an annual percentage. |
+| term | The length of the loan, which is always set as a whole number of months. |
+| grade | Loan grade, which takes values A through G and represents the quality of the loan and its likelihood of being repaid. |
+| state | US state where the borrower resides. |
+| total_income | Borrower's total income, including any second income, in US dollars. |
+| homeownership | Indicates whether the person owns, owns but has a mortgage, or rents. |
+
+: Variables and their descriptions for the loan dataset. {#tbl-loan50-variables}
+
+::: {.guidedpractice}
+What is the grade of the first loan in @tbl-loan50-df? And what is the homeownership status of the borrower for that first loan?
+
+<details>
+<summary>Show answer</summary>
+The loan's grade is B, and the borrower rents their residence.
+</details>
+:::
+
+### Tidy data
+
+A data frame where each row is a unique case (observational unit), each column is a variable, and each cell is a single value is commonly referred to as **tidy data**.
+
+::: {.definition}
+**Tidy data** is a standard way of mapping the meaning of a dataset to its structure. A dataset is tidy when:
+
+1. Each row represents a single observation.
+2. Each column represents a single variable.
+3. Each cell contains a single value.
+:::
+
+When recording data, use a tidy data frame unless you have a very good reason to use a different structure. This structure allows new cases to be added as rows or new variables as new columns and facilitates visualization, summarization, and other statistical analyses.
+
+::: {.guidedpractice}
+The grades for assignments, quizzes, and exams in a course are often recorded in a gradebook that takes the form of a data frame. How might you organize a course's grade data using a data frame? Describe the observational units and variables.
+
+<details>
+<summary>Show answer</summary>
+There are multiple strategies that can be followed. One common strategy is to have each student represented by a row, and then add a column for each assignment, quiz, or exam. Under this setup, it is easy to review a single line to understand the grade history of a student. There should also be columns to include student information, such as one column to list student names.
+</details>
+:::
+
+### A larger dataset: US counties
+
+We consider data for 3,142 counties in the United States, which includes the name of each county, the state where it resides, its population in 2017, the population change from 2010 to 2017, poverty rate, and several additional characteristics.
+
+::: {.guidedpractice}
+How might these data be organized in a data frame? What are the observations and variables?
+
+<details>
+<summary>Show answer</summary>
+Each county may be viewed as a case, and there are multiple pieces of information recorded for each case. A table with 3,142 rows and 14 columns could hold these data, where each row represents a county and each column represents a particular piece of information.
+</details>
+:::
+
+| name | state | pop2017 | pop_change | unemployment_rate | median_edu |
+|:-----|:------|--------:|-----------:|------------------:|:-----------|
+| Autauga County | Alabama | 55,504 | 1.48 | 3.86 | some_college |
+| Baldwin County | Alabama | 212,628 | 9.19 | 3.83 | some_college |
+| Barbour County | Alabama | 25,270 | -6.22 | 6.44 | hs_diploma |
+| Bibb County | Alabama | 22,668 | 0.73 | 4.39 | hs_diploma |
+| Blount County | Alabama | 58,013 | 0.68 | 4.02 | hs_diploma |
+| Bullock County | Alabama | 10,309 | -2.28 | 7.72 | hs_diploma |
+
+: Six observations and six variables from a US county dataset. {#tbl-county-df}
+
+| Variable | Description |
+|:---------|:------------|
+| name | Name of county. |
+| state | Name of state. |
+| pop2000 | Population in 2000. |
+| pop2010 | Population in 2010. |
+| pop2017 | Population in 2017. |
+| pop_change | Population change from 2010 to 2017 (in percent). |
+| poverty | Percent of population in poverty in 2017. |
+| homeownership | Homeownership rate, 2006--2010. |
+| multi_unit | Percent of housing units that are in multi-unit structures, 2006--2010. |
+| unemployment_rate | Unemployment rate in 2017. |
+| metro | Whether the county contains a metropolitan area (yes or no). |
+| median_edu | Median education level (2013--2017): below_hs, hs_diploma, some_college, or bachelors. |
+| per_capita_income | Per capita (per person) income (2013--2017). |
+| median_hh_income | Median household income. |
+| smoking_ban | Type of county-level smoking ban in place in 2010: none, partial, or comprehensive. |
+
+: Variables and their descriptions for the county dataset. {#tbl-county-variables}
+
+
+## Types of variables {#sec-variable-types}
+
+Examine the variables `unemployment_rate`, `pop2017`, `state`, and `median_edu` in the county dataset. Each of these variables is inherently different from the other three, yet some share certain characteristics. Understanding these distinctions is fundamental to choosing the right analysis tools.
+
+### Numerical variables
+
+::: {.definition}
+A **quantitative variable** (also called a **numerical variable**) takes on values where arithmetic operations like adding, subtracting, or averaging make sense.
+:::
+
+Consider `unemployment_rate`, which can take a wide range of numerical values, and it is sensible to add, subtract, or take averages with those values. On the other hand, we would not classify a variable reporting telephone area codes as quantitative since the average, sum, and difference of area codes does not have any clear meaning.
+
+Quantitative variables can be further subdivided:
+
+- **Continuous variables** can take any value within a range, including decimals. The `unemployment_rate` is continuous --- it could be 3.86%, 4.127%, or any value in between.
+- **Discrete variables** can only take counting values (typically whole numbers: 0, 1, 2, ...). The variable `pop2017` (population count) is discrete --- you cannot have 55,504.7 people.
+
+::: {.important}
+**The key test for quantitative vs. categorical.** Ask yourself: does it make sense to compute the average of this variable? If you can meaningfully average the values, it is quantitative. If averaging does not make sense (as with zip codes or phone numbers), the variable is categorical, even if it happens to be recorded using digits.
+:::
+
+### Categorical variables
+
+::: {.definition}
+A **categorical variable** (also called a **qualitative variable**) takes on values that are category names or labels. The possible values of a categorical variable are called its **levels**.
+:::
+
+The variable `state` can take up to 51 values (after accounting for Washington, DC): Alabama, Alaska, ..., and Wyoming. Because the responses themselves are categories, `state` is a categorical variable, and the possible values (states) are the variable's levels.
+
+Categorical variables can be further subdivided:
+
+- **Nominal variables** have categories with no natural ordering. The variable `state` is nominal --- there is no inherent reason to rank Alabama above Alaska or Wyoming.
+- **Ordinal variables** have categories with a meaningful order. The variable `median_edu` takes values `below_hs`, `hs_diploma`, `some_college`, or `bachelors`. These categories have a natural ordering (less education to more education), making `median_edu` ordinal.
+
+::: {.original}
+In most of this course, we will treat categorical variables as nominal (unordered). The distinction between nominal and ordinal becomes more important in advanced courses when special methods are used to take advantage of the ordering.
+:::
+
+### Variable type hierarchy
+
+The breakdown of variable types is summarized in the diagram below.
+
+```{r}
+#| label: fig-variables
+#| fig-cap: "Breakdown of variables into their respective types. All variables are either quantitative or categorical. Quantitative variables are further classified as discrete or continuous. Categorical variables are further classified as ordinal or nominal."
+#| fig-alt: "A tree diagram showing variable types. At the top is 'all variables' which branches into 'quantitative' and 'categorical'. Quantitative branches into 'discrete' and 'continuous'. Categorical branches into 'ordinal' and 'nominal'."
+#| fig-width: 7
+#| fig-height: 4
+#| echo: false
+
+library(ggplot2)
+
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+plot.new()
+plot.window(xlim = c(0, 10), ylim = c(0, 6))
+
+IMSCOL_blue <- COL_BLUE
+IMSCOL_pink <- COL_PINK
+
+# Box drawing helper
+draw_box <- function(x, y, w, h, label, fill = "white", border = "gray30") {
+  rect(x - w/2, y - h/2, x + w/2, y + h/2, col = fill, border = border, lwd = 1.5)
+  text(x, y, label, cex = 1.0, font = 2)
+}
+
+# Level 0: root
+draw_box(5, 5.2, 2.8, 0.7, "all variables", fill = "#F0F0F0")
+
+# Level 1
+draw_box(2.5, 3.2, 2.2, 0.7, "quantitative", fill = IMSCOL_blue)
+draw_box(7.5, 3.2, 2.2, 0.7, "categorical", fill = IMSCOL_pink)
+
+# Level 2
+draw_box(1.5, 1.2, 1.8, 0.7, "discrete", fill = "#A8D4E6")
+draw_box(3.5, 1.2, 2.0, 0.7, "continuous", fill = "#A8D4E6")
+draw_box(6.5, 1.2, 1.6, 0.7, "ordinal", fill = "#F2B8C0")
+draw_box(8.5, 1.2, 1.8, 0.7, "nominal", fill = "#F2B8C0")
+
+# Connectors
+segments(5, 5.2 - 0.35, 5, 4.4, lwd = 1.5, col = "gray30")
+segments(2.5, 4.4, 7.5, 4.4, lwd = 1.5, col = "gray30")
+segments(2.5, 4.4, 2.5, 3.2 + 0.35, lwd = 1.5, col = "gray30")
+segments(7.5, 4.4, 7.5, 3.2 + 0.35, lwd = 1.5, col = "gray30")
+
+segments(2.5, 3.2 - 0.35, 2.5, 2.4, lwd = 1.5, col = "gray30")
+segments(1.5, 2.4, 3.5, 2.4, lwd = 1.5, col = "gray30")
+segments(1.5, 2.4, 1.5, 1.2 + 0.35, lwd = 1.5, col = "gray30")
+segments(3.5, 2.4, 3.5, 1.2 + 0.35, lwd = 1.5, col = "gray30")
+
+segments(7.5, 3.2 - 0.35, 7.5, 2.4, lwd = 1.5, col = "gray30")
+segments(6.5, 2.4, 8.5, 2.4, lwd = 1.5, col = "gray30")
+segments(6.5, 2.4, 6.5, 1.2 + 0.35, lwd = 1.5, col = "gray30")
+segments(8.5, 2.4, 8.5, 1.2 + 0.35, lwd = 1.5, col = "gray30")
+```
+
+::: {.workedexample}
+Data were collected about students in a statistics course. Three variables were recorded for each student: number of siblings, student height, and whether the student had previously taken a statistics course. Classify each of the variables as continuous quantitative, discrete quantitative, or categorical.
+
+---
+
+The number of siblings and student height represent quantitative variables. Because the number of siblings is a count, it is discrete. Height varies continuously, so it is a continuous quantitative variable. The last variable classifies students into two categories --- those who have and those who have not taken a statistics course --- which makes this variable categorical.
+:::
+
+::: {.guidedpractice}
+An experiment is evaluating the effectiveness of a new drug in treating migraines. A `group` variable is used to indicate the experiment group for each patient: treatment or control. The `num_migraines` variable represents the number of migraines the patient experienced during a 3-month period. Classify each variable as either quantitative or categorical.
+
+<details>
+<summary>Show answer</summary>
+The `group` variable can take just one of two group names, making it categorical. The `num_migraines` variable describes a count of the number of migraines, which is an outcome where basic arithmetic is sensible, which means this is a quantitative outcome; more specifically, since it represents a count, `num_migraines` is a discrete quantitative variable.
+</details>
+:::
+
+::: {.guidedpractice}
+Classify each variable as continuous quantitative, discrete quantitative, nominal categorical, or ordinal categorical:
+
+a. Number of text messages sent per day
+b. Favorite type of music
+c. Temperature in Fahrenheit
+d. Satisfaction rating (1 = very unsatisfied, ..., 5 = very satisfied)
+
+
+<details>
+<summary>Show answer</summary>
+a. Discrete quantitative --- it is a count. b. Nominal categorical --- the categories (rock, jazz, classical, etc.) have no natural ordering. c. Continuous quantitative --- temperature can take any value in a range. d. Ordinal categorical --- the numbers have a meaningful order, but the intervals between them may not be equal, and averaging satisfaction ratings is debatable.
+</details>
+:::
+
+
+## Relationships between variables {#sec-variable-relationships}
+
+Many analyses are motivated by a researcher looking for a relationship between two or more variables. A social scientist might like to answer questions such as:
+
+> Does a higher-than-average increase in county population tend to correspond to counties with higher or lower median household incomes?
+
+> If homeownership in one county is lower than the national average, will the percent of housing units that are in multi-unit structures in that county tend to be above or below the national average?
+
+> How much can the median education level explain the median household income for counties in the US?
+
+To answer these questions, data must be collected, such as the county dataset shown in @tbl-county-df. Examining summary statistics can provide numerical insights about the specifics of each of these questions. Alternatively, graphs can be used to visually explore the data, potentially providing more insight than a summary statistic.
+
+### Scatterplots
+
+::: {.definition}
+A **scatterplot** is a graph that displays the relationship between two quantitative variables. Each observation is represented by a point, with one variable on the horizontal axis and the other on the vertical axis.
+:::
+
+The figure below displays the relationship between `homeownership` and `multi_unit` (the percent of housing units that are in multi-unit structures such as apartments and condos) for US counties. Each point on the plot represents a single county. For instance, one highlighted point corresponds to Chattahoochee County, Georgia, which has 39.4% of housing units in multi-unit structures and a homeownership rate of 31.3%.
+
+```{r}
+#| label: fig-county-multi-unit-homeownership
+#| fig-cap: "A scatterplot of homeownership rate versus the percent of housing units in multi-unit structures for US counties. There is a clear negative trend: as the multi-unit rate increases, homeownership tends to decrease. Chattahoochee County, Georgia is highlighted. [Open in StatLens]({{< var tool-url >}}/explore/regression/?dataset=county_pop){.open-in-statlens target='_blank' aria-label='Explore county homeownership vs multi-unit housing in StatLens'}"
+#| fig-alt: "A scatterplot with percent of housing units in multi-unit structures on the x-axis and homeownership rate on the y-axis. The points show a clear downward trend from upper-left to lower-right. Chattahoochee County, Georgia is highlighted as an example point."
+#| fig-width: 7
+#| fig-height: 5
+#| echo: false
+
+county <- usdata::county
+
+chatt <- county[county$name == "Chattahoochee County" & county$state == "Georgia", ]
+
+ggplot(county, aes(x = multi_unit, y = homeownership)) +
+  geom_point(alpha = 0.3, color = COL_BLUE, size = 1.5) +
+  geom_point(data = chatt, color = COL_RED, size = 3) +
+  annotate("text", x = chatt$multi_unit + 3, y = chatt$homeownership + 2,
+           label = "Chattahoochee County, GA", color = COL_RED,
+           size = 3.5, hjust = 0, fontface = "bold") +
+  annotate("segment", x = chatt$multi_unit + 2.8, y = chatt$homeownership + 1.5,
+           xend = chatt$multi_unit + 0.5, yend = chatt$homeownership + 0.3,
+           color = COL_RED, arrow = arrow(length = unit(0.15, "cm"))) +
+  labs(x = "Percent of housing units in multi-unit structures",
+       y = "Homeownership rate (%)") +
+  theme_minimal(base_size = 14)
+```
+
+The scatterplot suggests a relationship between the two variables: counties with a higher rate of housing units in multi-unit structures tend to have lower homeownership rates. We might brainstorm as to why this relationship exists and investigate each idea to determine which are the most reasonable explanations.
+
+### Associated and independent variables
+
+::: {.definition}
+When two variables show some connection or pattern with one another, they are called **associated** variables (or **related** variables). If two variables are not associated --- there is no evident relationship between them --- they are said to be **independent**.
+:::
+
+Because there is a downward trend in the homeownership vs. multi-unit scatterplot --- counties with more multi-unit housing are associated with lower homeownership --- these variables are said to be **negatively associated**.
+
+::: {.definition}
+A **positive association** means that as one variable increases, the other tends to increase as well. A **negative association** means that as one variable increases, the other tends to decrease.
+:::
+
+::: {.workedexample}
+Consider the relationship between the percent change in population from 2010 to 2017 and median household income for counties, as shown in the scatterplot below. Are these variables associated?
+
+```{r}
+#| label: fig-county-pop-income
+#| fig-cap: "A scatterplot showing population change against median household income for US counties. There is a positive trend: counties with higher median household income tend to have higher population growth. Owsley County, Kentucky is highlighted. [Open in StatLens]({{< var tool-url >}}/explore/regression/?dataset=county){.open-in-statlens target='_blank' aria-label='Explore county-level population change vs income in StatLens'}"
+#| fig-alt: "A scatterplot with median household income on the x-axis and population change on the y-axis. The points show a positive trend from lower-left to upper-right. Owsley County, Kentucky is highlighted in the lower-left region."
+#| fig-width: 7
+#| fig-height: 5
+#| echo: false
+
+owsley <- county[county$name == "Owsley County" & county$state == "Kentucky", ]
+
+ggplot(county, aes(x = median_hh_income, y = pop_change)) +
+  geom_point(alpha = 0.3, color = COL_BLUE, size = 1.5) +
+  geom_point(data = owsley, color = COL_RED, size = 3) +
+  annotate("text", x = owsley$median_hh_income + 4000, y = owsley$pop_change - 1,
+           label = "Owsley County, KY", color = COL_RED,
+           size = 3.5, hjust = 0, fontface = "bold") +
+  annotate("segment",
+           x = owsley$median_hh_income + 3800, y = owsley$pop_change - 0.5,
+           xend = owsley$median_hh_income + 500, yend = owsley$pop_change + 0.1,
+           color = COL_RED, arrow = arrow(length = unit(0.15, "cm"))) +
+  scale_x_continuous(labels = scales::dollar_format()) +
+  labs(x = "Median household income",
+       y = "Population change (%)") +
+  theme_minimal(base_size = 14)
+```
+
+---
+
+The larger the median household income for a county, the higher the population growth observed for the county. While it is not true that every county with a higher median household income has higher population growth, the trend in the plot is evident. Since there is some relationship between the variables, they are associated. Because both variables tend to increase together, this is a positive association.
+:::
+
+::: {.important}
+**Associated or independent, not both.** A pair of variables are either related in some way (associated) or not (independent). No pair of variables is both associated and independent.
+:::
+
+::: {.guidedpractice}
+Examine the variables in the loan dataset, which are described in @tbl-loan50-variables. Create two questions about possible relationships between variables in the loan data that are of interest to you.
+
+<details>
+<summary>Show answer</summary>
+Two example questions: (1) What is the relationship between loan amount and total income? (2) If someone's income is above the average, will their interest rate tend to be above or below the average?
+</details>
+:::
+
+
+## Explanatory and response variables {#sec-explanatory-response}
+
+When we ask questions about the relationship between two variables, we sometimes also want to determine if the change in one variable causes a change in the other. Consider the following rephrasing of an earlier question about the county dataset:
+
+> If there is an increase in the median household income in a county, does this *drive* an increase in its population?
+
+In this question, we are asking whether one variable affects another.
+
+::: {.definition}
+When we suspect one variable might causally affect another, we label the first variable the **explanatory variable** and the second the **response variable**.
+
+$$\text{explanatory variable} \;\longrightarrow\; \text{might affect} \;\longrightarrow\; \text{response variable}$$
+
+We also use the terms explanatory and response to describe variables where the response might be *predicted* using the explanatory variable, even if there is no causal relationship.
+:::
+
+For many pairs of variables, there is no hypothesized relationship, and these labels would not be applied to either variable.
+
+::: {.workedexample}
+In the stent study from @sec-case-stents, identify the explanatory and response variables.
+
+---
+
+The explanatory variable is the treatment group assignment (stent or control), because this is the factor that the researchers manipulated. The response variable is whether the patient had a stroke, because this is the outcome the researchers measured to evaluate the treatment's effect.
+:::
+
+::: {.caution}
+Labeling one variable as "explanatory" does not guarantee that it *causes* changes in the response. A formal evaluation of whether one variable causes changes in another requires an experiment. We discuss this distinction further in @sec-obs-vs-exp.
+:::
+
+::: {.original}
+Some disciplines use the terms **independent variable** and **dependent variable** instead of explanatory and response. We avoid this language because the word "independent" has a different technical meaning in statistics --- it refers to variables that are not associated. Using "independent" in two different ways can cause confusion.
+:::
+
+::: {.guidedpractice}
+A researcher is studying whether hours spent studying for an exam are related to exam scores. Identify the explanatory and response variables.
+
+<details>
+<summary>Show answer</summary>
+The explanatory variable is hours spent studying, because this is the factor that might influence the outcome. The response variable is exam score, because this is the outcome being measured.
+</details>
+:::
+
+
+## Observational studies and experiments {#sec-obs-vs-exp}
+
+There are two primary types of data collection: experiments and observational studies. Understanding the difference is critical, because the type of study determines what conclusions we can draw.
+
+### Experiments
+
+::: {.definition}
+An **experiment** is a study in which the researcher actively imposes treatments on the subjects in order to observe their responses. When subjects are randomly assigned to treatment groups, the study is called a **randomized experiment**.
+:::
+
+For instance, we may suspect that drinking a high-calorie energy drink will improve performance in a race. To check if there really is a causal relationship between the explanatory variable (whether the runner drank an energy drink or not) and the response variable (the race time), researchers identify a sample of individuals and split them into groups. The individuals in each group are *assigned* a treatment. Random assignment organizes the participants into groups that are roughly equal on all aspects, thus allowing us to control for any other variables that might affect the outcome (such as fitness level, racing experience, or age).
+
+For example, each runner in the experiment could be randomly assigned --- perhaps by flipping a coin --- into one of two groups: the first group receives a **placebo** (a fake treatment, in this case a no-calorie drink that looks identical to the energy drink) and the second group receives the high-calorie energy drink.
+
+::: {.definition}
+A **placebo** is a fake treatment that is made to look like the real treatment. Placebos are used so that subjects in the control group have the same experience as those in the treatment group (except for the actual treatment), which helps researchers isolate the effect of the treatment itself.
+:::
+
+See the stent case study in @sec-case-stents for another example of an experiment, though that study did not employ a placebo.
+
+### Observational studies
+
+::: {.definition}
+An **observational study** is a study in which the researcher collects data without interfering with how the data arise. In an observational study, the researcher merely observes what happens naturally.
+:::
+
+Researchers perform observational studies when they collect data via surveys, review medical or company records, or follow a **cohort** (a group of similar individuals) over time to form hypotheses about why certain outcomes might occur. In each of these situations, researchers merely observe the data that arise --- they do not assign treatments to subjects.
+
+::: {.workedexample}
+A researcher wants to know if smoking causes lung cancer. She follows 10,000 adults over 20 years, recording whether each person smokes and whether they develop lung cancer. Is this an experiment or an observational study?
+
+---
+
+This is an observational study. The researcher did not assign anyone to smoke or not smoke --- she simply observed the participants' behavior and health outcomes. While the study might reveal an association between smoking and lung cancer, it cannot by itself prove causation, because there may be other differences between smokers and non-smokers (such as diet, exercise habits, or genetics) that contribute to the outcome.
+:::
+
+### The key distinction: association vs. causation
+
+In general, observational studies can provide evidence of a naturally occurring association between variables, but they cannot by themselves show a causal connection. This is because in observational studies, researchers cannot control for all the other variables that might be influencing the outcome.
+
+::: {.important}
+**Association does not imply causation.**
+
+In general, association does not imply causation. An advantage of a randomized experiment is that it is easier to establish causal relationships, because random assignment tends to balance out the effects of other variables across treatment groups. Establishing causation from observational studies requires advanced statistical methods that are beyond the scope of this course. We revisit these ideas when we discuss study design in the study design chapter.
+:::
+
+::: {.workedexample}
+Determine whether each of the following is an experiment or an observational study:
+
+a. A pharmaceutical company randomly assigns 200 patients to receive either a new drug or a placebo and measures their cholesterol levels after 6 months.
+b. A university surveys its graduates to determine whether those who participated in study-abroad programs earn higher salaries five years after graduation.
+c. A teacher assigns students in her morning class to use a new learning app and students in her afternoon class to study using traditional methods, then compares exam scores.
+
+---
+
+a. This is an experiment --- the company randomly assigns patients to treatments.
+b. This is an observational study --- the university simply collects data on students who chose (or chose not) to study abroad. The students were not randomly assigned.
+c. This is tricky. The teacher assigns groups, so it might seem like an experiment. However, because students were not randomly assigned (they ended up in morning vs. afternoon classes for their own reasons), this is better described as a quasi-experiment or an observational study. Differences in outcomes could be due to the app, or they could be due to systematic differences between the types of students who take morning vs. afternoon classes.
+:::
+
+::: {.original}
+### Putting it all together
+
+The table below summarizes the key differences between experiments and observational studies.
+
+| | Experiment | Observational Study |
+|:--|:--|:--|
+| **Researcher's role** | Assigns treatments | Observes what happens naturally |
+| **Random assignment?** | Yes (in a randomized experiment) | No |
+| **Can establish causation?** | Yes | Generally no |
+| **Example** | Randomly assign patients to drug vs. placebo | Survey people about their exercise habits and health |
+:::
+
+
+## Chapter review {#sec-intro-to-data-review}
+
+### Summary
+
+This chapter introduced you to the world of data. Here are the key ideas:
+
+- **Data** are observations collected about the world around us. **Statistics** is the science of collecting, analyzing, and drawing conclusions from data.
+- A **data frame** organizes data so that each row represents an observation and each column represents a variable. Data organized this way is called **tidy data**.
+- Variables come in two fundamental types: **quantitative** (continuous or discrete) and **categorical** (nominal or ordinal).
+- When two variables show a pattern together, they are **associated**; if not, they are **independent**. Associations can be **positive** (both increase together) or **negative** (one increases while the other decreases).
+- The **explanatory variable** is the variable we think might influence the **response variable**.
+- **Experiments** randomly assign subjects to treatments and can establish causation. **Observational studies** merely observe what happens and can identify associations, but generally cannot establish causation.
+- **Association does not imply causation** --- this is one of the most important principles in statistics.
+
+Many of the ideas from this chapter will be revisited as we move on to doing end-to-end data analyses. In the next chapter, you will learn about how we can design studies to collect the data we need to make conclusions with the desired scope of inference.
+
+### Key terms
+
+The following terms were introduced in this chapter. You should be able to define and give an example of each.
+
+| Term | Term | Term |
+|:-----|:-----|:-----|
+| associated | data | data frame |
+| case | categorical variable | cohort |
+| continuous | dependent variable | discrete |
+| experiment | explanatory variable | independent |
+| level | negative association | nominal |
+| quantitative variable | observation | observational study |
+| ordinal | placebo | positive association |
+| randomized experiment | response variable | summary statistic |
+| tidy data | unit of observation | variable |
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-intro-to-data) at the back of the book.
+
+{{< include ../exercises/_intro-to-data-exercises.qmd >}}

@@ -1,0 +1,53 @@
+<!-- StatLens Interactive Exercises — Normal Approximation -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: reading normal probabilities,    -->
+<!-- standardizing, the success-failure condition, and when the formula and   -->
+<!-- the simulation agree.                                                    -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Read a normal probability in plain English.** Open the [Normal Distribution tool]({{< var tool-url >}}/distribution/normal/?mu=0&sigma=1&tail=right){target="_blank"} preset to $\mu = 0$, $\sigma = 1$.
+
+    a.  Drag the boundary to $z = 1$. Report the area to the right. What is the matching area to the *left* of $z = -1$? Why are they equal?
+    b.  Switch to the "middle" tail and set the boundaries to $\pm 2$. What is the area? Is your answer consistent with the **68--95--99.7 rule**?
+    c.  Switch back to "left tail" and set the boundary so the area is exactly 0.025. What $z$-value did you get? Where will you use this number later in the course?
+    d.  A student says: "Areas under the curve are probabilities, so they must be less than 1." Could you have an area of 1? An area of 0? What do those represent?
+
+
+2.  **Standardize, then read off the probability.** SAT math scores are approximately $N(\mu = 520, \sigma = 110)$.
+
+    a.  Compute the $z$-score for a student who scored 700.
+    b.  Use [Normal at $\mu = 520, \sigma = 110$]({{< var tool-url >}}/distribution/normal/?mu=520&sigma=110&tail=right){target="_blank"} to find the proportion of test-takers scoring above 700.
+    c.  Now use [the *standardized* normal at $\mu = 0, \sigma = 1$]({{< var tool-url >}}/distribution/normal/?mu=0&sigma=1&tail=right){target="_blank"} and set the boundary to your $z$-score from (a). Same answer?
+    d.  A counselor says: "About 5% of students score 700 or higher." Explain in one sentence what is *probabilistic* about the 5% and what is *not*.
+
+
+3.  **The sampling distribution of $\bar{x}$ is also normal --- with different $\sigma$.** Continuing the SAT example: a school selects a random sample of $n = 25$ students and computes their mean math score $\bar{x}$.
+
+    a.  What is the sampling distribution of $\bar{x}$? Give its mean, standard error, and shape.
+    b.  Use [the appropriate normal tool]({{< var tool-url >}}/distribution/normal/?mu=520&sigma=22&tail=right){target="_blank"} (pre-loaded with $\mu = 520$, $\sigma = 110/\sqrt{25} = 22$) to find the probability that $\bar{x} \ge 550$.
+    c.  Compare this to the probability that an **individual student** scores $\ge 550$. Which is bigger and why?
+    d.  The school doubles $n$ to 50. Will the probability in (b) get bigger or smaller? Why?
+
+
+4.  **Normal approximation to a proportion --- when does the formula work?** Open the [One-Proportion $z$-Test tool]({{< var tool-url >}}/inference/one-prop/){target="_blank"}.
+
+    a.  Enter a scenario where $\hat{p}$ is close to 0.5 and $n$ is large (say $\hat{p} = 0.45$, $n = 200$). Run a test. The tool reports the success--failure counts. Does the normal approximation apply?
+    b.  Now enter a scenario with small $\hat{p}$: $\hat{p} = 0.05$, $n = 40$. Does the normal approximation apply? Why or why not?
+    c.  For the small-$\hat{p}$ scenario in (b), if the test gives a small p-value, should you trust it? What should you do instead?
+    d.  Why is the success--failure rule based on $np_0$ and $n(1 - p_0)$ (using the **null** $p_0$) rather than $n\hat{p}$ and $n(1 - \hat{p})$ for a hypothesis test?
+
+
+5.  **Simulation vs. analytic --- when does the normal model agree with the bootstrap?** Pair the [One-Proportion $z$-Test]({{< var tool-url >}}/inference/one-prop/){target="_blank"} with the [Bootstrap CI for One Proportion]({{< var tool-url >}}/simulate/bootstrap-prop/){target="_blank"} on two datasets.
+
+    First a well-behaved case: any dataset with $\hat{p}$ near 0.5 and $n \ge 100$.
+
+    a.  Compare the 95% intervals from the two tools. How close are they?
+
+    Now a troublesome case: a dataset with small $\hat{p}$ (e.g., the medical consultant data, $\hat{p} \approx 0.05$).
+
+    b.  Compare the 95% intervals again. Where do they disagree --- in the midpoint, the width, or both?
+    c.  Look at the **bootstrap distribution** of $\hat{p}$. Is it symmetric or skewed? How does that explain the disagreement with the symmetric $z$-interval?
+    d.  A student says: "Both intervals are 'right' --- they're just approximations." What's a more accurate framing? Which interval is more honest in the troublesome case, and what does "honest" mean for an interval?
+

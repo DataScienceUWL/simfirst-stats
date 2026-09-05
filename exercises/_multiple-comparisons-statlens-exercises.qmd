@@ -1,0 +1,49 @@
+<!-- StatLens Interactive Exercises — Multiple Comparisons -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: family-wise error, choosing     -->
+<!-- Bonferroni vs. Tukey, reading pairwise CIs, and the ANOVA-then-posthoc   -->
+<!-- workflow.                                                                -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Frame the problem.** A researcher measures reaction time under **five** different lighting conditions and wants to know which conditions produce different mean reaction times. She plans to run all $\binom{5}{2} = 10$ pairwise $t$-tests, each at $\alpha = 0.05$.
+
+    a.  What is the **per-test** Type I error rate? What is the **family-wise** Type I error rate, and how do they differ?
+    b.  Under the assumption that all 10 null hypotheses are true and the tests are independent, what is the probability of at least one false positive across the 10 tests?
+    c.  A colleague suggests: "Just report the per-test $\alpha$; don't worry about the family-wise rate." Why is that unacceptable when the goal is to identify *which* conditions differ?
+
+
+2.  **Choose the procedure.** For each scenario, name the appropriate approach --- **Tukey HSD**, **Bonferroni**, **just the ANOVA F-test (no post-hoc needed)**, or **not a multiple-comparisons problem**.
+
+    a.  ANOVA rejects $H_0$ across 4 fertilizer brands; you want to identify which brands differ from which.
+    b.  ANOVA fails to reject $H_0$ across 4 fertilizer brands.
+    c.  You have 3 groups but pre-specified only *two* comparisons of interest before seeing the data (e.g., new-treatment vs. control, and new-treatment vs. standard).
+    d.  You want to compare mean scores across two teaching methods.
+    e.  You want to test the same difference-in-means for 100 different genes to see which are associated with a disease.
+
+
+3.  **Check conditions before you trust the post-hoc.** Open the [Multiple Comparisons tool]({{< var tool-url >}}/inference/multiple-comparisons/?dataset=insectsprays){target="_blank"} loaded with the classic `insectsprays` data (6 insecticides, count of dead insects per plot).
+
+    a.  Confirm from the tool's display: how many groups? What is the smallest per-group $n$? Is that enough for the pairwise procedure to work?
+    b.  What conditions does the Tukey HSD test require, beyond just "3+ groups"?
+    c.  The tool's output shows the ANOVA table above the pairwise panel. Why is it appropriate to *inspect* the omnibus F-test first, even if you plan to do pairwise comparisons?
+
+
+4.  **Run it and interpret it.** Stay in the [Multiple Comparisons tool]({{< var tool-url >}}/inference/multiple-comparisons/?dataset=insectsprays){target="_blank"}. Make sure `?posthoc=tukey` is active.
+
+    a.  Report the omnibus $F$ statistic and p-value. Does the ANOVA reject $H_0$?
+    b.  In the pairwise table, count how many pairs have **adjusted p-values below 0.05**. How many pairs are declared *not* discernibly different?
+    c.  Read the forest plot: which pairs' CIs cross zero, and which do not? Group the 6 sprays into "equivalence classes" (letters that don't discernibly differ from each other but do differ from other classes).
+    d.  A student writes: "Sprays A and B differ from Spray C at family-wise $\alpha = 0.05$." Write the *correct* sentence including which quantity has family-wise coverage, and what "family-wise" actually means for the interpretation.
+    e.  The tool warns *not* to run post-hoc if the omnibus F is not significant. Why?
+
+
+5.  **Bonferroni vs. Tukey --- when do they agree?** Switch the tool between `?posthoc=tukey` and `?posthoc=bonferroni` (or use the toggle).
+
+    a.  Compare the widths of the pairwise 95% CIs under Tukey vs. Bonferroni on the `insectsprays` data. Which method gives **narrower** intervals?
+    b.  Repeat on a smaller dataset (e.g., 3 groups, small $n$). Do the two methods still favor Tukey by the same margin?
+    c.  Why does Tukey give tighter intervals than Bonferroni **when the goal is all pairwise comparisons of means**? Tie your answer to what each method is *actually* controlling.
+    d.  When would you prefer **Bonferroni** over Tukey?
+    e.  A student is confused because on one dataset Bonferroni declares an extra pair discernibly different that Tukey does not. What could explain that, and which conclusion should you trust?
+

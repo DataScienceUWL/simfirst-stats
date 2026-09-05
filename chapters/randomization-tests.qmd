@@ -1,0 +1,502 @@
+---
+title: "Randomization Tests"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+Statistical inference is primarily concerned with understanding and quantifying the uncertainty of parameter estimates. While the equations and details change depending on the setting, the foundations for inference are the same throughout all of statistics. In this chapter, we introduce the **hypothesis testing framework** --- a formal method for evaluating competing claims about a population using data. We learn how to build **randomization distributions** by shuffling data under the assumption that there is no effect, and we use these distributions to compute **p-values** that quantify the strength of the evidence.
+:::
+
+## The hypothesis testing framework {#sec-hypothesis-framework}
+
+Throughout this course so far, you have worked with data in a variety of contexts. You have learned how to summarize and visualize data as well as how to describe relationships between variables. But more often than not, data have been collected to answer a research question about a larger group --- and the data are a (hopefully) representative subset.
+
+There is almost always variability in data --- one dataset will not be identical to a second dataset even if they are both collected from the same population using the same methods. However, quantifying the variability in the data is neither obvious nor easy. Answering the question "*how* different is one dataset from another?" is not trivial.
+
+::: {.workedexample}
+Suppose your professor splits the students in your class into two groups: students who sit on the left side of the classroom and students who sit on the right side. If $\hat{p}_{L}$ represents the proportion of left-side students who prefer reading on a screen and $\hat{p}_{R}$ represents the proportion of right-side students who prefer reading on a screen, would you be surprised if $\hat{p}_{L}$ did not *exactly* equal $\hat{p}_{R}$?
+
+---
+
+While the proportions $\hat{p}_{L}$ and $\hat{p}_{R}$ would probably be close to each other, it would be unusual for them to be exactly the same. We would probably observe a small difference due to *chance*.
+:::
+
+::: {.guidedpractice}
+If we do not think the side of the room a person sits on in class is related to whether they prefer to read books on a screen, what assumption are we making about the relationship between these two variables?
+
+<details>
+<summary>Show answer</summary>
+We would be assuming that these two variables are **independent** --- knowing which side of the room someone sits on tells us nothing about their reading preference.
+</details>
+:::
+
+The question at the heart of hypothesis testing is: *Could the pattern we observe in the data have arisen from chance alone, or is there something real going on?*
+
+::: {.important}
+**Hypothesis testing.**
+
+A **hypothesis test** is a statistical technique used to evaluate competing claims using data. The process involves:
+
+1. **State the hypotheses**: Define a null hypothesis ($H_0$) and an alternative hypothesis ($H_A$).
+2. **Collect data**: Gather evidence that bears on the hypotheses.
+3. **Assess the evidence**: Determine how likely the observed data would be if the null hypothesis were true.
+4. **Draw a conclusion**: Decide whether the evidence is strong enough to reject the null hypothesis.
+
+If the null hypothesis and the data notably disagree, then we reject the null hypothesis in favor of the alternative hypothesis. There are many nuances to hypothesis testing, and we will discuss these ideas throughout this chapter and those that follow.
+:::
+
+## Null and alternative hypotheses {#sec-null-alternative}
+
+::: {.definition}
+The **null hypothesis** ($H_0$) often represents a skeptical perspective or a claim of "no difference" or "no effect." It assumes that any observed pattern in the data is due to chance alone.
+
+The **alternative hypothesis** ($H_A$) represents the claim under investigation --- typically that there *is* a real difference, a real effect, or a real relationship. The alternative hypothesis is usually the reason the research was conducted in the first place.
+:::
+
+::: {.workedexample}
+The US court system considers two possible claims about a defendant: they are either innocent or guilty. If we set these claims up in a hypothesis framework, which would be the null hypothesis and which the alternative?
+
+---
+
+The jury considers whether the evidence is so convincing that there is no reasonable doubt regarding the person's guilt. The skeptical perspective (null hypothesis) is that the person is innocent until evidence is presented that convinces the jury the person is guilty (alternative hypothesis).
+
+$$H_0: \text{The defendant is innocent.}$$
+$$H_A: \text{The defendant is guilty.}$$
+:::
+
+::: {.caution}
+Notice that if a jury finds a defendant *not guilty*, this does not necessarily mean the jury is confident in the person's innocence. They are simply not convinced of the alternative. This is also the case with hypothesis testing: **even if we fail to reject the null hypothesis, we do not accept the null hypothesis as truth.** Failing to find evidence in favor of the alternative is not the same as finding evidence that the null hypothesis is true.
+:::
+
+## Case study: sex discrimination {#sec-sex-discrimination}
+
+We consider a study investigating sex discrimination in the 1970s, set in the context of personnel decisions within a bank. The research question: "Are individuals who identify as female discriminated against in promotion decisions made by their managers who identify as male?"
+
+::: {.caution}
+**A note on the data.** This 1972 study recorded each participant's sex as one of two categories, male or female, as was standard practice at the time. We keep that framing here to stay faithful to the original data. Sex and gender are now understood to be more varied than a single binary variable, and a study designed today might record them differently.
+:::
+
+### Observed data
+
+The participants were 48 bank supervisors who identified as male, attending a management institute at the University of North Carolina in 1972. They were asked to assume the role of personnel director of a bank and were given a personnel file to judge whether the person should be promoted to a branch manager position. The files were identical, except that half indicated the candidate identified as male and the other half indicated the candidate identified as female. These files were randomly assigned to the bank managers.
+
+::: {.guidedpractice}
+Is this an observational study or an experiment? How does the type of study impact what can be inferred from the results?
+
+<details>
+<summary>Show answer</summary>
+The study is an experiment, as subjects were randomly assigned a "male" file or a "female" file (remember, all the files were actually identical in content). Since this is an experiment, the results can be used to evaluate a causal relationship between the sex of a candidate and the promotion decision.
+</details>
+:::
+
+The results are summarized in the table below:
+
+|  | Promoted | Not promoted | Total |
+|:---|:---:|:---:|:---:|
+| Male | 21 | 3 | 24 |
+| Female | 14 | 10 | 24 |
+| Total | 35 | 13 | 48 |
+
+::: {.workedexample}
+When looking at the rates of promotion in this study, why might we be tempted to immediately conclude that individuals identifying as female are being discriminated against?
+
+---
+
+The large difference in promotion rates (58.3% for female personnel versus 87.5% for male personnel) suggests there might be discrimination against women in promotion decisions. However, we cannot yet be sure if the observed difference represents discrimination or is just due to random chance when there is no discrimination occurring. Since we wouldn't expect the sample proportions to be *exactly* equal, even if the truth was that the promotion decisions were independent of sex, we can't rule out random chance as a possible explanation.
+:::
+
+The observed difference in promotion rates is:
+
+$$\hat{p}_M - \hat{p}_F = \frac{21}{24} - \frac{14}{24} = 0.875 - 0.583 = 0.292$$
+
+This is 29.2 percentage points. The point estimate is large, but the sample size is small, making it unclear if this represents real discrimination or simply chance variation. We label two competing claims:
+
+- $H_0$: **Null hypothesis.** The variables `sex` and `decision` are independent. The difference in promotion rates of 29.2% was due to natural variability inherent in the random assignment.
+- $H_A$: **Alternative hypothesis.** The variables `sex` and `decision` are *not* independent. The difference in promotion rates of 29.2% was not due to natural variability, and equally qualified female personnel are less likely to be promoted than male personnel.
+
+## Building a randomization distribution {#sec-randomization-distribution}
+
+What would it mean if the null hypothesis were true? It would mean each banker would decide whether to promote the candidate without regard to the sex indicated on the file. The 35 promotions and 13 non-promotions were determined by factors *other than sex*, and the difference we observed was just bad luck in how the files happened to be assigned.
+
+We can test this by performing a **randomization** --- simulating what the results would look like if sex and the promotion decision were independent, as the null hypothesis claims.
+
+### The card-shuffling metaphor
+
+Think of the data as 48 cards:
+
+- 35 red cards (promoted)
+- 13 white cards (not promoted)
+
+In the actual study, 24 cards were dealt to the "male" pile and 24 to the "female" pile. Under the null hypothesis, the color of each card (the promotion decision) has nothing to do with which pile it lands in.
+
+To simulate what the null hypothesis looks like, we:
+
+1. **Thoroughly shuffle** all 48 cards together.
+2. **Deal** 24 into a "male" pile and 24 into a "female" pile.
+3. **Count** the number of red (promoted) cards in each pile and compute the difference in proportions.
+
+This gives us one simulated difference *under the null hypothesis* --- a difference that arose purely from the random shuffle, not from any real discrimination.
+
+### One simulation
+
+Suppose after shuffling and dealing, we get the following result:
+
+|  | Promoted | Not promoted | Total |
+|:---|:---:|:---:|:---:|
+| Male | 18 | 6 | 24 |
+| Female | 17 | 7 | 24 |
+| Total | 35 | 13 | 48 |
+
+The simulated difference is $18/24 - 17/24 = 0.042$, or about 4.2% --- much smaller than the observed 29.2%.
+
+::: {.guidedpractice}
+What is the difference in promotion rates in the simulated data above? How does this compare to the observed difference of 29.2% from the actual study?
+
+<details>
+<summary>Show answer</summary>
+The simulated difference is $18/24 - 17/24 = 0.042$ or about 4.2% in favor of male personnel. This difference due to chance is much smaller than the 29.2% difference observed in the actual groups.
+</details>
+:::
+
+### Many simulations
+
+One simulation is not enough. We need to repeat the shuffle-and-deal process many times to build up a picture of what *chance alone* looks like. Using a computer, we can do this hundreds or thousands of times.
+
+```{r}
+#| label: fig-sex-discrim-rand-dist
+#| fig-cap: "A histogram of differences from 100 simulations produced under the null hypothesis. The simulated sex and decision are independent. Differences at least as large as the observed 0.292 are highlighted in red. [↗ Try this live](https://learnlens.org/statlens/simulate/randomization-diff-props/) — shuffle the labels yourself and rebuild the null distribution."
+#| fig-alt: "A histogram of 100 simulated differences in promotion rates between male and female candidates. The distribution is centered at zero. A small number of simulations at or beyond 0.292 are highlighted, showing they are rare under the null hypothesis."
+#| fig-width: 7
+#| fig-height: 4.5
+#| echo: false
+
+library(ggplot2)
+set.seed(42)
+
+# Simulate: 35 promoted out of 48, split into 24 male and 24 female
+n_sims <- 100
+sim_diffs <- replicate(n_sims, {
+  promoted <- sample(c(rep(1, 35), rep(0, 13)))
+  p_m <- mean(promoted[1:24])
+  p_f <- mean(promoted[25:48])
+  p_m - p_f
+})
+
+sim_df <- data.frame(diff = sim_diffs)
+sim_df$extreme <- sim_df$diff >= 0.292
+
+ggplot(sim_df, aes(x = diff, fill = extreme)) +
+  geom_histogram(binwidth = 1/24, boundary = 0, color = "white", linewidth = 0.3) +
+  scale_fill_manual(values = c("FALSE" = COL_BLUE, "TRUE" = COL_RED),
+                    labels = c("Below 0.292", "At or above 0.292"),
+                    name = NULL) +
+  geom_vline(xintercept = 0.292, linetype = "dashed", color = COL_RED, linewidth = 0.8) +
+  annotate("text", x = 0.32, y = Inf, label = "Observed\ndifference = 0.292",
+           color = COL_RED, vjust = 1.5, hjust = 0, size = 3.5, fontface = "bold") +
+  labs(x = expression(hat(p)[M] - hat(p)[F]),
+       y = "Count") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```
+
+The distribution of these simulated differences is centered around 0. This makes sense: under the null hypothesis, which makes no distinction between male and female files, we would expect the difference to be near zero with some random fluctuation.
+
+::: {.workedexample}
+How often would you observe a difference of at least 29.2% according to the randomization distribution? Often, sometimes, rarely, or never?
+
+---
+
+It appears that a difference of at least 29.2% under the null hypothesis would only happen about 2% of the time. Such a low probability indicates that observing such a large difference from chance alone is rare.
+:::
+
+### The conclusion
+
+The difference of 29.2% is a rare event if there really is no effect of sex on promotion decisions. This provides us with two possible interpretations:
+
+- If $H_0$ is true: Sex has no effect on promotion decisions, and we observed a difference that is so large it would only happen rarely by chance.
+- If $H_A$ is true: Sex has an effect on promotion decisions, and what we observed was actually due to equally qualified female candidates being discriminated against.
+
+When we conduct formal studies, we reject a null position if the data strongly conflict with it. Since there was only about a 2% probability of obtaining a difference at least as large as 29.2% under the null hypothesis, we conclude that the data provide strong evidence of sex discrimination. We reject the null hypothesis in favor of the alternative.
+
+::: {.statlens}
+**Predict → Do → Explain.** Open the [Randomization Test Walkthrough]({{< var tool-url >}}/simulate/randomization-diff-props/?activity=randomization-test-gated.json){target="_blank"} --- a gated activity that loads the sex-discrimination data and walks you through the permutation logic with a cards-shuffling mechanism strip alongside the resampled dotplot. The activity opens with a **Predict** step (commit to the center, shape, and where you expect the observed 0.292 to fall in the shuffle distribution), walks you through 1,000 shuffles with a reality-check gate at each stage, and closes with an **Explain** step where you articulate why the shuffle centers at zero and why the tail fraction *is* the p-value. Your predictions and explanation save locally in the tool, so you can return to your work on the same device.
+:::
+
+::: {.callout-tip}
+**Open sandbox** (no scaffolding). Prefer to run the test yourself with your own data? Launch the [Randomization Test: Difference in Proportions]({{< var tool-url >}}/simulate/randomization-diff-props/){target="_blank"} directly, enter the sex-discrimination table (or your own), generate 1,000 shuffled differences, and read off the tail fraction as the p-value.
+:::
+
+## Case study: opportunity cost {#sec-opportunity-cost}
+
+How rational and consistent is the behavior of the typical American college student? Here, we explore whether reminding students that money not spent now can be spent later causes them to be thriftier.
+
+One hundred and fifty students were recruited for the study. All were given a scenario about purchasing a video on sale for \$14.99. Half (the control group) were given these options:
+
+> (A) Buy this entertaining video.
+> (B) Not buy this entertaining video.
+
+The other half (the treatment group) saw a slightly modified option (B):
+
+> (A) Buy this entertaining video.
+> (B) Not buy this entertaining video. Keep the \$14.99 for other purchases.
+
+The hypotheses are:
+
+- $H_0$: Reminding students that they can save money for later purchases will not have any impact on their spending decisions.
+- $H_A$: Reminding students that they can save money for later purchases will reduce the chance they will continue with a purchase.
+
+### Observed data
+
+The results are summarized below:
+
+|  | Buy video | Not buy video | Total |
+|:---|:---:|:---:|:---:|
+| Control | 56 | 19 | 75 |
+| Treatment | 41 | 34 | 75 |
+| Total | 97 | 53 | 150 |
+
+We define a "success" as a student who chooses *not* to buy the video. The difference in the proportion choosing not to buy is:
+
+$$\hat{p}_{T} - \hat{p}_{C} = \frac{34}{75} - \frac{19}{75} = 0.453 - 0.253 = 0.200$$
+
+The proportion of students who chose not to buy was 20 percentage points higher in the treatment group. Is this 20% difference so prominent that it is unlikely to have occurred from chance alone?
+
+### Simulating under the null
+
+Using the same randomization technique, we start with 150 index cards: 53 labeled "not buy video" and 97 labeled "buy video." We shuffle all cards together and deal them into two stacks of 75.
+
+::: {.workedexample}
+If we randomly assign the cards into simulated treatment and control groups, how many "not buy video" cards would we expect in each group? What would be the expected difference in proportions?
+
+---
+
+Since the groups are equal in size, we would expect about $53/2 \approx 26$ or 27 "not buy video" cards in each group, yielding a difference of roughly 0%. Due to random chance, we might sometimes observe a little more or fewer than 26--27.
+:::
+
+After running 1,000 simulations, the results show that the distribution of simulated differences is centered at 0, as expected under the null hypothesis.
+
+```{r}
+#| label: fig-opportunity-cost-rand-dist
+#| fig-cap: "A histogram of 1,000 simulated differences produced under the null hypothesis. Differences at least as large as the observed 0.20 are highlighted in red. [↗ Try this live](https://learnlens.org/statlens/simulate/randomization-diff-props/) — run the randomization on your own data — vary reps and watch it settle."
+#| fig-alt: "A histogram of 1000 simulated differences between the proportion of students choosing not to buy the video in the treatment and control groups. The distribution is centered at zero. A small number of simulations at or beyond 0.20 are highlighted in red."
+#| fig-width: 7
+#| fig-height: 4.5
+#| echo: false
+
+set.seed(42)
+
+# Simulate: 97 "buy" and 53 "not buy" among 150, split into two groups of 75
+n_sims <- 1000
+sim_diffs <- replicate(n_sims, {
+  not_buy <- sample(c(rep(1, 53), rep(0, 97)))
+  p_treatment <- mean(not_buy[1:75])
+  p_control <- mean(not_buy[76:150])
+  p_treatment - p_control
+})
+
+sim_df <- data.frame(diff = sim_diffs)
+sim_df$extreme <- sim_df$diff >= 0.20
+
+ggplot(sim_df, aes(x = diff, fill = extreme)) +
+  geom_histogram(binwidth = 1/75, boundary = 0, color = "white", linewidth = 0.3) +
+  scale_fill_manual(values = c("FALSE" = COL_BLUE, "TRUE" = COL_RED),
+                    labels = c("Below 0.20", "At or above 0.20"),
+                    name = NULL) +
+  geom_vline(xintercept = 0.20, linetype = "dashed", color = COL_RED, linewidth = 0.8) +
+  annotate("text", x = 0.22, y = Inf, label = "Observed\ndifference = 0.20",
+           color = COL_RED, vjust = 1.5, hjust = 0, size = 3.5, fontface = "bold") +
+  labs(x = expression(hat(p)[T] - hat(p)[C]),
+       y = "Count") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "bottom")
+```
+
+Under the null hypothesis, we would observe a difference of at least +20% about 0.6% of the time. That is very rare! We conclude the data provide strong evidence there is a treatment effect: reminding students that they could spend money later lowers their chance of making a purchase. Because this is an experiment (with random assignment), we can make a causal claim.
+
+## P-values {#sec-p-values}
+
+The probability we computed in the previous sections --- the chance of observing a result as extreme as or more extreme than the one actually observed, *if the null hypothesis were true* --- has a name.
+
+::: {.definition}
+The **p-value** is the probability of observing data at least as favorable to the alternative hypothesis as our current dataset, if the null hypothesis were true. We typically use a summary statistic of the data, such as a difference in proportions, to compute the p-value. This summary value is called the **test statistic**.
+:::
+
+::: {.workedexample}
+In the sex discrimination study, the test statistic was the difference in promotion rates. What was the test statistic in the opportunity cost study?
+
+---
+
+The test statistic in the opportunity cost study was the difference in the proportion of students who decided against the video purchase in the treatment and control groups: $\hat{p}_T - \hat{p}_C = 0.200$.
+:::
+
+::: {.important}
+**Interpreting the p-value.**
+
+- A **small p-value** (e.g., below 0.05) means that the observed result would be rare if the null hypothesis were true. This is evidence *against* the null hypothesis.
+- A **large p-value** (e.g., above 0.10) means that the observed result is not particularly unusual under the null hypothesis. The data do not provide strong evidence against the null hypothesis.
+- The p-value is **not** the probability that the null hypothesis is true. It is the probability of the observed data (or more extreme data) *given that* the null hypothesis is true.
+:::
+
+::: {.caution}
+A common mistake is to interpret the p-value as the probability that the null hypothesis is true (e.g., "there is a 2% chance that sex has no effect on promotions"). This is incorrect. The p-value tells us how *surprising* the data would be *if* the null hypothesis were true, not how likely the null hypothesis is to be true.
+:::
+
+## Statistical discernibility {#sec-statistical-significance}
+
+::: {.definition}
+We say that the data provide **statistically discernible** evidence against the null hypothesis if the p-value is less than a predetermined threshold called the **discernibility level**, denoted $\alpha$ (the Greek letter alpha).
+:::
+
+::: {.callout-note}
+## A note on the vocabulary
+
+Traditionally this result has been called *statistically significant*, and the threshold $\alpha$ the *significance level* --- terms you will still see in most other books. Because *significant* in everyday English suggests *large* or *important*, which a small but genuinely detectable effect may not be, we follow *Introduction to Modern Statistics* and instead call the result **statistically discernible** and the threshold the **discernibility level**.
+:::
+
+The most commonly used discernibility level is $\alpha = 0.05$, meaning we reject the null hypothesis when the p-value is less than 5%. However, there is nothing magical about 0.05 --- it is a convention, and in some fields or applications a stricter (e.g., 0.01) or more lenient (e.g., 0.10) threshold may be appropriate.
+
+::: {.workedexample}
+In the opportunity cost study, we found that a difference of at least 20% would occur only about 6-in-1,000 times if the reminder had no influence on student decisions. The p-value is approximately 0.006. Would you classify this as statistically discernible?
+
+---
+
+Yes. Since $p\text{-value} = 0.006 < 0.05 = \alpha$, the data provide statistically discernible evidence that US college students were actually influenced by the reminder.
+:::
+
+::: {.important}
+**What "statistically discernible" does and does not mean.**
+
+"Statistically discernible" means the p-value fell below the chosen discernibility level. It does **not** necessarily mean the effect is large or practically important. A very large sample can detect a tiny difference as "statistically discernible" even if the difference is too small to matter in practice.
+
+Conversely, "not statistically discernible" does not mean there is no effect. It may simply mean the sample was too small to detect the effect.
+:::
+
+### Decision framework
+
+The logic of hypothesis testing follows a consistent pattern:
+
+| If the p-value is... | Then we... | Because... |
+|:---|:---|:---|
+| Less than $\alpha$ | **Reject** $H_0$ | The data are unlikely under $H_0$; evidence supports $H_A$ |
+| Greater than or equal to $\alpha$ | **Fail to reject** $H_0$ | The data are not sufficiently unusual under $H_0$ |
+
+::: {.guidedpractice}
+A researcher tests whether a new teaching method improves exam scores compared to the standard method. The p-value from the randomization test is 0.12. Using $\alpha = 0.05$, what conclusion should the researcher draw?
+
+<details>
+<summary>Show answer</summary>
+Since $p\text{-value} = 0.12 > 0.05 = \alpha$, the researcher fails to reject the null hypothesis. The data do not provide sufficient evidence that the new teaching method improves exam scores. This does not mean the new method is ineffective --- only that this study did not produce enough evidence to conclude it is effective.
+</details>
+:::
+
+## Two-sided tests {#sec-two-sided-tests}
+
+In the sex discrimination study, we looked for differences in *one direction only* --- whether female candidates were promoted at a lower rate. This is called a **one-sided** (or one-tailed) test. The alternative hypothesis specified a direction:
+
+$$H_A: p_M - p_F > 0 \quad \text{(males promoted at a higher rate)}$$
+
+Sometimes, however, we are interested in detecting a difference in *either direction*. For example, if we are studying whether a new drug changes blood pressure (it could increase it *or* decrease it), we would use a **two-sided** (or two-tailed) test:
+
+$$H_A: p_1 \neq p_2 \quad \text{(the proportions are different, in either direction)}$$
+
+::: {.definition}
+In a **one-sided test**, the alternative hypothesis specifies a direction (greater than or less than). The p-value is computed as the proportion of the randomization distribution in one tail.
+
+In a **two-sided test**, the alternative hypothesis does not specify a direction (just "different"). The p-value is computed as the proportion of the randomization distribution in *both* tails --- values at least as extreme as the observed statistic in either direction.
+:::
+
+::: {.workedexample}
+Suppose we are testing whether a coin is fair. We flip it 100 times and get 60 heads.
+
+- **One-sided** ($H_A: p > 0.5$): The p-value counts only simulations with 60 or more heads.
+- **Two-sided** ($H_A: p \neq 0.5$): The p-value counts simulations with 60 or more heads *and* simulations with 40 or fewer heads (equally extreme in the other direction).
+
+---
+
+For a symmetric randomization distribution, the two-sided p-value is approximately twice the one-sided p-value. If the one-sided p-value is 0.03, the two-sided p-value is approximately 0.06.
+:::
+
+::: {.guidedpractice}
+A researcher wants to know if a new fertilizer changes plant growth compared to no fertilizer. Should this be a one-sided or two-sided test? Write the hypotheses using appropriate notation, where $\mu_T$ is the mean growth with fertilizer and $\mu_C$ is the mean growth without.
+
+<details>
+<summary>Show answer</summary>
+This should be a two-sided test because the fertilizer could either increase or decrease growth (perhaps it has a toxic effect in some soils). The hypotheses are: $H_0: \mu_T - \mu_C = 0$ (no difference in mean growth) and $H_A: \mu_T - \mu_C \neq 0$ (the fertilizer changes mean growth, in either direction).
+</details>
+:::
+
+::: {.important}
+**Choosing one-sided vs. two-sided.**
+
+- Use a **one-sided test** when you have a specific directional hypothesis *before looking at the data*. For example, "we believe this drug *lowers* blood pressure."
+- Use a **two-sided test** when you want to detect a difference in either direction, or when you are not sure which direction the difference might go.
+- When in doubt, use a two-sided test. It is the more conservative choice and is less susceptible to bias from choosing the direction after seeing the data.
+:::
+
+## The randomization test procedure: a summary {#sec-randomization-summary}
+
+We can summarize the randomization test procedure as follows:
+
+1. **Frame the research question in terms of hypotheses.** The null hypothesis ($H_0$) usually represents no difference or no effect. The alternative hypothesis ($H_A$) represents the claim of interest.
+
+2. **Collect data.** If the research question focuses on associations but not causation, use an observational study. If you want to establish a causal connection, use an experiment with random assignment.
+
+3. **Model what would happen under the null hypothesis.** Shuffle (randomize) the data to break any association between the explanatory and response variables. Compute the test statistic for each shuffle. Repeat many times to build the **randomization distribution** (also called the null distribution).
+
+4. **Compute the p-value.** Determine what proportion of the randomization distribution is at least as extreme as the observed test statistic.
+
+5. **Draw a conclusion.** If the p-value is small (less than $\alpha$), reject $H_0$ and conclude there is evidence for $H_A$. If the p-value is not small, fail to reject $H_0$. Write the conclusion in context, in plain language.
+
+::: {.statlens}
+**See it in action.** Open the [Randomization Test: Difference in Proportions]({{< var tool-url >}}/simulate/randomization-diff-props/){target="_blank"} to run the full procedure on your own data --- and watch how the p-value shifts when you change the sample size or the magnitude of the observed difference.
+:::
+
+::: {.callout-note}
+### Testing a single proportion by simulation
+
+This chapter focused on comparing two groups because that is the most common use of a randomization test. The same simulate-under-$H_0$ logic also works for a *single* sample against a claimed proportion — instead of shuffling group labels, you draw new samples from a modeled null population. That one-sample simulation test is developed in the [inference for proportions chapter](inference-proportions.qmd) (see the "Building the null distribution by simulation" section).
+:::
+
+## Chapter review {#sec-randomization-tests-review}
+
+### Summary
+
+- A **hypothesis test** evaluates two competing claims: the null hypothesis ($H_0$), which represents no effect or no difference, and the alternative hypothesis ($H_A$), which represents the claim under investigation.
+- A **randomization test** (or permutation test) assesses the null hypothesis by shuffling the data to simulate what would happen if there were truly no effect. The collection of simulated test statistics forms the **randomization distribution**.
+- The **test statistic** is the summary value computed from the data (e.g., a difference in proportions) that we use to evaluate the hypotheses.
+- The **p-value** is the probability of observing a test statistic at least as extreme as the one observed, assuming the null hypothesis is true. It quantifies the strength of the evidence against $H_0$.
+- We reject $H_0$ when the p-value is less than the **discernibility level** $\alpha$ (commonly 0.05). This is called a **statistically discernible** result.
+- A **one-sided test** looks for effects in a specified direction; a **two-sided test** looks for effects in either direction.
+- Failing to reject $H_0$ is not the same as proving $H_0$ is true.
+- Statistical discernibility does not imply practical importance.
+
+### Key terms
+
+| Term | Definition |
+|:-----|:-----------|
+| Hypothesis test | A formal procedure for evaluating competing claims using data |
+| Null hypothesis ($H_0$) | The claim of no effect or no difference; the skeptical position |
+| Alternative hypothesis ($H_A$) | The claim that there is an effect or difference |
+| Randomization test | A hypothesis test that builds a null distribution by shuffling data |
+| Randomization distribution | The distribution of the test statistic under repeated randomizations |
+| Test statistic | The summary value (e.g., difference in proportions) used to evaluate hypotheses |
+| P-value | Probability of observing a result as extreme as or more extreme than the data, if $H_0$ is true |
+| Discernibility level ($\alpha$) | The threshold below which the p-value leads us to reject $H_0$ |
+| Statistically discernible | A result whose p-value falls below $\alpha$ |
+| One-sided test | Alternative hypothesis specifies a direction |
+| Two-sided test | Alternative hypothesis does not specify a direction |
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-randomization-tests) at the back of the book.
+
+{{< include ../exercises/_randomization-tests-exercises.qmd >}}
+
+{{< include ../exercises/_randomization-tests-statlens-exercises.qmd >}}

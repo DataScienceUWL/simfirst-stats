@@ -1,0 +1,58 @@
+<!-- StatLens Interactive Exercises — Linear Regression -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based -->
+<!-- on purpose; the numbers come from StatLens.                              -->
+
+### StatLens Exercises {.unnumbered}
+
+These exercises focus on the parts of regression inference a calculator *can't* do for you: **framing the question**, **choosing the right procedure**, **checking the four regression conditions**, and **interpreting** slopes and intervals without falling into the standard traps. Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic.
+
+1.  **Frame the question.** A real-estate analyst fits a simple linear regression of house **price** (response, $\$1000\text{s}$) on **square footage** (explanatory) using 200 homes in one zip code. The fitted line is $\widehat{\text{price}} = 80 + 0.15 \cdot \text{sqft}$.
+
+    a.  Identify the explanatory and response variables and give the symbol for the **population slope**.
+    b.  Write the null and alternative hypotheses for a two-sided test of whether square footage is associated with price.
+    c.  The slope is 0.15. **Interpret it in context, including units.** Then identify the most common error students make in slope interpretation.
+
+
+2.  **Choose the procedure.** For each scenario, name the procedure --- **CI for slope $\beta_1$**, **hypothesis test for $\beta_1$**, **correlation test ($\rho = 0$)**, or **not a regression problem**.
+
+    a.  Is there evidence of *any* linear association between hours studied and exam score?
+    b.  Estimate, with a margin of error, how much exam score changes per extra hour studied.
+    c.  Compare the *mean* exam score in morning vs. evening sections of the same course.
+    d.  Decide whether the **strength** of the linear relationship between two variables is statistically discernible from zero.
+    e.  Estimate the mean weight of all puppies in a litter from a sample of 8.
+
+
+3.  **Check the conditions before you trust the slope.** Open a regression dataset in the [Regression Slope tool]({{< var tool-url >}}/inference/slope/){target="_blank"}; pair it with the [Regression scatterplot]({{< var tool-url >}}/explore/regression/){target="_blank"} for diagnostics.
+
+    a.  Name the **four** regression conditions (often summarized as "LINE": **L**inearity, **I**ndependence, **N**ormality of residuals, **E**qual variance of residuals).
+    b.  Open the residual plot. What pattern in the residuals would convince you that the **linearity** condition has failed? What pattern would convince you the **equal-variance** condition has failed?
+    c.  Suppose one observation has a residual five times larger than any other. Should you discard it before re-running the regression? What two questions should you ask first?
+
+
+4.  **Run it and interpret it.** Open any regression dataset in the [Regression Slope tool]({{< var tool-url >}}/inference/slope/){target="_blank"}.
+
+    a.  Report the estimated slope $b_1$, its standard error, the $t$ statistic, and the p-value.
+    b.  Read off the 95% confidence interval for $\beta_1$. Does it contain 0?
+    c.  Write a one-sentence conclusion **in context**, naming both variables, the direction, and the strength of evidence.
+    d.  Which statement is the correct interpretation of the 95% CI for $\beta_1$?
+
+        i.   There is a 95% probability that the true slope lies in this interval.
+        ii.  If the study were repeated many times, about 95% of the intervals built this way would contain the true slope.
+        iii. 95% of the data points fall within this interval.
+        iv.  About 95% of the predicted responses fall within this interval.
+
+
+5.  **Simulation vs. analytic --- the bootstrap slope as a check.** The $t$-CI for the slope ($b_1 \pm t^* \cdot \text{SE}(b_1)$) assumes the LINE conditions hold. The bootstrap CI for the slope assumes only that the data are an i.i.d. sample from the population. You will compare them.
+
+    First a well-behaved case. Open any roughly linear, homoscedastic regression dataset in both the [Regression Slope tool]({{< var tool-url >}}/inference/slope/){target="_blank"} *and* the [Bootstrap Slope tool]({{< var tool-url >}}/simulate/bootstrap-slope/){target="_blank"} (generate 5000 resamples in the latter).
+
+    a.  Compare the two 95% intervals for $\beta_1$. How close are they?
+
+    Now a troublesome case. Pick a regression dataset (or paste in one) with **visible heteroscedasticity** --- a clear fan-shaped residual pattern.
+
+    b.  Compare the two 95% intervals again. Do they still agree? Which one is **wider**?
+    c.  Explain the pattern. The bootstrap resamples whole $(x, y)$ pairs, so it "sees" the heteroscedasticity --- the resampled slopes fluctuate more in some parts of $x$ than others. The $t$-formula uses a *single* SE pooled across all $x$, which under-counts the variability in the high-spread region. Which interval is more honest?
+    d.  A student concludes: "If the conditions fail, you must transform the data." Why is that the *first* impulse, but not the only one? When is **the bootstrap CI the better tool** even after a transformation?
+

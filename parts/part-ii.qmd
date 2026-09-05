@@ -1,0 +1,7 @@
+---
+title: "Unit 2: Simulate"
+---
+
+How can we draw conclusions about a population from a single sample? We answer this question through *simulation*. By resampling data thousands of times, we build an intuitive understanding of sampling variability, hypothesis testing, and confidence intervals — without formulas or distribution tables.
+
+This is the heart of the simulation-first approach: understand the *logic* of inference before learning the mathematical shortcuts.

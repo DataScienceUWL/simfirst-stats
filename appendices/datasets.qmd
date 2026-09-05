@@ -1,0 +1,108 @@
+---
+title: "Datasets"
+---
+
+Every dataset used in this textbook is listed below with a one-line description, its source package, and the chapters where it appears. Every dataset is also available as a CSV in this book's [`datasets/`](https://github.com/DataScienceUWL/DataScienceUWL.github.io/tree/main/STAT145/textbook/datasets) folder for use with Jamovi or any other tool.
+
+## From the `openintro` R package {#sec-openintro-data}
+
+These datasets ship with the [openintro R package](https://cran.r-project.org/package=openintro). Install with `install.packages("openintro")` and access via `openintro::name` or `data(name)` after `library(openintro)`. Each name below links to the package's documentation page.
+
+| Dataset | Description | Where used |
+|:--------|:------------|:-----------|
+| [`antibiotics`](https://openintrostat.github.io/openintro/reference/antibiotics.html) | Antibiotic vs. symptomatic treatment for acute sinusitis | Ch 3 |
+| [`avandia`](https://openintrostat.github.io/openintro/reference/avandia.html) | Cardiovascular problems in patients on Avandia vs. other diabetes drug | Ch 7 |
+| [`bac`](https://openintrostat.github.io/openintro/reference/bac.html) | Blood-alcohol content vs. beers consumed | Ch 20, 21 |
+| [`babies_crawl`](https://openintrostat.github.io/openintro/reference/babies_crawl.html) | Average crawling age vs. birth-month temperature | Ch 19, 21 |
+| [`bdims`](https://openintrostat.github.io/openintro/reference/bdims.html) | Body measurements (girths, diameters, sex) of 507 physically active adults | Ch 13, 19, 20 |
+| [`biontech_adolescents`](https://openintrostat.github.io/openintro/reference/biontech_adolescents.html) | Pfizer-BioNTech COVID-19 vaccine trial in 12–15-year-olds | Ch 1 |
+| [`births14`](https://openintrostat.github.io/openintro/reference/births14.html) | 1000 births in North Carolina, 2014 (birth weight, weeks, mom's habits) | Ch 13, 14, 20 |
+| [`china`](https://openintrostat.github.io/openintro/reference/china.html) | Newborn health outcomes vs. rural/urban location in China | Ch 17 |
+| [`cia_factbook`](https://openintrostat.github.io/openintro/reference/cia_factbook.html) | 259 country-level indicators (life expectancy, GDP, births) from the CIA | Ch 2, 4 |
+| [`coast_starlight`](https://openintrostat.github.io/openintro/reference/coast_starlight.html) | Distances and travel times between stops on Amtrak's Coast Starlight | Ch 19, 20 |
+| [`corr_match`](https://openintrostat.github.io/openintro/reference/corr_match.html) | Scatterplots with known correlations for the match-r-to-plot exercise | Ch 19 |
+| [`county_2019`](https://openintrostat.github.io/openintro/reference/county_2019.html) | 2019 US Census county-level statistics | Ch 20 |
+| [`county_complete`](https://openintrostat.github.io/openintro/reference/county_complete.html) | Full US county socioeconomic dataset (many years, many variables) | Ch 2, 4 |
+| [`daycare_fines`](https://openintrostat.github.io/openintro/reference/daycare_fines.html) | Late-pickup counts at 10 daycare centers before/during/after a fine | Ch 1 |
+| [`epa2021`](https://openintrostat.github.io/openintro/reference/epa2021.html) | 2021 EPA vehicle fuel economy | Ch 14 |
+| [`exam_grades`](https://openintrostat.github.io/openintro/reference/exam_grades.html) | Course grades and exam scores in a college statistics course | Ch 19 |
+| [`friday`](https://openintrostat.github.io/openintro/reference/friday.html) | Traffic and admissions counts on Friday the 6th vs. the 13th | Ch 14 |
+| [`heart_transplant`](https://openintrostat.github.io/openintro/reference/heart_transplant.html) | Stanford heart-transplant study --- survival by treatment | Ch 3, 7, 12 |
+| [`hsb2`](https://openintrostat.github.io/openintro/reference/hsb2.html) | High School and Beyond survey subsample (reading, writing, math scores) | Ch 14 |
+| [`immigration`](https://openintrostat.github.io/openintro/reference/immigration.html) | Public opinion on immigration policy by age group | Ch 3 |
+| [`lizard_habitat`](https://openintrostat.github.io/openintro/reference/lizard_habitat.html) | Lizard sun/partial/shade preference by habitat | Ch 16 |
+| [`lizard_run`](https://openintrostat.github.io/openintro/reference/lizard_run.html) | Sprint speed of lizards under two temperature conditions | Ch 14 |
+| [`loan50`](https://openintrostat.github.io/openintro/reference/loan50.html) | 50 personal loans (income, rate, term, purpose) from Lending Club | Ch 4, 5 |
+| [`mammals`](https://openintrostat.github.io/openintro/reference/mammals.html) | Body/brain weight and other traits for 62 mammal species | Ch 5 |
+| [`mcu_films`](https://openintrostat.github.io/openintro/reference/mcu_films.html) | Marvel Cinematic Universe Infinity Saga films (runtimes, gross) | Ch 1 |
+| [`migraine`](https://openintrostat.github.io/openintro/reference/migraine.html) | Acupuncture vs. control for migraine pain relief | Ch 1 |
+| [`nyc_marathon`](https://openintrostat.github.io/openintro/reference/nyc_marathon.html) | NYC Marathon winning times by year and gender | Ch 5 |
+| [`oscars`](https://openintrostat.github.io/openintro/reference/oscars.html) | Best Actor and Best Actress Oscar winner ages | Ch 5 |
+| [`pm25_2022_durham`](https://openintrostat.github.io/openintro/reference/pm25_2022_durham.html) | Daily PM2.5 air-quality readings, Durham NC 2022 | Ch 4 |
+| [`possum`](https://openintrostat.github.io/openintro/reference/possum.html) | Body measurements of 104 mountain brushtail possums | Ch 19, 20, 21 |
+| [`seattlepets`](https://openintrostat.github.io/openintro/reference/seattlepets.html) | Registered pets in Seattle (species, names, breed) | Ch 1 |
+| [`sinusitis`](https://openintrostat.github.io/openintro/reference/sinusitis.html) | Antibiotic vs. symptomatic sinusitis treatment (paired randomized trial) | Ch 1 |
+| [`smoking`](https://openintrostat.github.io/openintro/reference/smoking.html) | Smoking status, demographics for 1,691 UK residents | Ch 1 |
+| [`starbucks`](https://openintrostat.github.io/openintro/reference/starbucks.html) | Nutrition information for Starbucks menu items | Ch 21 |
+| [`urban_owner`](https://openintrostat.github.io/openintro/reference/urban_owner.html) | Homeownership rates by state in urban vs. rural counties | Ch 21 |
+| [`us_temperature`](https://openintrostat.github.io/openintro/reference/us_temperature.html) | US city temperature paired sample (January vs. July) | Ch 14 |
+| [`yawn`](https://openintrostat.github.io/openintro/reference/yawn.html) | MythBusters' contagious-yawning experiment | Ch 12 |
+
+## From other R packages {#sec-other-r-pkgs}
+
+| Dataset | Package | Description | Where used |
+|:--------|:--------|:------------|:-----------|
+| [`run17`](https://mine-cetinkaya-rundel.github.io/cherryblossom/reference/run17.html) | `cherryblossom` | 2017 Cherry Blossom race times and runner demographics | Ch 1 |
+| [`usairports`](https://mine-cetinkaya-rundel.github.io/airports/reference/usairports.html) | `airports` | US airport locations and characteristics | Ch 1 |
+| [`penguins`](https://allisonhorst.github.io/palmerpenguins/reference/penguins.html) | `palmerpenguins` | Palmer Archipelago penguins (species, bill/flipper/mass) | Ch 1 |
+| [`ukbabynames`](https://mine-cetinkaya-rundel.github.io/ukbabynames/reference/ukbabynames.html) | `ukbabynames` | UK baby name popularity by year and nation | Ch 1 |
+| [`un_votes`](https://cran.r-project.org/package=unvotes) | `unvotes` | UN General Assembly vote records | Ch 1 |
+
+Install with `install.packages("packagename")`.
+
+## UWL-local datasets {#sec-local-datasets}
+
+These CSVs are hosted alongside the book and referenced in projects and labs.
+
+| Dataset | Description |
+|:--------|:------------|
+| [`ai_tool_use.csv`](../datasets/ai_tool_use.csv) | UWL student survey: AI-tool use by age group (small, categorical --- good for two-way tables and inference for two proportions) |
+| [`class_survey.csv`](../datasets/class_survey.csv) | UWL student survey: year, housing, study hours, sleep hours, commute (mixed quantitative + categorical --- good for a full EDA project) |
+| [`flying_etiquette.csv`](../datasets/flying_etiquette.csv) | FiveThirtyEight survey on in-flight etiquette (many categorical variables --- rich for chi-square practice) |
+
+## Exercise datasets bundled with this book {#sec-ims-exercise-data}
+
+Four CSVs live in `chapters/data/` rather than in an R package, because the
+exercises that use them build their figures when the book is rendered. All four
+are redistributed **unchanged** from
+[*Introduction to Modern Statistics*](https://github.com/OpenIntroStat/ims),
+which is licensed CC BY-SA 3.0 --- the same license as this book. The original
+data sources are listed so you can go back to them.
+
+| Dataset | Description | Original source | Where used |
+|:--------|:------------|:----------------|:-----------|
+| `meat.csv` | Meat and carbohydrate consumption vs. life expectancy in 175 countries, averaged over 2011--2013 | @You:2022 | Ch 5, 19 |
+| `netflix_titles.csv` | 7,788 Netflix titles with type, rating, production country, and release year | [TidyTuesday, 2021-04-20](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-04-20), from a [Kaggle dataset](https://www.kaggle.com/datasets/shivamb/netflix-shows) | Ch 1 |
+| `stanford-open-policing-combined-data.csv` | Traffic-stop summary statistics (stop, search, arrest, and citation rates) by county and driver race | [Stanford Open Policing Project](https://openpolicing.stanford.edu/) [@pierson2020large] | Ch 1 |
+| `survey.csv` | GPA and major for students in an introductory statistics course at Duke University | IMS exercise data | Ch 17 |
+
+## Using the datasets
+
+**In Jamovi or another statistics package.** Every dataset above is downloadable as a CSV from the openintro website (e.g., `https://www.openintro.org/data/csv/<name>.csv`), or as tab-separated/txt/rdata from the same page. The UWL-local files are linked directly above.
+
+**In R.** After installing the source package:
+
+```r
+library(openintro)
+data(penguins, package = "palmerpenguins")  # if the dataset is in another package
+head(mcu_films)                              # peek at the first rows
+?mcu_films                                   # open the documentation
+```
+
+**Full openintro dataset catalog.** The complete list of openintro datasets (400+, not all used in this book) lives at [openintrostat.github.io/openintro/reference/](https://openintrostat.github.io/openintro/reference/).
+
+::: {.callout-note}
+## About this appendix
+
+The list above is auto-generated by scanning chapter and exercise source files for named dataset references. If you spot a dataset used in the book that isn't listed, please report it via the [Report an Issue --- Textbook](https://uws.instructure.com/courses/880956) board or annotate the offending chapter in the [145 Textbook Review](https://hypothes.is/groups/7agVNpDo/145-textbook-review) Hypothesis group.
+:::

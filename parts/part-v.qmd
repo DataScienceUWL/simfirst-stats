@@ -1,0 +1,7 @@
+---
+title: "Unit 5: Foundations"
+---
+
+You have already been *doing* probability — every simulation you ran was an experiment in randomness. This part formalizes the rules governing random events, introduces random variables, and develops the binomial and normal distributions as mathematical models. These foundations explain *why* the methods from earlier parts work.
+
+The final chapters explore what happens when inference goes wrong: Type II errors, statistical power, and how to plan studies large enough to detect meaningful effects. These topics are essential for designing good research and critically evaluating published results.

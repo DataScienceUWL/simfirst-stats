@@ -1,0 +1,47 @@
+<!-- StatLens Interactive Exercises — Chi-Square Test of Independence -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based.-->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Frame the question.** A campus survey crosses **major** (STEM / humanities / social science / business) with **caffeine source** (coffee / tea / energy drink / none) for 600 students.
+
+    a.  Identify the two categorical variables and the dimensions of the contingency table.
+    b.  Write the null and alternative hypotheses for a test of independence, in words.
+    c.  The test of **independence** and the test of **homogeneity** use the same $\chi^2$ statistic, the same expected-count formula, and the same df. What is the *conceptual* difference between them, and why does it matter how the data were collected?
+
+
+2.  **Choose the procedure.** For each scenario, name the procedure --- **$\chi^2$ test of independence (or homogeneity)**, **$\chi^2$ goodness-of-fit**, **two-proportion $z$**, or **not a $\chi^2$ problem**.
+
+    a.  Is political party (3 levels) related to opinion on a policy (favor / oppose / undecided)?
+    b.  Is the proportion of "favor" responses different between Democrats and Republicans?
+    c.  Does the distribution of blood types (A/B/AB/O) in a sample of 500 match the population frequencies?
+    d.  Is the mean reaction time the same across three age groups?
+    e.  Is there an association between meal-plan choice (4 levels) and dorm (5 levels)?
+
+
+3.  **Check conditions before you trust the test.** Open the [Chi-Square test tool]({{< var tool-url >}}/inference/chisq/){target="_blank"} with any two-categorical-variable dataset (e.g., bundled examples on relationships).
+
+    a.  What is the **expected-count condition** for the $\chi^2$ independence test? Why are expected counts (not observed) the criterion?
+    b.  How are the **expected counts** in cell $(i, j)$ computed? Walk through the formula in words.
+    c.  Suppose the smallest expected count is 4. Should you trust the $\chi^2$ approximation? Name two responses that are more defensible than just running the test anyway.
+
+
+4.  **Run it and interpret it.** Open the [Chi-Square test tool]({{< var tool-url >}}/inference/chisq/){target="_blank"} with a two-categorical dataset.
+
+    a.  Report the $\chi^2$ statistic, df, and p-value.
+    b.  State your decision at $\alpha = 0.05$ and write a one-sentence conclusion **in context**.
+    c.  The tool reports the observed and expected counts side-by-side. Suppose $H_0$ is rejected --- how do you decide *where* the association is strongest? What does a large positive $O - E$ in one cell mean substantively?
+    d.  A student concludes from a rejected $H_0$: "Major *causes* a student to choose a certain caffeine source." Why is this the wrong conclusion --- and what *is* the right one?
+
+
+5.  **Simulation as a sanity check.** Open the [Randomization $\chi^2$ test]({{< var tool-url >}}/simulate/randomization-chisq/){target="_blank"} on the same data.
+
+    a.  Run 5000 simulated $\chi^2$ statistics. Compare its **simulation p-value** to the **$\chi^2$-distribution p-value** from Exercise 4. How close are they?
+    b.  Repeat with a smaller dataset (or one cell deliberately small). Are the two p-values still close? Which would you trust?
+    c.  In a $2 \times 2$ table, the $\chi^2$ test of independence gives the *same* p-value as a two-proportion $z$-test (squared). Why is this not a coincidence?
+    d.  Suppose you have a $3 \times 3$ table and $H_0$ is rejected. Why is "the variables are associated" all you can conclude from the test alone? What additional analyses would help pinpoint *which* groups differ?
+

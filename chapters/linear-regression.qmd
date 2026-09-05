@@ -1,0 +1,481 @@
+---
+title: "Linear Regression"
+---
+
+
+::: {.chapterintro}
+Linear regression is a powerful statistical technique for describing the relationship between two quantitative variables. Many people have some familiarity with regression just from reading the news, where straight lines are overlaid on scatterplots. In this chapter, we build on the ideas of correlation from the previous chapter to develop the least squares regression line. We learn how to interpret the slope and intercept, use residuals to assess model fit, quantify the strength of the model with $R^2$, and perform inference on the slope to test whether a linear relationship exists in the population.
+:::
+
+## Fitting a line to data {#sec-fitting-line}
+
+Linear regression is the statistical method for fitting a line to data where the relationship between two variables, $x$ and $y$, can be modeled by a straight line with some error:
+
+$$y = b_0 + b_1 x + e$$
+
+The values $b_0$ and $b_1$ represent the model's **intercept** and **slope**, respectively, and the error is represented by $e$. These values are calculated from the data -- they are sample statistics. If the observed data are a random sample from a target population, these values are point estimates for the population parameters $\beta_0$ and $\beta_1$.
+
+When we use $x$ to predict $y$, we call $x$ the **predictor** variable (or explanatory variable) and $y$ the **outcome** variable (or response variable). We often write the model without the error term when focusing on the predicted average outcome:
+
+$$\hat{y} = b_0 + b_1 x$$
+
+The "hat" on $y$ signifies that this is a predicted (estimated) value.
+
+It is rare for all data to fall perfectly on a straight line. Instead, data more commonly appear as a cloud of points, where the trend may be strong or weak.
+
+```{r}
+#| include: false
+source("../_common.R")
+```
+
+```{r}
+#| label: fig-three-relationships
+#| fig-cap: "Three scatterplots with fabricated data showing a strong negative linear trend, a moderate positive linear trend, and a very weak trend."
+#| fig-alt: "Three scatterplots. The first shows a strong negative linear relationship, the second shows a moderate positive relationship, and the third shows almost no relationship."
+#| fig-width: 10
+#| fig-height: 3.5
+
+library(ggplot2)
+
+set.seed(42)
+n <- 80
+
+# Strong negative
+sigma_neg <- matrix(c(1, -0.93, -0.93, 1), 2, 2)
+xy_neg <- MASS::mvrnorm(n, mu = c(0, 0), Sigma = sigma_neg)
+
+# Moderate positive
+sigma_pos <- matrix(c(1, 0.62, 0.62, 1), 2, 2)
+xy_pos <- MASS::mvrnorm(n, mu = c(0, 0), Sigma = sigma_pos)
+
+# Very weak
+sigma_weak <- matrix(c(1, 0.08, 0.08, 1), 2, 2)
+xy_weak <- MASS::mvrnorm(n, mu = c(0, 0), Sigma = sigma_weak)
+
+three_df <- rbind(
+  data.frame(x = xy_neg[,1], y = xy_neg[,2], panel = "Strong Negative (r = -0.93)"),
+  data.frame(x = xy_pos[,1], y = xy_pos[,2], panel = "Moderate Positive (r = 0.62)"),
+  data.frame(x = xy_weak[,1], y = xy_weak[,2], panel = "Very Weak (r = 0.08)")
+)
+three_df$panel <- factor(three_df$panel, levels = c(
+  "Strong Negative (r = -0.93)", "Moderate Positive (r = 0.62)", "Very Weak (r = 0.08)"))
+
+ggplot(three_df, aes(x = x, y = y)) +
+  geom_point(color = COL_BLUE, alpha = 0.6, size = 1.5) +
+  geom_smooth(method = "lm", se = FALSE, color = COL_RED, linewidth = 0.8) +
+  facet_wrap(~ panel, scales = "free", nrow = 1) +
+  labs(x = "", y = "") +
+  theme_minimal(base_size = 13) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+There are also cases where fitting a straight line is inappropriate, even if there is a clear relationship between the variables. When the relationship is nonlinear, a linear model can be misleading.
+
+### Using linear regression to predict possum head lengths
+
+Researchers captured 104 brushtail possums in Australia and took body measurements. We consider total body length (cm) as the predictor to predict head length (mm).
+
+```{r}
+#| label: fig-possum-regression
+#| fig-cap: "A scatterplot showing head length against total length for 104 brushtail possums, with a linear model fit to the data. [Open in StatLens]({{< var tool-url >}}/explore/regression/?dataset=possum_regression){.open-in-statlens target='_blank' aria-label='Fit the possum regression interactively in StatLens'}"
+#| fig-alt: "A scatterplot with total length on the x-axis and head length on the y-axis, with a least squares line superimposed."
+
+possum <- openintro::possum
+
+ggplot(possum, aes(x = total_l, y = head_l)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = COL_RED, linewidth = 1) +
+  labs(x = "Total Length (cm)", y = "Head Length (mm)") +
+  theme_minimal(base_size = 14)
+```
+
+The equation for this line is:
+
+$$\hat{y} = 41 + 0.59x$$
+
+We can use this line to make predictions. For instance, the equation predicts a possum with a total length of 80 cm will have a head length of:
+
+$$\hat{y} = 41 + 0.59 \times 80 = 88.2 \text{ mm}$$
+
+This estimate may be viewed as an average: the equation predicts that possums with a total length of 80 cm will have an average head length of 88.2 mm.
+
+## Residuals {#sec-residuals}
+
+**Residuals** are the leftover variation in the data after accounting for the model fit:
+
+$$\text{Data} = \text{Fit} + \text{Residual}$$
+
+Each observation has a residual. If an observation is above the regression line, its residual is positive. If it is below the line, the residual is negative.
+
+::: {.important}
+**Residual: Difference between observed and expected.**
+
+The residual of the $i^{th}$ observation $(x_i, y_i)$ is the difference between the observed outcome and the predicted outcome:
+
+$$e_i = y_i - \hat{y}_i$$
+
+We identify $\hat{y}_i$ by plugging $x_i$ into the model.
+:::
+
+::: {.workedexample}
+The linear fit is $\hat{y} = 41 + 0.59x$. Compute the residual for the observation $(76.0, 85.1)$.
+
+---
+
+First compute the predicted value: $\hat{y} = 41 + 0.59 \times 76.0 = 85.84$. The residual is $e = 85.1 - 85.84 = -0.74$ mm. The negative residual indicates that the model overpredicted head length for this possum.
+
+[Try this in StatLens →]({{< var tool-url >}}/inference/slope/?dataset=possum_regression){.open-in-statlens target='_blank' aria-label='Fit the possum regression and inspect residuals in StatLens'}
+:::
+
+::: {.guidedpractice}
+If a model underestimates an observation, will the residual be positive or negative? What about if it overestimates?
+
+<details>
+<summary>Show answer</summary>
+If a model underestimates an observation, the residual is positive (the actual value exceeds the prediction). If it overestimates, the residual is negative.
+</details>
+:::
+
+### Residual plots
+
+Residuals are helpful in evaluating how well a linear model fits a dataset. We display them in a **residual plot**, where the horizontal axis shows the predicted values and the vertical axis shows the residuals.
+
+```{r}
+#| label: fig-possum-residuals
+#| fig-cap: "A residual plot for the possum model. The residuals appear randomly scattered around zero with no obvious pattern. [Open in StatLens]({{< var tool-url >}}/explore/regression/?dataset=possum_regression){.open-in-statlens target='_blank' aria-label='Inspect the possum residuals in StatLens'}"
+#| fig-alt: "A residual plot with predicted values on the x-axis and residuals on the y-axis, scattered randomly around the horizontal line at zero."
+
+possum_model <- lm(head_l ~ total_l, data = possum)
+resid_df <- data.frame(
+  fitted = fitted(possum_model),
+  residuals = residuals(possum_model)
+)
+
+ggplot(resid_df, aes(x = fitted, y = residuals)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 2) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray40") +
+  labs(x = "Predicted Head Length (mm)", y = "Residual (mm)") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.workedexample}
+What patterns should we look for in a residual plot?
+
+---
+
+- **No pattern (good):** Residuals scattered randomly around zero suggest the linear model is appropriate.
+- **Curved pattern (bad):** A U-shape or other curve in the residuals indicates a nonlinear relationship that a straight line fails to capture.
+- **Fan shape (bad):** Increasing or decreasing spread in the residuals indicates non-constant variability.
+:::
+
+## Least squares regression {#sec-least-squares}
+
+Fitting linear models by eye is subjective. **Least squares regression** provides an objective, rigorous approach.
+
+### The objective: minimize squared residuals
+
+We want a line with small residuals. The **least squares line** minimizes the sum of the squared residuals:
+
+$$e_1^2 + e_2^2 + \cdots + e_n^2$$
+
+Why square the residuals rather than just sum their absolute values?
+
+1. It is the most commonly used method.
+2. It is widely supported in statistical software.
+3. A residual twice as large is usually more than twice as bad. Squaring accounts for this.
+4. The inference theory connecting the model to population parameters is most straightforward with least squares.
+
+### Interpreting the slope and intercept
+
+For the Elmhurst College data, the least squares line predicting gift aid (in \$1,000s) from family income (in \$1,000s) is:
+
+$$\widehat{\text{aid}} = 24.3 - 0.0431 \times \text{family\_income}$$
+
+| Term | Estimate | Std. Error | T statistic | p-value |
+|---|:---:|:---:|:---:|:---:|
+| (Intercept) | 24.32 | 1.29 | 18.83 | <0.0001 |
+| family_income | -0.0431 | 0.0108 | -3.98 | 0.0002 |
+
+::: {.workedexample}
+What do the intercept and slope mean?
+
+---
+
+**Slope ($b_1 = -0.0431$):** For each additional \$1,000 of family income, we would expect a student to receive \$43.10 less in gift aid, on average. The negative coefficient means higher income is associated with less aid. We must be cautious: this is an observational study, so we cannot interpret a causal connection.
+
+**Intercept ($b_0 = 24.32$):** The model predicts that a student whose family has no income would receive \$24,320 in gift aid, on average. This is meaningful because the family income for some students is near zero. In other applications, the intercept may have no practical meaning if $x = 0$ is outside the range of the data.
+:::
+
+::: {.important}
+**Interpreting parameters estimated by least squares.**
+
+The **slope** describes the estimated difference in the predicted average outcome of $y$ if the predictor variable $x$ were one unit larger.
+
+The **intercept** describes the average outcome of $y$ if $x = 0$, provided the linear model is valid at $x = 0$ (which may not be the case if $x = 0$ is far outside the observed data range).
+:::
+
+### Computing the slope and intercept from summary statistics
+
+The slope can be computed using the correlation and the standard deviations of the two variables:
+
+$$b_1 = \frac{s_y}{s_x} \cdot r$$
+
+The least squares line always passes through the point $(\bar{x}, \bar{y})$. Using the point-slope form:
+
+$$b_0 = \bar{y} - b_1 \cdot \bar{x}$$
+
+::: {.important}
+**Identifying the least squares line from summary statistics.**
+
+- Estimate the slope: $b_1 = (s_y / s_x) \cdot r$.
+- Find the intercept using the fact that $(\bar{x}, \bar{y})$ is on the line: $b_0 = \bar{y} - b_1 \bar{x}$.
+:::
+
+## R-squared {#sec-r-squared}
+
+We evaluated the strength of a linear relationship using $r$. More commonly, we describe the strength of a linear fit using $R^2$, called **R-squared** or the **coefficient of determination**.
+
+::: {.important}
+**Coefficient of determination: proportion of variability explained by the model.**
+
+$R^2$ measures the proportion of variation in the outcome variable $y$ that is explained by the linear model with predictor $x$. Since $r$ is always between $-1$ and $1$, $R^2$ is always between 0 and 1.
+
+$$R^2 = 1 - \frac{SSE}{SST}$$
+
+where:
+
+- $SST = \sum (y_i - \bar{y})^2$ is the **total sum of squares**, measuring total variability in $y$.
+- $SSE = \sum (y_i - \hat{y}_i)^2 = \sum e_i^2$ is the **sum of squared errors**, measuring leftover variability after using the model.
+
+For simple linear regression, $R^2 = r^2$.
+:::
+
+::: {.workedexample}
+For the Elmhurst data, the correlation is $r = -0.499$. What proportion of the variability in gift aid is explained by family income?
+
+---
+
+$R^2 = (-0.499)^2 = 0.249$, or about 25%. Family income explains about 25% of the variability in gift aid among these students.
+:::
+
+::: {.guidedpractice}
+If a linear model has a very strong negative relationship with $r = -0.97$, how much of the variation in the outcome is explained by the predictor?
+
+<details>
+<summary>Show answer</summary>
+$R^2 = (-0.97)^2 = 0.94$, or about 94% of the variation is explained.
+</details>
+:::
+
+::: {.statlens}
+**See it in action.** Two guided walkthroughs: [Fit a Line by Eye lab]({{< var tool-url >}}/explore/regression-by-eye/?activity=regression-fit-by-eye.json){target="_blank"} (OLS vs. LAD losses, noise-vs-uncertainty story) and [Slope Inference walkthrough]({{< var tool-url >}}/inference/slope/?activity=regression-slope-inference.json){target="_blank"} (LINE conditions → $t$-test → interpretation). Or open the [Regression Explorer]({{< var tool-url >}}/explore/regression/){target="_blank"} or [Slope $t$-Test]({{< var tool-url >}}/inference/slope/){target="_blank"} directly on your own data.
+:::
+
+## Inference for the slope {#sec-inference-slope}
+
+We have been computing sample statistics $b_0$ and $b_1$, but these are estimates of population parameters $\beta_0$ and $\beta_1$. We now turn to formal inference: testing whether a linear relationship exists in the population.
+
+### Hypotheses
+
+- $H_0$: $\beta_1 = 0$. There is no linear relationship between $x$ and $y$.
+- $H_A$: $\beta_1 \ne 0$. There is a linear relationship between $x$ and $y$.
+
+### Randomization test for the slope
+
+If the null hypothesis is true ($\beta_1 = 0$), then $x$ and $y$ are not linearly related. We can simulate this by **permuting** the response variable: randomly shuffling the $y$ values while keeping the $x$ values fixed. This breaks any relationship between $x$ and $y$.
+
+```{r}
+#| label: fig-permutation-comparison
+#| fig-cap: "Original data showing a positive linear relationship between weeks of gestation and birth weight, alongside the same data after permuting the weight variable, which destroys the relationship. [↗ Try this live](https://learnlens.org/statlens/simulate/randomization-correlation/) — permute the response yourself and compare to the observed pattern."
+#| fig-alt: "Two scatterplots side by side. The left shows the original data with a positive trend. The right shows permuted data with no trend."
+#| fig-width: 10
+#| fig-height: 4
+
+set.seed(42)
+n <- 50
+gestation <- round(runif(n, 34, 42), 1)
+weight <- 0.335 * gestation + rnorm(n, 0, 0.8) - 7
+
+perm_df <- rbind(
+  data.frame(x = gestation, y = weight, panel = "Original Data"),
+  data.frame(x = gestation, y = sample(weight), panel = "Permuted Data")
+)
+
+ggplot(perm_df, aes(x = x, y = y)) +
+  geom_point(color = COL_BLUE, alpha = 0.7, size = 2) +
+  geom_smooth(method = "lm", se = FALSE, color = COL_RED, linewidth = 1) +
+  facet_wrap(~ panel) +
+  labs(x = "Weeks of Gestation", y = "Birth Weight (kg)") +
+  theme_minimal(base_size = 14) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+By repeating the permutation many times and computing the slope each time, we build a null distribution of slopes.
+
+```{r}
+#| label: fig-null-slopes
+#| fig-cap: "Histogram of slopes from 1,000 permutations of birth weight. The permuted slopes range from about −0.15 to +0.15, centered at zero. The observed slope of 0.335 is far from this distribution. [↗ Try this live](https://learnlens.org/statlens/simulate/randomization-correlation/) — build the null slope distribution live from permutations."
+#| fig-alt: "Histogram of permuted slopes centered at zero, ranging from about -0.15 to +0.15. The observed slope of 0.335 is far to the right of the distribution."
+
+set.seed(42)
+n_sims <- 1000
+perm_slopes <- replicate(n_sims, {
+  coef(lm(sample(weight) ~ gestation))[2]
+})
+
+slope_df <- data.frame(slope = perm_slopes)
+
+ggplot(slope_df, aes(x = slope)) +
+  geom_histogram(binwidth = 0.01, fill = COL_BLUE, color = "white", alpha = 0.8) +
+  geom_vline(xintercept = 0.335, color = COL_RED, linewidth = 1, linetype = "dashed") +
+  annotate("text", x = 0.335, y = Inf, label = "Observed slope = 0.335",
+           hjust = -0.1, vjust = 2, size = 4, color = COL_RED) +
+  labs(x = "Permuted Slope", y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+The observed slope of 0.335 is far from any value in the null distribution. We reject $H_0$ and conclude there is a linear relationship between weeks of gestation and birth weight.
+
+### Mathematical model: the t-test for slope
+
+When the technical conditions are met, we can use the $t$-distribution to test the slope:
+
+$$T = \frac{b_1 - 0}{SE_{b_1}}$$
+
+This $T$-statistic follows a $t$-distribution with $df = n - 2$.
+
+::: {.workedexample}
+The regression output for predicting the change in House seats for the President's party from the unemployment rate is:
+
+| Term | Estimate | Std. Error | T statistic | p-value |
+|---|:---:|:---:|:---:|:---:|
+| (Intercept) | -7.36 | 5.16 | -1.43 | 0.1649 |
+| unemp | -0.89 | 0.835 | -1.07 | 0.2961 |
+
+The p-value of 0.2961 is not discernible. The data do not provide convincing evidence that the unemployment rate is a useful predictor of midterm election outcomes.
+:::
+
+### Confidence intervals for the slope
+
+::: {.important}
+**Confidence intervals for model coefficients.**
+
+Confidence intervals for model coefficients can be computed using the $t$-distribution:
+
+$$b_1 \pm t_{df}^* \times SE_{b_1}$$
+
+where $t_{df}^*$ is the critical value corresponding to the confidence level, with $df = n - 2$.
+:::
+
+::: {.workedexample}
+Using the Elmhurst College regression output ($b_1 = -0.0431$, $SE = 0.0108$, $df = 48$), compute a 95% confidence interval for the slope.
+
+---
+
+The critical value is $t_{48}^* = 2.01$. The confidence interval is:
+
+$$-0.0431 \pm 2.01 \times 0.0108 = (-0.0648, -0.0214)$$
+
+We are 95% confident that for each additional \$1,000 in family income, the university's gift aid decreases by between \$21.40 and \$64.80 on average.
+:::
+
+## Conditions for linear regression {#sec-conditions-regression}
+
+For the mathematical inference to be valid, we check four conditions, often remembered by the **LINE** mnemonic:
+
+- **L -- Linear model:** The data should show a linear trend. Check the scatterplot and residual plot.
+- **I -- Independent observations:** Be cautious with time series data or clustered observations.
+- **N -- Nearly normal residuals:** Residuals should be approximately normally distributed. This is less critical for large samples (Central Limit Theorem), but outliers are always a concern.
+- **E -- Equal variability:** The variability of points around the line should be roughly constant across all values of $x$. A "fan shape" in the residual plot indicates a violation.
+
+```{r}
+#| label: fig-diagnostics-grid
+#| fig-cap: "Four scatterplots and their residual plots showing common violations: nonlinearity, an outlier, increasing variability, and correlated observations."
+#| fig-alt: "A grid of 2 by 4 plots showing four types of regression condition violations: nonlinearity, outlier, non-constant variance, and correlated observations."
+#| fig-width: 12
+#| fig-height: 6
+
+par(mfrow = c(2, 4), mar = c(4, 4, 3, 1))
+
+set.seed(42)
+n <- 60
+
+# 1. Nonlinear
+x1 <- runif(n, 0, 10)
+y1 <- 2 * x1 - 0.2 * x1^2 + rnorm(n, 0, 1)
+m1 <- lm(y1 ~ x1)
+plot(x1, y1, pch = 19, col = COL_BLUE, main = "Nonlinear", xlab = "x", ylab = "y", cex = 0.8)
+abline(m1, col = COL_RED, lwd = 2)
+plot(fitted(m1), residuals(m1), pch = 19, col = COL_BLUE, main = "Residuals", xlab = "Fitted", ylab = "Residual", cex = 0.8)
+abline(h = 0, lty = 2, col = "gray40")
+
+# 2. Outlier
+x2 <- runif(n, 0, 10)
+y2 <- 1 + 0.5 * x2 + rnorm(n, 0, 0.8)
+y2[n] <- 12
+x2[n] <- 5
+m2 <- lm(y2 ~ x2)
+plot(x2, y2, pch = 19, col = COL_BLUE, main = "Outlier", xlab = "x", ylab = "y", cex = 0.8)
+abline(m2, col = COL_RED, lwd = 2)
+points(x2[n], y2[n], pch = 19, col = COL_PINK, cex = 1.5)
+plot(fitted(m2), residuals(m2), pch = 19, col = COL_BLUE, main = "Residuals", xlab = "Fitted", ylab = "Residual", cex = 0.8)
+abline(h = 0, lty = 2, col = "gray40")
+points(fitted(m2)[n], residuals(m2)[n], pch = 19, col = COL_PINK, cex = 1.5)
+
+# 3. Non-constant variance (fan shape)
+x3 <- runif(n, 1, 10)
+y3 <- 1 + 0.8 * x3 + rnorm(n, 0, 0.3 * x3)
+m3 <- lm(y3 ~ x3)
+plot(x3, y3, pch = 19, col = COL_BLUE, main = "Non-constant Variance", xlab = "x", ylab = "y", cex = 0.8)
+abline(m3, col = COL_RED, lwd = 2)
+plot(fitted(m3), residuals(m3), pch = 19, col = COL_BLUE, main = "Residuals", xlab = "Fitted", ylab = "Residual", cex = 0.8)
+abline(h = 0, lty = 2, col = "gray40")
+
+# 4. Correlated observations (time series)
+x4 <- 1:n
+e4 <- numeric(n)
+e4[1] <- rnorm(1, 0, 0.5)
+for (i in 2:n) e4[i] <- 0.8 * e4[i-1] + rnorm(1, 0, 0.5)
+y4 <- 0.05 * x4 + e4
+m4 <- lm(y4 ~ x4)
+plot(x4, y4, pch = 19, col = COL_BLUE, main = "Correlated Obs.", xlab = "x", ylab = "y", cex = 0.8)
+abline(m4, col = COL_RED, lwd = 2)
+plot(fitted(m4), residuals(m4), pch = 19, col = COL_BLUE, main = "Residuals", xlab = "Fitted", ylab = "Residual", cex = 0.8)
+abline(h = 0, lty = 2, col = "gray40")
+
+par(mfrow = c(1, 1))
+```
+
+::: {.important}
+**Diagnostics for linear regression.**
+
+Independence is always important. The normality condition matters most for small samples. The constant variance condition is especially important for inference. The linearity condition is the most fundamental -- if the true relationship is not linear, the slope estimate has no meaningful interpretation.
+:::
+
+## Chapter review {#sec-linear-regression-review}
+
+### Summary
+
+In this chapter, we developed the least squares regression line as a tool for modeling the linear relationship between two quantitative variables. The slope describes the predicted change in $y$ for a one-unit increase in $x$, and the intercept describes the predicted value of $y$ when $x = 0$. Residuals measure the difference between observed and predicted values, and residual plots help assess whether the linear model is appropriate. The coefficient of determination $R^2$ quantifies the proportion of variability in $y$ explained by the model. For inference, we use either a randomization test or the $t$-distribution to test whether the slope is discernibly different from zero, and we can construct confidence intervals for the slope. The LINE conditions (linearity, independence, normality, equal variance) must be checked for the mathematical model to be valid.
+
+### Key terms
+
+- Predictor / outcome variable
+- Least squares line
+- Slope ($b_1$) and intercept ($b_0$)
+- Residual
+- Residual plot
+- R-squared ($R^2$) / coefficient of determination
+- Total sum of squares (SST) / sum of squared errors (SSE)
+- T-test for slope
+- LINE conditions
+- Extrapolation
+
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-linear-regression) at the back of the book.
+
+{{< include ../exercises/_linear-regression-exercises.qmd >}}
+
+{{< include ../exercises/_linear-regression-statlens-exercises.qmd >}}

@@ -1,0 +1,57 @@
+<!-- StatLens Interactive Exercises — Hypothesis Tests for Means -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based -->
+<!-- on purpose; the numbers come from StatLens.                              -->
+
+### StatLens Exercises {.unnumbered}
+
+These exercises focus on the parts of inference a calculator *can't* do for you: **framing the question**, **choosing the right procedure**, **checking conditions**, and **interpreting** what a tool reports. Where a link is given, let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic and spend your effort on the reasoning.
+
+1.  **Frame the question.** A manufacturer advertises that its energy bars contain a mean of 220 calories. A consumer group buys a random sample of $n = 36$ bars and measures the actual calorie content of each.
+
+    a.  Identify the parameter of interest in words and give its symbol.
+    b.  Write the null and alternative hypotheses for a test of whether the *true* mean differs from 220. Is your test one-sided or two-sided, and why?
+    c.  Suppose the consumer group instead suspected the manufacturer was *under-filling* the bars. Rewrite the alternative hypothesis. What is the practical danger of switching from a two-sided to a one-sided test *after* looking at the data?
+
+
+2.  **Choose the procedure.** For each scenario, name the procedure --- **one-sample** $t$, **two-sample** $t$ (independent groups), **paired** $t$, or a procedure **beyond this chapter** (more than two means, or a proportion).
+
+    a.  Each of 20 patients has their blood pressure measured before and after a meditation program; ask whether the program lowers blood pressure on average.
+    b.  An agronomist compares the mean yield (bushels/acre) of two corn varieties planted in 30 randomly chosen plots each.
+    c.  Is the proportion of voters who support a candidate more than 50%?
+    d.  Test whether the mean fuel economy of a single car model differs from the EPA-rated 32 mpg.
+    e.  Compare the mean weight gain of mice on three different diets.
+
+
+3.  **Check conditions before you trust the test.** Open the [One-Sample $t$ tool]({{< var tool-url >}}/inference/one-mean/){target="_blank"} with any small numeric dataset (or paste in $n = 15$ values of your own).
+
+    a.  What two conditions does the one-sample $t$-test require? State each in plain language.
+    b.  The tool displays a dotplot or histogram of the data alongside the $t$-statistic. With $n = 15$, what would you look for in that picture to decide whether the test is trustworthy?
+    c.  Suppose the data show an extreme outlier --- one observation more than three SDs from the rest. Should you still run the $t$-test? What two questions should you ask before deciding what to do with the outlier?
+
+
+4.  **Run it and interpret it (two means).** Open the [Two-Sample $t$ tool]({{< var tool-url >}}/inference/two-means/){target="_blank"} with any two-group numeric dataset (or use the bundled examples).
+
+    a.  Identify the explanatory and response variables, and define $\mu_1 - \mu_2$ in words.
+    b.  Run the test. Report the test statistic, degrees of freedom, and p-value. State your decision at $\alpha = 0.05$.
+    c.  Write a one-sentence conclusion **in context**. Then write *another* sentence that translates the p-value into plain language --- without using the words "probability that $H_0$ is true."
+    d.  Which statement is the correct interpretation of the p-value?
+
+        i.   The probability that the null hypothesis is true given the data.
+        ii.  The probability of observing a difference at least as extreme as the one we got, *if* $H_0$ were true.
+        iii. The probability that $\mu_1 = \mu_2$.
+
+
+5.  **Simulation vs. analytic --- when do they agree?** A randomization test and a two-sample $t$-test are two routes to the same conclusion about whether two group means differ. Sometimes they land in nearly the same place; sometimes they don't.
+
+    First a well-behaved case. Open any moderate-$n$ two-group numeric dataset in the [Two-Sample $t$ tool]({{< var tool-url >}}/inference/two-means/){target="_blank"} and record the p-value, then open the *same* data in the [Randomization Test for the Difference in Means]({{< var tool-url >}}/simulate/randomization-diff-means/){target="_blank"} and run 1000 shuffles.
+
+    a.  How close are the two p-values?
+
+    Now construct (or pick) a trouble case --- a small dataset ($n_1, n_2 \le 10$ each) where one group has a visible outlier or a strong skew. Run *both* procedures again.
+
+    b.  Are the p-values still close? Where do they diverge --- is the $t$-test's p-value smaller or larger than the randomization p-value? In which direction?
+    c.  Explain the pattern. Why do the two procedures agree on well-behaved data but diverge in the trouble case? Tie your explanation to (i) the role of normality in the $t$ distribution and (ii) what the randomization test *does* assume (only exchangeability under $H_0$).
+    d.  A student says, "The randomization test gave a bigger p-value, so the $t$-test must be wrong." Why is that the wrong framing? Which test should you trust more when they disagree, and why?
+

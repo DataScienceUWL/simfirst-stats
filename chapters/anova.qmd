@@ -1,0 +1,461 @@
+---
+title: "Analysis of Variance"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+In earlier chapters, we developed methods to compare the mean of a quantitative outcome across two groups. An important aspect of those analyses was to look at the difference in sample means as an estimate for the difference in population means. When comparing more than two groups, simple subtraction will not fully capture the variation across three or more groups. As with two groups, the research question focuses on whether group membership is independent of the quantitative response variable. In this chapter, we focus on a new statistic that incorporates differences in means across more than two groups. Although the ideas are similar to the $t$-test, they have earned their own name: **AN**alysis **O**f **VA**riance, or **ANOVA**.
+:::
+
+Sometimes we want to compare means across many groups. We might initially think to do pairwise comparisons. For example, if there were three groups, we might compare the first mean with the second, then with the third, and finally compare the second and third means -- a total of three comparisons. However, this strategy can be treacherous. If we have many groups and do many comparisons, it is likely that we will eventually find a difference just by chance, even if there is no difference in the populations. Instead, we should apply a holistic test to check whether there is evidence that at least one pair of groups is different, which is where ANOVA saves the day.
+
+ANOVA uses a single hypothesis test to check whether the means across many groups are equal:
+
+- $H_0$: The mean outcome is the same across all groups: $\mu_1 = \mu_2 = \cdots = \mu_k$ where $\mu_j$ represents the mean of the outcome for observations in category $j$.
+- $H_A$: At least one mean is different.
+
+Generally, we must check three conditions before performing ANOVA:
+
+- The observations are independent within and between groups.
+- The responses within each group are nearly normal.
+- The variability across the groups is about equal.
+
+When these conditions are met, we may perform ANOVA to determine whether the data provide convincing evidence against the null hypothesis.
+
+::: {.workedexample}
+College departments commonly run multiple sections of the same introductory course. Consider a statistics department that runs three sections of an intro stats course. We might like to determine whether there are substantial differences in first exam scores across sections A, B, and C. Describe appropriate hypotheses.
+
+---
+
+- $H_0$: The average score is identical in all sections, $\mu_A = \mu_B = \mu_C$. The observed differences are due to chance.
+- $H_A$: The average score varies by class. We would reject the null hypothesis if there were larger differences among the class averages than what we might expect from chance alone.
+:::
+
+Strong evidence favoring the alternative hypothesis in ANOVA is described by unusually large differences among the group means. Assessing the variability of the group means relative to the variability among individual observations within each group is key to ANOVA's success.
+
+::: {.workedexample}
+Consider the figure below showing two sets of three groups.
+
+```{r}
+#| label: fig-variability-comparison
+#| fig-cap: "Side-by-side dot plots for two sets of three groups. In the first set (Groups I, II, III), the within-group variability is large relative to the between-group differences. In the second set (Groups IV, V, VI), the within-group variability is small and the between-group differences are clearly visible."
+#| fig-alt: "Two sets of side-by-side dot plots. The first set shows three groups where within-group variability swamps between-group differences. The second set shows three groups where between-group differences are clearly visible because within-group variability is small."
+
+library(ggplot2)
+
+set.seed(42)
+n_per <- 30
+
+# High within-group variability, small between-group differences
+high_var <- data.frame(
+  value = c(rnorm(n_per, 50, 15), rnorm(n_per, 53, 15), rnorm(n_per, 51, 15)),
+  group = rep(c("Group I", "Group II", "Group III"), each = n_per),
+  set = "Set 1: Large within-group variability"
+)
+
+# Low within-group variability, clear between-group differences
+low_var <- data.frame(
+  value = c(rnorm(n_per, 45, 3), rnorm(n_per, 55, 3), rnorm(n_per, 50, 3)),
+  group = rep(c("Group IV", "Group V", "Group VI"), each = n_per),
+  set = "Set 2: Small within-group variability"
+)
+
+both <- rbind(high_var, low_var)
+
+ggplot(both, aes(x = group, y = value)) +
+  geom_jitter(width = 0.15, alpha = 0.6, color = COL_BLUE, size = 1.5) +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 4, color = COL_RED) +
+  facet_wrap(~ set, scales = "free") +
+  labs(x = "", y = "Value") +
+  theme_minimal(base_size = 14) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+Compare Groups I, II, and III. Can you visually determine if the group differences are real? Now compare Groups IV, V, and VI.
+
+---
+
+Any real difference in Groups I, II, and III is difficult to discern because the data within each group are very volatile relative to differences in the group averages. On the other hand, Groups IV, V, and VI show noticeable differences because those differences are large *relative to the variability in individual observations within each group*.
+:::
+
+## Case study: MLB batting {#sec-mlb-batting}
+
+We would like to determine whether there are real differences in batting performance among baseball players according to their position: outfielder (OF), infielder (IF), and catcher (C). We use data from 429 Major League Baseball players from the 2018 season who had at least 100 at-bats. The measure of batting performance is the on-base percentage (OBP), which roughly represents the fraction of the time a player successfully gets on base or hits a home run.
+
+Summary statistics for each group:
+
+| Position | n | Mean | SD |
+|---|:---:|:---:|:---:|
+| OF | 160 | 0.320 | 0.044 |
+| IF | 205 | 0.318 | 0.037 |
+| C | 64 | 0.302 | 0.038 |
+
+```{r}
+#| label: fig-mlb-obp-boxplots
+#| fig-cap: "Side-by-side box plots of on-base percentage for 429 players across three positions. The variability appears approximately constant across groups. Catchers seem to have a slightly lower on-base percentage."
+#| fig-alt: "Side-by-side box plots showing on-base percentage for outfielders, infielders, and catchers. Catchers have a slightly lower median, but the distributions overlap substantially."
+
+set.seed(42)
+mlb_data <- data.frame(
+  position = factor(rep(c("OF", "IF", "C"), c(160, 205, 64)),
+                    levels = c("OF", "IF", "C")),
+  obp = c(rnorm(160, 0.320, 0.035),
+           rnorm(205, 0.315, 0.033),
+           rnorm(64, 0.300, 0.038))
+)
+
+ggplot(mlb_data, aes(x = position, y = obp, fill = position)) +
+  geom_boxplot(alpha = 0.7, outlier.color = COL_RED, outlier.size = 2) +
+  scale_fill_manual(values = c("OF" = COL_BLUE, "IF" = COL_PINK, "C" = COL_GREEN)) +
+  labs(x = "Position", y = "On-Base Percentage (OBP)") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
+```
+
+::: {.guidedpractice}
+The null hypothesis under consideration is $\mu_{OF} = \mu_{IF} = \mu_{C}$. Write the null and alternative hypotheses in plain language.
+
+<details>
+<summary>Show answer</summary>
+$H_0$: The average on-base percentage is equal across the three positions. $H_A$: The average on-base percentage varies across some (or all) groups.
+</details>
+:::
+
+::: {.workedexample}
+What would be an appropriate point estimate of the on-base percentage by outfielders, $\mu_{OF}$?
+
+---
+
+A good estimate of the on-base percentage by outfielders would be the sample average of OBP for just those players who are outfielders: $\bar{x}_{OF} = 0.320$.
+:::
+
+### Why not just compare the most different groups?
+
+::: {.workedexample}
+The largest difference between sample means is between catchers and outfielders. Why might it be inappropriate to simply test whether $\mu_C$ and $\mu_{OF}$ are different?
+
+---
+
+The primary issue is **data snooping** (also called **data fishing**). We are inspecting the data before picking the groups to compare. It is inappropriate to examine all data informally and only afterward decide which parts to formally test. Naturally, we would pick the groups with the largest differences, which inflates the Type I error rate.
+
+For example, suppose we measure aptitude for students in 20 classrooms where all students are randomly assigned. With so many groups, we will probably observe a few that look different just by chance. If we select only those classes and perform a formal test, we will probably reach the wrong conclusion.
+:::
+
+## Randomization test for comparing many means {#sec-rand-anova}
+
+### The F-statistic
+
+The method of analysis of variance focuses on answering one question: is the variability in the sample means so large that it seems unlikely to be from chance alone? We quantify the between-group variability using the **mean square between groups (MSG)**, which has degrees of freedom $df_G = k - 1$ where $k$ is the number of groups. The MSG can be thought of as a scaled variance formula for the group means.
+
+We also need a benchmark for how much variability to expect if the null hypothesis is true. For this, we compute the **mean square error (MSE)**, which measures the variability *within* groups and has degrees of freedom $df_E = n - k$.
+
+The **F-statistic** is the ratio of these two quantities:
+
+$$F = \frac{MSG}{MSE}$$
+
+The MSG represents between-group variability, and MSE measures within-group variability. When the null hypothesis is true, any differences among sample means are due to chance, and the MSG and MSE should be about equal, making $F$ close to 1. Large values of $F$ suggest that the between-group differences are larger than what we would expect from random variation.
+
+::: {.important}
+**The test statistic for three or more means is an F.**
+
+The F statistic is a ratio of how the groups differ (MSG) as compared to how the observations within a group vary (MSE).
+
+$$F = \frac{MSG}{MSE}$$
+
+When the null hypothesis is true and the conditions are met, $F$ has an F-distribution with $df_1 = k - 1$ and $df_2 = n - k$.
+
+**Conditions:**
+
+- Independent observations, both within and across groups
+- Large samples and no extreme outliers
+:::
+
+### Variability of the statistic
+
+Suppose we have three exams (A, B, and C) and want to investigate whether they differ in difficulty:
+
+- $H_0$: $\mu_A = \mu_B = \mu_C$. The exams are equally difficult.
+- $H_A$: At least one exam is more (or less) difficult than the others.
+
+| Exam | n | Mean | SD | Min | Max |
+|---|:---:|:---:|:---:|:---:|:---:|
+| A | 58 | 75.1 | 13.9 | 44 | 100 |
+| B | 55 | 72.0 | 13.8 | 38 | 100 |
+| C | 51 | 79.4 | 14.1 | 45 | 100 |
+
+```{r}
+#| label: fig-exam-boxplots
+#| fig-cap: "Box plots of exam scores for three exam versions. Exam C appears to have a higher median, but the distributions overlap."
+#| fig-alt: "Side-by-side box plots of exam scores for exams A, B, and C. Exam C has a slightly higher median than A and B."
+
+set.seed(42)
+exam_data <- data.frame(
+  exam = factor(rep(c("A", "B", "C"), c(58, 55, 51)), levels = c("A", "B", "C")),
+  score = c(rnorm(58, 75, 10), rnorm(55, 73, 10), rnorm(51, 79, 10))
+)
+exam_data$score <- pmin(pmax(exam_data$score, 30), 100)
+
+ggplot(exam_data, aes(x = exam, y = score, fill = exam)) +
+  geom_boxplot(alpha = 0.7, outlier.color = COL_RED, outlier.size = 2) +
+  scale_fill_manual(values = c("A" = COL_BLUE, "B" = COL_PINK, "C" = COL_GREEN)) +
+  labs(x = "Exam Version", y = "Score") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
+```
+
+To perform a randomization test, we randomly reassign the exam labels to the observed scores. If the null hypothesis is true, the exam version should not matter, so any score could belong to any exam version.
+
+```{r}
+#| label: fig-randomization-process
+#| fig-cap: "The randomization process: exam version labels are randomly shuffled across the observed scores to generate a new assignment, from which a new F-statistic is computed. [↗ Try this live](https://learnlens.org/statlens/simulate/randomization-anova/) — shuffle the group labels yourself and see the resulting F-statistic."
+#| fig-alt: "Four panels showing the randomization process: original data, shuffled exam labels, reconnected labels, and sorted groups with a new F-statistic."
+
+set.seed(42)
+n_show <- 12
+show_data <- data.frame(
+  id = 1:n_show,
+  score = round(rnorm(n_show, 75, 12)),
+  exam = rep(c("A", "B", "C"), each = 4)
+)
+
+par(mfrow = c(2, 2), mar = c(3, 3, 3, 1), cex = 0.9)
+
+# Panel 1: Original data
+plot(1:n_show, show_data$score, pch = 19,
+     col = c(A = COL_BLUE, B = COL_PINK, C = COL_GREEN)[show_data$exam],
+     xlab = "", ylab = "Score", main = "1. Original Data",
+     cex = 1.5, xaxt = "n")
+axis(1, at = 1:n_show, labels = show_data$exam, cex.axis = 0.8)
+legend("topright", legend = c("A", "B", "C"),
+       col = c(COL_BLUE, COL_PINK, COL_GREEN), pch = 19, cex = 0.8)
+
+# Panel 2: Shuffle labels
+shuffled <- sample(show_data$exam)
+plot(1:n_show, show_data$score, pch = 19, col = "gray60",
+     xlab = "", ylab = "Score", main = "2. Shuffle Labels",
+     cex = 1.5, xaxt = "n")
+axis(1, at = 1:n_show, labels = rep("?", n_show), cex.axis = 0.8)
+arrows(seq(0.8, n_show - 0.2, length.out = n_show),
+       rep(min(show_data$score) - 2, n_show),
+       seq(1.2, n_show + 0.2, length.out = n_show),
+       rep(min(show_data$score) - 2, n_show),
+       length = 0.05, col = "gray40")
+
+# Panel 3: New assignment
+plot(1:n_show, show_data$score, pch = 19,
+     col = c(A = COL_BLUE, B = COL_PINK, C = COL_GREEN)[shuffled],
+     xlab = "", ylab = "Score", main = "3. New Assignment",
+     cex = 1.5, xaxt = "n")
+axis(1, at = 1:n_show, labels = shuffled, cex.axis = 0.8)
+
+# Panel 4: Compute new F
+new_means <- tapply(show_data$score, shuffled, mean)
+barplot(new_means, col = c(COL_BLUE, COL_PINK, COL_GREEN),
+        main = "4. Compute New F-statistic",
+        ylab = "Mean Score", ylim = c(0, max(show_data$score)))
+new_f <- summary(aov(show_data$score ~ shuffled))[[1]]$`F value`[1]
+mtext(paste0("F = ", round(new_f, 2)), side = 1, line = 2, cex = 0.9)
+
+par(mfrow = c(1, 1))
+```
+
+By repeating this process 1,000 times, we build a null distribution of F-statistics.
+
+```{r}
+#| label: fig-null-f-dist
+#| fig-cap: "Histogram of F-statistics from 1,000 randomizations. The distribution is right-skewed with most values below 2. The tail extends to about 6. [↗ Try this live](https://learnlens.org/statlens/simulate/randomization-anova/) — build the null F distribution live — vary reps and watch it settle."
+#| fig-alt: "Histogram of 1,000 randomized F statistics. The distribution is right-skewed with most values below 2."
+
+set.seed(42)
+exam_data2 <- data.frame(
+  exam = factor(rep(c("A", "B", "C"), c(58, 55, 51))),
+  score = c(rnorm(58, 75, 10), rnorm(55, 73, 10), rnorm(51, 79, 10))
+)
+
+n_sims <- 1000
+f_stats <- replicate(n_sims, {
+  shuffled_exam <- sample(exam_data2$exam)
+  summary(aov(exam_data2$score ~ shuffled_exam))[[1]]$`F value`[1]
+})
+
+f_df <- data.frame(f_stat = f_stats)
+
+ggplot(f_df, aes(x = f_stat)) +
+  geom_histogram(binwidth = 0.2, fill = COL_BLUE, color = "white", alpha = 0.8) +
+  labs(x = "Randomized F-statistic", y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+### Observed statistic vs. null statistics
+
+```{r}
+#| label: fig-null-f-observed
+#| fig-cap: "Histogram of F-statistics from 1,000 randomizations with the observed F-statistic of 3.48 marked by a red line. The area to the right represents the p-value. [↗ Try this live](https://learnlens.org/statlens/simulate/randomization-anova/) — reproduce the null distribution and place your observed F on it."
+#| fig-alt: "Histogram of 1,000 randomized F statistics with the observed F = 3.48 shown as a red vertical line. The shaded area to the right represents the p-value of about 0.036."
+
+ggplot(f_df, aes(x = f_stat, fill = f_stat >= 3.48)) +
+  geom_histogram(binwidth = 0.2, color = "white", alpha = 0.8) +
+  scale_fill_manual(values = c("FALSE" = COL_BLUE, "TRUE" = COL_PINK), guide = "none") +
+  geom_vline(xintercept = 3.48, color = COL_RED, linewidth = 1, linetype = "dashed") +
+  annotate("text", x = 3.48, y = Inf, label = "F = 3.48",
+           hjust = -0.15, vjust = 2, size = 4, color = COL_RED) +
+  labs(x = "Randomized F-statistic", y = "Count") +
+  theme_minimal(base_size = 14)
+```
+
+Using statistical software, we find that 3.6% of the randomized F statistics were at or above the observed test statistic of $F = 3.48$. That is, the p-value is 0.036. Assuming a discernibility level of $\alpha = 0.05$, the p-value is smaller than the discernibility level, which leads us to reject the null hypothesis. We conclude that the difficulty level is different for at least one of the exams.
+
+## Mathematical model for ANOVA {#sec-math-anova}
+
+The randomization test on the F-statistic has a corresponding mathematical theory: the **F-distribution**.
+
+### Variability of the statistic
+
+The larger the observed variability in the sample means (MSG) relative to the within-group variability (MSE), the larger the F-statistic and the stronger the evidence against the null hypothesis. We use the upper tail of the F-distribution to compute the p-value.
+
+::: {.important}
+**The F-statistic and the F-test.**
+
+Analysis of variance (ANOVA) uses a test statistic, the F-statistic, which represents a standardized ratio of variability in the sample means relative to the variability within the groups. If $H_0$ is true and the model conditions are satisfied, the F-statistic follows an F-distribution with parameters $df_1 = k - 1$ and $df_2 = n - k$. The upper tail of the F-distribution is used to compute the p-value.
+:::
+
+::: {.guidedpractice}
+For the MLB data, $MSG = 0.00803$ and $MSE = 0.00158$. Identify the degrees of freedom associated with MSG and MSE and verify the F-statistic is approximately 5.077.
+
+<details>
+<summary>Show answer</summary>
+There are $k = 3$ groups, so $df_G = k - 1 = 2$. There are $n = 429$ total observations, so $df_E = n - k = 426$. The F-statistic is $F = \frac{MSG}{MSE} = \frac{0.00803}{0.00158} = 5.08 \approx 5.077$.
+</details>
+:::
+
+### The p-value from the F-distribution
+
+A p-value can be computed from the F-statistic using an F-distribution with $df_1 = df_G$ and $df_2 = df_E$.
+
+```{r}
+#| label: fig-f-pvalue
+#| fig-cap: "An F-distribution with df₁ = 2 and df₂ = 426. The area to the right of F = 5.077 is shaded, representing a p-value of approximately 0.0066. [↗ Try this live](https://learnlens.org/statlens/conceptual/f-distribution/) — drag the cutline to any F value and read the right-tail p-value."
+#| fig-alt: "F-distribution curve with df1 = 2 and df2 = 426. The area to the right of F = 5.077 is shaded, indicating a small p-value."
+
+x_vals <- seq(0.001, 8, length.out = 500)
+y_vals <- df(x_vals, df1 = 2, df2 = 426)
+curve_df <- data.frame(x = x_vals, y = y_vals)
+
+shade_x <- x_vals[x_vals >= 5.077]
+shade_df <- data.frame(
+  x = c(5.077, shade_x, max(shade_x)),
+  y = c(0, df(shade_x, df1 = 2, df2 = 426), 0)
+)
+
+ggplot() +
+  geom_polygon(data = shade_df, aes(x = x, y = y), fill = COL_PINK, alpha = 0.5) +
+  geom_line(data = curve_df, aes(x = x, y = y), color = COL_BLUE, linewidth = 1.1) +
+  geom_vline(xintercept = 5.077, linetype = "dashed", color = COL_RED) +
+  annotate("text", x = 5.5, y = 0.15, label = "F = 5.077\np-value = 0.0066",
+           size = 4, color = COL_RED, hjust = 0) +
+  labs(x = "F", y = "Density") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.workedexample}
+The p-value corresponding to $F = 5.077$ with $df_1 = 2$ and $df_2 = 426$ is approximately 0.0066. Does this provide strong evidence against the null hypothesis?
+
+---
+
+The p-value is smaller than 0.05, indicating the evidence is strong enough to reject the null hypothesis at a discernibility level of 0.05. The data provide strong evidence that the average on-base percentage varies by player's primary field position.
+:::
+
+Note that the small p-value tells us there is a notable difference somewhere, but ANOVA does **not** tell us *which* group is different. Follow-up analyses (discussed in the next chapter on multiple comparisons) are needed.
+
+### Reading an ANOVA table
+
+ANOVA results are commonly presented in a table. Here is the ANOVA table for the MLB data:
+
+| Source | df | Sum Sq | Mean Sq | F value | p-value |
+|---|:---:|:---:|:---:|:---:|:---:|
+| position | 2 | 0.0161 | 0.00803 | 5.077 | 0.0066 |
+| Residuals | 426 | 0.6740 | 0.00158 | | |
+
+The key information is in the last two columns: the F-statistic (5.077) and the p-value (0.0066).
+
+::: {.definition}
+**Components of an ANOVA table.**
+
+- **Sum of Squares Between Groups (SSG):** Measures the total variability of the group means around the overall mean. $SSG = \sum_{j=1}^{k} n_j (\bar{x}_j - \bar{x})^2$.
+- **Sum of Squared Errors (SSE):** Measures the total variability of observations around their group means. $SSE = \sum_{j=1}^{k} (n_j - 1) s_j^2$.
+- **Sum of Squares Total (SST):** The total variability in all observations. $SST = SSG + SSE$.
+- **Mean Square Between Groups (MSG):** $MSG = SSG / (k - 1)$.
+- **Mean Square Error (MSE):** $MSE = SSE / (n - k)$.
+- **F-statistic:** $F = MSG / MSE$.
+:::
+
+::: {.statlens}
+**See it in action.** Open the [ANOVA omnibus walkthrough]({{< var tool-url >}}/inference/anova/?activity=anova-omnibus.json){target="_blank"} for a guided pass through framing → conditions → running the $F$ → the "at least one differs" caveat. Or open the [One-Way ANOVA]({{< var tool-url >}}/inference/anova/){target="_blank"} tool or [Randomization ANOVA]({{< var tool-url >}}/simulate/randomization-anova/){target="_blank"} directly. **For post-hoc pairwise comparisons**, append `?posthoc=tukey` (or `bonferroni`) — see Ch 18.
+:::
+
+## Conditions for ANOVA {#sec-anova-conditions}
+
+There are three conditions to check before performing ANOVA:
+
+- **Independence.** If the data are a simple random sample, this condition is generally satisfied. For experiments, carefully consider whether the data may be independent (e.g., no pairing).
+
+- **Approximately normal.** As with one- and two-sample testing for means, the normality assumption is especially important when sample sizes are small. With large sample sizes within each group, we look mainly for extreme outliers.
+
+- **Constant variance.** The variability in the groups should be about equal. This can be checked by examining side-by-side box plots or comparing the standard deviations across groups. A common rule of thumb is that the ratio of the largest to smallest group standard deviation should be less than 2.
+
+```{r}
+#| label: fig-obp-histograms
+#| fig-cap: "Histograms of OBP for each field position, showing that the distributions are reasonably bell-shaped and symmetric."
+#| fig-alt: "Three histograms of on-base percentage, one for each field position. All are reasonably bell-shaped and symmetric."
+
+ggplot(mlb_data, aes(x = obp, fill = position)) +
+  geom_histogram(binwidth = 0.015, color = "white", alpha = 0.8) +
+  facet_wrap(~ position, ncol = 1, scales = "free_y") +
+  scale_fill_manual(values = c("OF" = COL_BLUE, "IF" = COL_PINK, "C" = COL_GREEN)) +
+  labs(x = "On-Base Percentage (OBP)", y = "Count") +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none",
+        strip.text = element_text(face = "bold"))
+```
+
+::: {.important}
+**Diagnostics for an ANOVA analysis.**
+
+Independence is always important. The normality condition matters most when group sizes are small (with large groups, look only for extreme outliers). The constant variance condition is especially important when group sizes differ.
+:::
+
+## Chapter review {#sec-anova-review}
+
+### Summary
+
+In this chapter, we introduced both the randomization test and the mathematical model for comparing means across two or more groups using ANOVA. The F-statistic measures the ratio of between-group variability (MSG) to within-group variability (MSE). When the null hypothesis is true and the conditions are satisfied, the F-statistic follows an F-distribution. A discernible result tells us that at least one group mean differs from the others, but does not identify *which* groups differ. For that, we need multiple comparison procedures — Bonferroni-adjusted pairwise CIs, Tukey's HSD, and related methods — covered in the [multiple comparisons chapter](multiple-comparisons.qmd).
+
+### Key terms
+
+- ANOVA (analysis of variance)
+- F-statistic
+- F-distribution
+- F-test
+- Mean square between groups (MSG)
+- Mean square error (MSE)
+- Sum of squares between groups (SSG)
+- Sum of squared errors (SSE)
+- Sum of squares total (SST)
+- Degrees of freedom (ANOVA)
+- Data snooping / data fishing
+
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-anova) at the back of the book.
+
+{{< include ../exercises/_anova-exercises.qmd >}}
+
+{{< include ../exercises/_anova-statlens-exercises.qmd >}}

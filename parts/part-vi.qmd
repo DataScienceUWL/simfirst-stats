@@ -1,0 +1,5 @@
+---
+title: "Design"
+---
+
+A hypothesis test can fail to detect a real effect — a Type II error. This part explores when and why this happens, introduces statistical power, and shows how to plan studies that are large enough to detect meaningful effects. These topics are essential for designing good research studies and critically evaluating published results.

@@ -1,0 +1,32 @@
+/*-- scss:rules --*/
+
+/* ================================================================
+   ACCESSIBILITY — light-mode contrast fixes (WCAG 2.1 AA)
+   Loaded after simfirst.scss (light theme only). The IMSCOL blue
+   ($primary #569BBD) is a low-contrast blue as TEXT: it clears AA only
+   as large headings (>= 3:1), not as labels / small text (need 4.5:1).
+   These rules swap the failing blue/red TEXT colors for darker,
+   AA-passing variants. Borders and fills keep #569BBD (decorative;
+   the 3:1 non-text contrast requirement is met).
+   ================================================================ */
+
+$blue-a11y: #397594;   /* >= 4.5:1 on white and on the light tinted boxes */
+
+/* Small subheadings — h1-h3 stay #569BBD (compliant as large text). */
+h4, h5, h6 { color: $blue-a11y; }
+
+/* Callout labels and other blue text uses */
+.guidedpractice::before,
+.workedexample::before,
+.statlens::before,
+.guidedpractice details summary,
+.sidebar-title,
+.exercises strong { color: $blue-a11y; }
+.guidedpractice details summary:hover { color: darken($blue-a11y, 12%); }
+
+/* Quiet figure-caption link — full opacity so it meets contrast on white */
+.open-in-statlens { color: $blue-a11y; opacity: 1; }
+
+/* Accent red/pink labels that failed on their tinted boxes */
+.important strong { color: #d82137; }   /* was darken($pink,10%) ~3.5:1 */
+.caution::before  { color: #d63010; }   /* was $red #F05133 ~3.3:1 */

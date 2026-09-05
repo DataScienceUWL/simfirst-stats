@@ -1,0 +1,570 @@
+---
+title: "Inference for Proportions"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+In earlier chapters, we used simulation-based methods to draw conclusions about population proportions. In the randomization tests and bootstrap confidence intervals chapters, we built randomization distributions and bootstrap confidence intervals; in the normal approximation chapter, we learned that the normal distribution provides a mathematical model for these sampling distributions when certain conditions are met. In this chapter, we bring everything together for proportions. We develop normal-based confidence intervals and hypothesis tests for a single proportion and for the difference between two proportions. Throughout, we compare these formula-based results to the simulation-based results from earlier chapters, reinforcing the idea that these are two routes to the same destination.
+:::
+
+## Case study: is the complication rate lower? {#sec-medical-consultant-setup}
+
+People providing an organ for donation sometimes seek the help of a special **medical consultant**. These consultants assist the patient in all aspects of the surgery, with the goal of reducing the possibility of complications during the medical procedure and recovery.
+
+One consultant tried to attract patients by noting the national complication rate for liver donor surgeries is about 10%, but her clients have had only 3 complications in the 62 liver donor surgeries she has facilitated. She claims this is strong evidence that her work reduces complications.
+
+Let $p$ denote the true complication rate for this consultant's clients. The point estimate is
+$$\hat{p} = \frac{3}{62} = 0.048.$$
+
+The sample rate 4.8% is well below the national 10%. But we saw the same puzzle in the sampling variability chapter: even when nothing is going on, sample proportions vary from sample to sample. **Could a rate as low as 4.8% out of 62 have happened by chance, if the true rate really were 10%?** That is the question a hypothesis test is built to answer:
+
+- $H_0$: The consultant's true complication rate matches the national rate, $p = 0.10$.
+- $H_A$: The consultant's true complication rate is lower, $p < 0.10$.
+
+To weigh the evidence, we need to know how much $\hat{p}$ would vary from sample to sample **if $H_0$ were true**. That variability is captured by the null distribution of $\hat{p}$.
+
+## Building the null distribution by simulation {#sec-null-dist-buildup}
+
+We do not need calculus or a formula to picture the null distribution --- we can build it directly with simulation. This mirrors the logic of the randomization tests chapter, applied here to a single proportion.
+
+### The marbles metaphor
+
+Imagine a large bag of marbles: 10% orange (complication) and 90% blue (no complication). This bag models the world under $H_0$. Each surgery is one draw from the bag; a "study" of $n = 62$ surgeries is one scoop of 62 marbles. The proportion of orange marbles in the scoop is one simulated $\hat{p}_{sim}$ from the null distribution.
+
+If we scoop 62 marbles and get 5 orange and 57 blue, then
+$$\hat{p}_{sim1} = \frac{5}{62} = 0.081.$$
+
+That is *one* simulated study. Under $H_0$, this could easily have happened, even though it does not equal 0.10 exactly.
+
+::: {.workedexample}
+Is one simulated $\hat{p}_{sim}$ enough to draw a conclusion about the consultant?
+
+---
+
+No. One draw tells us nothing about the *shape* of the null distribution --- it is a single value that happens to land somewhere by chance. To know what values of $\hat{p}$ are typical and which are extreme under $H_0$, we need many simulations.
+:::
+
+### From one draw to many
+
+The natural next question is: **what happens as we accumulate more draws?** Does the null distribution take a recognizable shape? Does it settle down or keep drifting?
+
+This is the moment where a static picture struggles. Jumping from "one draw at $\hat{p}_{sim1} = 0.081$" to a smooth histogram of 10,000 draws is a big cognitive leap when you have not seen this before. It is worth pausing to build the distribution one increment at a time.
+
+::: {.statlens}
+**Predict → Do → Explain.** Open the [Sampling Distribution Lab (proportion mode)]({{< var tool-url >}}/conceptual/sampling-lab/?activity=sampling-distribution-proportion.json&p=0.10&n=62){target="_blank"} --- preloaded with $p = 0.10$ and $n = 62$, the null-hypothesis world for the medical-consultant case. The gated activity opens with a **Predict** step (commit to where the distribution of $\hat{p}_{sim}$ will be centered, how spread out, and what shape), walks you through drawing 1, 10, 100, and 1,000 samples in sequence, and closes with an **Explain** step where you articulate what the buildup showed. Your responses save locally in the tool, so you can return to your work on the same device.
+:::
+
+Three ideas the activity lands on --- worth flagging in the reading so you can compare them to your own conclusions:
+
+- More samples do **not** make the individual $\hat{p}_{sim}$ values more precise --- they fill in the *same* null distribution. To get narrower $\hat{p}_{sim}$ values you must increase $n$ (the size of each scoop), not the number of scoops.
+- The null distribution has a stable center at $p = 0.10$ and a stable spread even while the individual draws stay noisy. That stability is what makes the p-value calculation possible.
+- The distribution is **roughly bell-shaped, but with a mild right skew**. That skew is not noise --- it is a signal. With $p = 0.10$ and $n = 62$, the expected number of successes is $np = 6.2 < 10$, so the success--failure condition fails and the normal approximation is only approximate. When $p$ sits near 0 (or 1) and $n$ is not large, $\hat{p}$ has more room to wander toward the middle than toward the floor, which pushes a tail out to the right. This is the case where a simulated null distribution is more trustworthy than a normal formula --- exactly the situation we started the chapter with.
+
+### The null distribution at 1,000 simulations
+
+A computer can repeat the marbles scoop as many times as we want. Here are the results of 1,000 simulated studies under $H_0$: each study draws 62 marbles from the 10% / 90% bag, and we record $\hat{p}_{sim}$ from each.
+
+```{r}
+#| label: fig-null-dist-medical
+#| fig-cap: "The null distribution of p-hat from 1,000 simulated studies under H₀: p = 0.10, n = 62. Simulations with p-hat ≤ 0.048 (as extreme as the consultant's observed value, or more extreme) are shaded orange. [↗ Try this live](https://learnlens.org/statlens/conceptual/sampling-lab/) — simulate under $H_0$ with your own $p$ and $n$ and rebuild the null."
+#| fig-alt: "Histogram of 1,000 simulated sample proportions under a null proportion of 0.10 with sample size 62. The distribution is centered near 0.10 and roughly bell-shaped but slightly right-skewed. The left tail at or below 0.048 is shaded."
+#| fig-width: 7
+#| fig-height: 3.5
+#| echo: false
+library(ggplot2)
+set.seed(334422)
+null_df <- data.frame(phat = rbinom(1000, size = 62, prob = 0.10) / 62)
+tail_share <- mean(null_df$phat <= 0.0484)
+
+ggplot(null_df, aes(x = phat, fill = phat <= 0.0484)) +
+  geom_histogram(binwidth = 1/62, color = "white", show.legend = FALSE) +
+  scale_fill_manual(values = c("FALSE" = COL_BLUE, "TRUE" = COL_ORANGE)) +
+  geom_vline(xintercept = 0.0484, linetype = "dashed", color = COL_ORANGE, linewidth = 0.7) +
+  annotate("text", x = 0.048, y = Inf,
+           label = expression(hat(p) == 0.048),
+           vjust = 1.4, hjust = 1.1, color = COL_ORANGE, size = 3.6, fontface = "bold") +
+  labs(x = expression(hat(p)[sim]),
+       y = "Count (out of 1,000)") +
+  theme_minimal(base_size = 13)
+```
+
+Two observations to record before we compute anything:
+
+1. **The distribution is centered near $p = 0.10$.** That is not luck --- it is because we built it under $H_0$, where the truth is $p = 0.10$. Simulated $\hat{p}$ values scatter symmetrically-ish around that center.
+2. **The distribution has a shape we can measure.** It looks roughly bell-shaped but with a mild right skew, because $p = 0.10$ is close to 0 and $\hat{p}$ cannot go below zero.
+
+### Reading the p-value
+
+The consultant's observed $\hat{p} = 0.048$ is marked with the dashed line. The orange-shaded bars are the simulated $\hat{p}_{sim}$ values that are *at least as extreme* as the observed value in the direction of the alternative --- here, $\hat{p}_{sim} \leq 0.048$.
+
+The p-value is the fraction of the simulated studies that landed in the shaded tail:
+
+$$\text{p-value} \;=\; \frac{\text{simulations with } \hat{p}_{sim} \leq 0.048}{1{,}000} \;\approx\; `r round(tail_share, 3)`.$$
+
+::: {.workedexample}
+Using $\alpha = 0.05$, what conclusion should we draw?
+
+---
+
+The p-value $\approx `r round(tail_share, 3)`$ is greater than $\alpha = 0.05$. We **fail to reject** $H_0$. The data do not provide convincing evidence that the consultant's true complication rate is lower than the national 10% --- a rate of 3 in 62 could plausibly occur even if her true rate were 10%.
+
+Failing to reject $H_0$ is not the same as concluding that her rate *equals* 10%. It only says the data are compatible with the national rate; a larger study would be needed to distinguish a small real improvement from chance.
+:::
+
+::: {.important}
+**Simulating the null distribution of $\hat{p}$.**
+
+Whenever we want to test $H_0: p = p_0$ but a normal-based formula is unreliable, we can build the null distribution directly:
+
+1. Set up a marbles-bag with the proportion $p_0$ specified by $H_0$.
+2. Repeatedly scoop $n$ marbles and record the simulated $\hat{p}_{sim}$.
+3. Read the p-value as the tail area of the null distribution beyond the observed $\hat{p}$.
+
+This works for **any** sample size and does not require the success--failure condition. The formula-based approach in the next section is faster when its conditions are met, but the simulation is always available as a backup.
+:::
+
+## Normal approximation for proportions {#sec-normal-approx-prop}
+
+### The sampling distribution of $\hat{p}$
+
+In the normal approximation chapter, we saw that the Central Limit Theorem guarantees that the sampling distribution of $\hat{p}$ is approximately normal when certain conditions are met. Let's state these conditions precisely.
+
+::: {.important}
+**Sampling distribution of $\hat{p}$.**
+
+The sampling distribution of the sample proportion $\hat{p}$, based on a sample of size $n$ from a population with true proportion $p$, is approximately normal when:
+
+1. **Independence.** The observations are independent (e.g., from a simple random sample).
+2. **Success-failure condition.** We expect to see at least 10 successes and 10 failures: $np \geq 10$ and $n(1-p) \geq 10$.
+
+When these conditions are met, the sampling distribution is approximately:
+
+$$\hat{p} \sim N\!\left(p,\ \sqrt{\frac{p(1-p)}{n}}\right)$$
+:::
+
+::: {.definition}
+The **success-failure condition** requires that the expected number of successes ($np$) and the expected number of failures ($n(1-p)$) are both at least 10. This ensures the sampling distribution of $\hat{p}$ is not too skewed for the normal approximation to work well.
+:::
+
+::: {.workedexample}
+A medical consultant facilitated 62 liver transplant surgeries, with 3 complications. Under the null hypothesis that the true complication rate is $p_0 = 0.10$, is it appropriate to use the normal approximation?
+
+---
+
+Check the success-failure condition using $p_0 = 0.10$:
+
+- Expected successes (complications): $np_0 = 62 \times 0.10 = 6.2$
+- Expected failures: $n(1-p_0) = 62 \times 0.90 = 55.8$
+
+The expected number of successes (6.2) is less than 10. The **success-failure condition is not met**, so the normal approximation should not be used here. A simulation-based approach (such as the parametric bootstrap from the bootstrap confidence intervals chapter) would be more appropriate.
+:::
+
+::: {.guidedpractice}
+A poll surveys 826 randomly selected payday loan borrowers and finds that 51% support a new regulation. Check whether the normal approximation can be used to model $\hat{p}$ for a hypothesis test with $H_0: p = 0.50$.
+
+<details>
+<summary>Show answer</summary>
+Check the success-failure condition using $p_0 = 0.50$: $np_0 = 826 \times 0.50 = 413$ and $n(1-p_0) = 826 \times 0.50 = 413$. Both are well above 10, so the success-failure condition is met. Combined with the random sample (independence), the normal approximation is appropriate.
+</details>
+:::
+
+### The standard error of $\hat{p}$
+
+::: {.important}
+**Standard error of $\hat{p}$.**
+
+When conditions are met, the variability of $\hat{p}$ is described by:
+
+$$SE(\hat{p}) = \sqrt{\frac{p(1-p)}{n}}$$
+
+Since we rarely know the true $p$:
+
+- **For confidence intervals**, use $\hat{p}$ as the best guess: $SE = \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$
+- **For hypothesis tests**, use $p_0$ (the value from $H_0$): $SE = \sqrt{\frac{p_0(1-p_0)}{n}}$
+:::
+
+::: {.guidedpractice}
+Consider polls of size 300 where approximately 2/3 of voters support legalized marijuana. Calculate the standard error of $\hat{p}$.
+
+<details>
+<summary>Show answer</summary>
+Using $p \approx 2/3$: $SE = \sqrt{\frac{(2/3)(1/3)}{300}} = \sqrt{\frac{2/9}{300}} = \sqrt{0.000741} = 0.027$.
+</details>
+:::
+
+## Confidence interval for a single proportion {#sec-ci-one-prop}
+
+### The formula
+
+::: {.important}
+**Confidence interval for a single proportion $p$.**
+
+$$\hat{p} \pm z^* \times \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}$$
+
+where $z^*$ is the critical value for the desired confidence level (e.g., $z^* = 1.96$ for 95%).
+
+**Steps:**
+
+1. Check conditions: independence and success-failure using $\hat{p}$.
+2. Compute $SE$ using $\hat{p}$.
+3. Apply the confidence interval formula.
+:::
+
+### Worked example: Payday loan regulation
+
+::: {.workedexample}
+A simple random sample of 826 payday loan borrowers was surveyed, and 70% supported new regulations on payday lenders. Construct a 95% confidence interval for the true proportion who support the regulations.
+
+---
+
+**Step 1: Check conditions.**
+
+- *Independence.* The data are a random sample.
+- *Success-failure condition.* Using $\hat{p} = 0.70$: $n\hat{p} = 826 \times 0.70 = 578$ and $n(1-\hat{p}) = 826 \times 0.30 = 248$. Both are well above 10.
+
+**Step 2: Compute SE.**
+
+$$SE = \sqrt{\frac{0.70 \times 0.30}{826}} = \sqrt{\frac{0.21}{826}} = \sqrt{0.000254} = 0.016$$
+
+**Step 3: Construct the interval.**
+
+$$0.70 \pm 1.96 \times 0.016 = 0.70 \pm 0.031 = (0.669, 0.731)$$
+
+We are 95% confident that between 66.9% and 73.1% of all payday loan borrowers support the new regulation.
+:::
+
+### Changing the confidence level
+
+The confidence level is controlled by the choice of $z^*$:
+
+| Confidence level | $z^*$ | Interval width |
+|-----------------|-------|---------------|
+| 90% | 1.645 | Narrower |
+| 95% | 1.960 | Moderate |
+| 99% | 2.576 | Wider |
+
+: Critical values for common confidence levels. {.striped}
+
+Higher confidence requires a wider interval -- we must cast a wider net to be more confident we have captured the true parameter.
+
+::: {.guidedpractice}
+Using the payday loan data ($\hat{p} = 0.70$, $n = 826$, $SE = 0.016$), construct a 99% confidence interval.
+
+<details>
+<summary>Show answer</summary>
+Using $z^* = 2.576$: $0.70 \pm 2.576 \times 0.016 = 0.70 \pm 0.041 = (0.659, 0.741)$. The 99% interval is wider than the 95% interval, as expected.
+</details>
+:::
+
+::: {.guidedpractice}
+A study on stent surgery found a point estimate of 0.090 (the difference in stroke rates) with $SE = 0.028$. Construct a 90% confidence interval.
+
+<details>
+<summary>Show answer</summary>
+Using $z^* = 1.645$: $0.090 \pm 1.645 \times 0.028 = 0.090 \pm 0.046 = (0.044, 0.136)$. We are 90% confident that stent implantation increases the 30-day stroke rate by between 4.4% and 13.6%.
+</details>
+:::
+
+::: {.important}
+**General confidence interval formula.** If a point estimate follows a normal model with standard error $SE$, then a confidence interval for the population parameter is:
+
+$$\text{point estimate} \pm z^* \times SE$$
+
+where $z^*$ corresponds to the chosen confidence level.
+:::
+
+::: {.callout-tip}
+### Planning a study: choosing $n$
+
+Before collecting data, researchers often need to decide how large a sample to draw. The width of the CI above is driven by the standard error $\sqrt{\hat{p}(1-\hat{p})/n}$, so hitting a target margin of error is really a question of choosing $n$ large enough. We work through the arithmetic (with worst-case $\hat{p} = 0.5$ and other refinements) in the [sample size chapter](sample-size.qmd) later in the book.
+:::
+
+## Hypothesis test for a single proportion {#sec-ht-one-prop}
+
+### The Z test for a proportion
+
+::: {.important}
+**The test statistic for a single proportion is a Z.**
+
+$$Z = \frac{\hat{p} - p_0}{\sqrt{p_0(1 - p_0) / n}}$$
+
+where $\hat{p}$ is the sample proportion and $p_0$ is the hypothesized proportion from $H_0$.
+
+When $H_0$ is true and conditions are met, $Z$ follows a standard normal distribution $N(0, 1)$.
+
+**Conditions:**
+
+- Independent observations
+- $np_0 \geq 10$ and $n(1 - p_0) \geq 10$
+:::
+
+Note that for hypothesis tests, the standard error is computed using $p_0$ (not $\hat{p}$), because we are evaluating the data under the assumption that $H_0$ is true.
+
+### Worked example: Support for credit checks
+
+::: {.workedexample}
+From a random sample of 826 payday loan borrowers, 51% said they would support a regulation requiring lenders to pull credit reports. Is there convincing evidence that a majority (more than 50%) of borrowers support this regulation?
+
+---
+
+**Step 1: State hypotheses.**
+
+- $H_0$: $p = 0.50$ (no majority support)
+- $H_A$: $p > 0.50$ (majority support)
+
+This is a one-sided test.
+
+**Step 2: Check conditions.**
+
+- *Independence.* Random sample.
+- *Success-failure.* Using $p_0 = 0.50$: $np_0 = 826 \times 0.50 = 413$ and $n(1-p_0) = 413$. Both $\geq 10$.
+
+**Step 3: Compute the test statistic and p-value.**
+
+$$SE = \sqrt{\frac{0.50 \times 0.50}{826}} = \sqrt{\frac{0.25}{826}} = 0.017$$
+
+$$Z = \frac{0.51 - 0.50}{0.017} = \frac{0.01}{0.017} = 0.59$$
+
+```{r}
+#| label: fig-normal-right-tail-z059
+#| fig-cap: "A standard normal curve with the area to the right of Z = 0.59 shaded, representing the one-sided p-value. [↗ Try this live](https://learnlens.org/statlens/conceptual/normal-distribution/) — drag the cutline to any Z value and read off the right-tail area."
+#| fig-alt: "A standard normal distribution curve with the area to the right of Z equals 0.59 shaded. This shaded area represents the p-value for the one-sided test."
+
+library(ggplot2)
+
+x <- seq(-4, 4, length.out = 500)
+y <- dnorm(x)
+base_df <- data.frame(x = x, y = y)
+shade_df <- data.frame(x = x[x >= 0.59], y = dnorm(x[x >= 0.59]))
+
+ggplot(base_df, aes(x = x, y = y)) +
+  geom_area(data = shade_df, aes(x = x, y = y), fill = COL_PINK, alpha = 0.5) +
+  geom_line(linewidth = 1, color = COL_GREEN) +
+  geom_vline(xintercept = 0.59, linetype = "dashed", color = COL_RED) +
+  annotate("text", x = 0.59, y = -0.015, label = "Z = 0.59", size = 4, color = COL_RED) +
+  annotate("text", x = 2.0, y = 0.08, label = "p-value = 0.278", size = 4, fontface = "bold", color = COL_PINK) +
+  labs(x = "Z", y = NULL) +
+  theme_minimal(base_size = 14)
+```
+
+The area to the right of $Z = 0.59$ is 0.278.
+
+**Step 4: Conclusion.** The p-value of 0.278 is much larger than $\alpha = 0.05$, so we fail to reject $H_0$. The poll does not provide convincing evidence that a majority of payday loan borrowers support the regulation requiring credit checks.
+:::
+
+::: {.guidedpractice}
+A candidate claims that more than 60% of voters in a district support her. A random sample of 500 voters finds $\hat{p} = 0.64$. Test the claim at $\alpha = 0.05$.
+
+<details>
+<summary>Show answer</summary>
+Hypotheses: $H_0: p = 0.60$, $H_A: p > 0.60$. Success-failure: $500(0.60) = 300$ and $500(0.40) = 200$, both $\geq 10$. $SE = \sqrt{0.60 \times 0.40 / 500} = \sqrt{0.000480} = 0.0219$. $Z = (0.64 - 0.60)/0.0219 = 1.83$. The right-tail area is 0.034. Since $0.034 < 0.05$, we reject $H_0$. There is sufficient evidence that more than 60% of voters support the candidate.
+</details>
+:::
+
+### When conditions fail
+
+::: {.caution}
+When the success-failure condition is not met, the normal model can underestimate the variability of $\hat{p}$, leading to inaccurate p-values and confidence intervals. In these cases, use simulation-based methods:
+
+- **Bootstrap hypothesis test**: Simulate samples under $H_0$ by drawing from a population with proportion $p_0$ (the parametric bootstrap from the bootstrap confidence intervals chapter).
+- **Bootstrap confidence interval**: Resample from the original data to estimate the variability of $\hat{p}$.
+:::
+
+## Difference of two proportions {#sec-diff-two-props}
+
+### The parameter and point estimate
+
+When comparing two groups, the parameter of interest is the difference in population proportions: $p_1 - p_2$. The point estimate is $\hat{p}_1 - \hat{p}_2$.
+
+### Confidence interval for a difference in proportions
+
+::: {.important}
+**Confidence interval for $p_1 - p_2$.**
+
+$$(\hat{p}_1 - \hat{p}_2) \pm z^* \times \sqrt{\frac{\hat{p}_1(1-\hat{p}_1)}{n_1} + \frac{\hat{p}_2(1-\hat{p}_2)}{n_2}}$$
+
+**Conditions:**
+
+1. **Independence (extended).** Observations are independent within and between groups.
+2. **Success-failure condition (each group separately).** $n_1\hat{p}_1 \geq 10$, $n_1(1-\hat{p}_1) \geq 10$, $n_2\hat{p}_2 \geq 10$, and $n_2(1-\hat{p}_2) \geq 10$.
+:::
+
+::: {.workedexample}
+In a CPR study, patients who had a heart attack were randomly assigned to receive a blood thinner (treatment) or not (control). The survival rates after 24 hours:
+
+| Group | $n$ | Survived | $\hat{p}$ |
+|-------|-----|----------|-----------|
+| Treatment | 50 | 14 | 0.280 |
+| Control | 40 | 11 | 0.275 |
+
+: CPR study results. {.striped}
+
+Construct a 90% confidence interval for the difference in survival rates, $p_T - p_C$.
+
+---
+
+**Check conditions.**
+
+- *Independence.* Patients were randomly assigned, so groups are independent.
+- *Success-failure.* Treatment: $50(0.28) = 14 \geq 10$ and $50(0.72) = 36 \geq 10$. Control: $40(0.275) = 11 \geq 10$ and $40(0.725) = 29 \geq 10$. All conditions met.
+
+**Compute the interval.**
+
+$$\hat{p}_T - \hat{p}_C = 0.280 - 0.275 = 0.005$$
+
+$$SE = \sqrt{\frac{0.280(0.720)}{50} + \frac{0.275(0.725)}{40}} = \sqrt{\frac{0.2016}{50} + \frac{0.1994}{40}} = \sqrt{0.004032 + 0.004985} = \sqrt{0.009017} = 0.095$$
+
+Using $z^* = 1.645$ for 90% confidence:
+
+$$0.005 \pm 1.645 \times 0.095 = 0.005 \pm 0.156 = (-0.151, 0.161)$$
+
+We are 90% confident that the difference in 24-hour survival rates is between $-15.1\%$ and $+16.1\%$. Because the interval contains 0, we cannot conclude that the blood thinner affects survival rates.
+:::
+
+### Hypothesis test for a difference in proportions
+
+::: {.important}
+**The test statistic for comparing two proportions is a Z.**
+
+$$Z = \frac{(\hat{p}_1 - \hat{p}_2) - 0}{\sqrt{\hat{p}_{pool}(1 - \hat{p}_{pool})\left(\frac{1}{n_1} + \frac{1}{n_2}\right)}}$$
+
+where the **pooled proportion** is:
+
+$$\hat{p}_{pool} = \frac{\text{total successes in both groups}}{\text{total sample size}} = \frac{x_1 + x_2}{n_1 + n_2}$$
+
+When $H_0$ is true ($p_1 = p_2$), both groups share the same population proportion, so we pool the data to get a single best estimate.
+
+**Conditions:**
+
+- Independence within and between groups.
+- $n_1\hat{p}_{pool} \geq 10$, $n_1(1-\hat{p}_{pool}) \geq 10$, $n_2\hat{p}_{pool} \geq 10$, $n_2(1-\hat{p}_{pool}) \geq 10$.
+:::
+
+::: {.workedexample}
+Does the blood thinner improve 24-hour survival after CPR? Using the data from the previous example (treatment: 14/50 survived; control: 11/40 survived), test at $\alpha = 0.05$.
+
+---
+
+**Step 1: State hypotheses.**
+
+- $H_0$: $p_T - p_C = 0$ (the blood thinner has no effect)
+- $H_A$: $p_T - p_C \neq 0$ (the blood thinner has some effect)
+
+**Step 2: Check conditions.**
+
+The pooled proportion is $\hat{p}_{pool} = \frac{14 + 11}{50 + 40} = \frac{25}{90} = 0.278$. Check:
+
+- $50(0.278) = 13.9 \geq 10$, $50(0.722) = 36.1 \geq 10$
+- $40(0.278) = 11.1 \geq 10$, $40(0.722) = 28.9 \geq 10$
+
+Conditions are met.
+
+**Step 3: Compute the test statistic and p-value.**
+
+$$SE = \sqrt{0.278(0.722)\left(\frac{1}{50} + \frac{1}{40}\right)} = \sqrt{0.2007 \times 0.045} = \sqrt{0.009032} = 0.095$$
+
+$$Z = \frac{0.005 - 0}{0.095} = 0.05$$
+
+The two-sided p-value for $Z = 0.05$ is $2 \times P(Z > 0.05) = 2 \times 0.480 = 0.960$.
+
+**Step 4: Conclusion.** The p-value of 0.960 is far larger than 0.05. We fail to reject $H_0$. There is no evidence that the blood thinner affects 24-hour survival rates.
+:::
+
+### Why pool for hypothesis tests but not for confidence intervals?
+
+::: {.original}
+You may have noticed a subtle difference:
+
+- **Hypothesis tests** use the **pooled proportion** $\hat{p}_{pool}$ in the standard error. This is because under $H_0$, we assume $p_1 = p_2$, so the best estimate of this common proportion comes from combining both samples.
+- **Confidence intervals** use the **individual sample proportions** $\hat{p}_1$ and $\hat{p}_2$ separately. We are not assuming the proportions are equal -- we are estimating how different they are.
+
+This distinction applies only to proportions. When we turn to means in the next chapters, we will instead use separate sample standard deviations in both tests and confidence intervals.
+:::
+
+## Comparing simulation-based and normal-based methods {#sec-sim-vs-normal-prop}
+
+::: {.original}
+Throughout this course, we have developed two parallel approaches to inference:
+
+| Feature | Simulation-based | Normal approximation |
+|---------|-----------------|---------------------|
+| **Requires conditions?** | Minimal (mainly independence) | Independence + success-failure |
+| **Small samples?** | Works well | May be inaccurate |
+| **Computational cost** | Higher (needs many simulations) | Lower (one formula) |
+| **Conceptual clarity** | High (directly simulates the process) | Moderate (requires distribution theory) |
+| **Precision** | Approximate (varies by number of simulations) | Approximate (varies by how well conditions hold) |
+
+: Comparison of simulation-based and normal approximation approaches. {.striped}
+
+### An example comparison
+
+Consider the opportunity cost study from the randomization tests chapter. The observed difference in proportions was 0.20 ($\hat{p}_T - \hat{p}_C$), and we wanted to test $H_0: p_T - p_C = 0$.
+
+**Randomization test (the randomization tests chapter):** We shuffled the group labels 10,000 times. The p-value was approximately 0.006.
+
+**Normal approximation (this chapter):** Using $SE = 0.078$ and $Z = 0.20 / 0.078 = 2.56$, the p-value was 0.005.
+
+Both methods give essentially the same answer and the same conclusion. This is reassuring and typical when conditions are met.
+
+### When do they disagree?
+
+The methods can give different answers when:
+
+1. **The success-failure condition fails.** The normal approximation may undercount the probability in the tails, leading to p-values that are too small. The simulation approach remains valid.
+2. **The sampling distribution is noticeably skewed.** The normal model is symmetric by definition, while the true sampling distribution of $\hat{p}$ near 0 or 1 is skewed.
+
+The medical consultant example illustrates this: with only 6.2 expected complications, the normal model gave a p-value of 0.085, while the simulation gave 0.122 -- nearly 45% higher. The simulation-based p-value is more trustworthy in this case.
+
+### Practical recommendation
+
+- **When conditions are met**: Both methods work. Use the normal approximation for its simplicity, or use simulation for its conceptual directness.
+- **When conditions are borderline or not met**: Use simulation. The bootstrap and randomization approaches make fewer assumptions and are more reliable in these settings.
+- **Always check conditions first.** The success-failure condition is a simple, quick check that helps you decide which approach to use.
+:::
+
+## Explore with StatLens {#sec-inference-proportions-statlens}
+
+The [Sampling Distribution Lab (proportion mode)]({{< var tool-url >}}/conceptual/sampling-lab/?activity=sampling-distribution-proportion.json){target="_blank"} builds the sampling distribution of $\hat{p}$ one sample at a time. Set $p = 0.60$ and $n = 50$, watch the distribution fill in, then drop $p$ to $0.05$ to see what happens when the success--failure condition fails.
+
+Analytical tools:
+
+- [One-Proportion $z$ test + CI]({{< var tool-url >}}/inference/one-prop/){target="_blank"}, [Two-Proportion $z$ test + CI]({{< var tool-url >}}/inference/two-props/){target="_blank"}.
+
+Simulation counterparts (for when conditions fail):
+
+- [Bootstrap CI for One Proportion]({{< var tool-url >}}/simulate/bootstrap-prop/){target="_blank"}, [Bootstrap CI for Difference in Proportions]({{< var tool-url >}}/simulate/bootstrap-two-props/){target="_blank"}.
+- [Randomization test for One Proportion]({{< var tool-url >}}/simulate/randomization-one-prop/){target="_blank"}, [Randomization test for Two Proportions]({{< var tool-url >}}/simulate/randomization-diff-props/){target="_blank"}.
+
+## Chapter review {#sec-inference-proportions-review}
+
+### Summary
+
+This chapter developed normal-based inference methods for proportions:
+
+- **Success-failure condition.** The normal approximation for $\hat{p}$ requires at least 10 expected successes and 10 expected failures. For confidence intervals, check with $\hat{p}$; for hypothesis tests, check with $p_0$.
+- **CI for one proportion**: $\hat{p} \pm z^* \times \sqrt{\hat{p}(1-\hat{p})/n}$. Use $\hat{p}$ in the SE.
+- **Hypothesis test for one proportion**: $Z = \frac{\hat{p} - p_0}{\sqrt{p_0(1-p_0)/n}}$. Use $p_0$ in the SE.
+- **CI for difference of proportions**: $(\hat{p}_1 - \hat{p}_2) \pm z^* \times SE$, where $SE$ uses separate sample proportions.
+- **Hypothesis test for difference of proportions**: $Z = \frac{\hat{p}_1 - \hat{p}_2}{SE}$, where $SE$ uses the **pooled proportion** $\hat{p}_{pool}$.
+- **Confidence level** is controlled by $z^*$: higher confidence means wider intervals.
+- **When conditions fail** (especially the success-failure condition), use simulation-based methods from the randomization tests and bootstrap confidence intervals chapters instead.
+- **Normal-based and simulation-based methods agree** when conditions are met and can give different answers when conditions are violated.
+
+### Key terms
+
+Success-failure condition, standard error of $\hat{p}$, Z test for a proportion, pooled proportion, confidence interval for a proportion, confidence interval for a difference of proportions, margin of error, critical value ($z^*$), confidence level.
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-inference-proportions) at the back of the book.
+
+{{< include ../exercises/_inference-proportions-exercises.qmd >}}
+
+{{< include ../exercises/_inference-proportions-statlens-exercises.qmd >}}

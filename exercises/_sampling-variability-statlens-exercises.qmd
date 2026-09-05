@@ -1,0 +1,44 @@
+<!-- StatLens Interactive Exercises — Sampling Variability -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: distinguishing parameters from   -->
+<!-- statistics, telling a sampling distribution from a data distribution,      -->
+<!-- and reasoning about the standard error — the understanding a simulator can -->
+<!-- build but not hand you. The numbers come from StatLens; the reasoning      -->
+<!-- is yours.                                                                  -->
+
+### StatLens Exercises {.unnumbered}
+
+These exercises focus on the ideas behind sampling variability: telling a **parameter** from a **statistic**, a **sampling distribution** from a **data distribution**, and reading the **standard error**. Where a link is given, let [StatLens]({{< var tool-url >}}){target="_blank"} do the simulating and spend your effort on the reasoning.
+
+1.  **Parameter or statistic?** A university has 14,000 undergraduates. A researcher surveys a random sample of 200 of them and finds that 132 work at least 10 hours a week.
+
+    a.  Identify the population and the sample.
+    b.  Is the value $132/200 = 0.66$ a parameter or a statistic? Give its symbol.
+    c.  Is the true fraction of *all* 14,000 undergraduates who work 10+ hours a parameter or a statistic? Give its symbol. Is its value known?
+
+
+2.  **Sampling distribution vs. data distribution.** A nurse records the resting heart rate of every patient in a large clinic, then also computes the mean heart rate of each day's batch of 40 patients over many days.
+
+    a.  Which collection of numbers forms a *data distribution* — the individual heart rates, or the daily means?
+    b.  Which forms a *sampling distribution*?
+    c.  Which of the two distributions has the larger spread, and why?
+
+
+3.  **Predict, then check: two different knobs.** You saw the *effect of sample size* on the sampling distribution in the [three-panel figure earlier in this chapter](../chapters/sampling-variability.qmd#sec-variability-statistics) (all three centered at $p = 0.60$, spread shrinking as $n$ grew). Now drive it yourself: *first, write your predictions; then* open the [Sampling Distribution Simulator]({{< var tool-url >}}/conceptual/sampling-lab/){.open-in-statlens target="_blank" aria-label="Open the sampling distribution simulator"} and choose the **right-skewed** population.
+
+    a.  **Predict** the shape of the sampling distribution of $\bar{x}$ for $n = 5$ (as skewed as the population, less skewed, or symmetric?). Then set $n = 5$, draw many samples, and compare to your prediction.
+    b.  With $n = 5$ still set, draw *even more* samples. Does the **spread** shrink, or does the distribution just fill in? Now switch to $n = 50$. Which of the two actions --- *more samples* or *larger $n$* --- changed the spread?
+    c.  The tool shows the theoretical standard error $\sigma/\sqrt{n}$ and the observed SD of the sample means. Why should these two numbers be close?
+
+
+4.  **Interpret the standard error.** A polling firm estimates support for a ballot measure from a random sample and reports $\hat{p} = 0.47$ with a standard error of $0.02$.
+
+    a.  In plain language, what does the standard error of $0.02$ tell you?
+    b.  Roughly how far from the true proportion might $\hat{p}$ reasonably be? (Use the "$\pm 2\,SE$" idea.)
+    c.  The firm wants to *halve* the standard error for its next poll. By what factor must it increase the sample size, and why?
+
+
+5.  **Spot the mistake.** A student writes: *"I took one sample of 60 students and got $\bar{x} = 7.1$ hours of sleep. The standard error was 0.3, so 95% of students sleep between about 6.5 and 7.7 hours."*
+
+    a.  What has the student confused?
+    b.  What does the interval $7.1 \pm 2(0.3)$ actually describe?
+

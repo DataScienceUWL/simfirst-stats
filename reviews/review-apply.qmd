@@ -1,0 +1,93 @@
+# Apply — Unit Review {.unnumbered}
+
+::: {.chapterintro}
+Unit 4 extends inference to richer data: **categorical associations**, comparing
+**many groups**, and **relationships between numerical variables**. The procedures
+are new, but the habit is the same — read the variables (how many, what type, how
+many groups) and let that pick the method. This review drills exactly that match.
+:::
+
+## The big picture {#sec-review-apply-bigpicture}
+
+Three families of questions, each tied to a data shape:
+
+- **Categorical data → chi-square.** Does one categorical variable match an expected distribution ([goodness of fit](../chapters/chisq-gof.qmd))? Are two categorical variables associated ([test of independence](../chapters/chisq-independence.qmd))?
+- **One numerical outcome across several groups → ANOVA.** Do three or more group means differ ([ANOVA](../chapters/anova.qmd))? If so, *which* pairs differ ([multiple comparisons](../chapters/multiple-comparisons.qmd))?
+- **Two numerical variables → correlation and regression.** How strong and what direction is the linear association ([correlation](../chapters/correlation.qmd))? What line predicts one from the other, and is the slope real ([linear regression](../chapters/linear-regression.qmd))? How well does the model fit, and how far can you trust it ([prediction & model fit](../chapters/prediction-model-fit.qmd))?
+
+## Which method? {#sec-review-apply-compare}
+
+Read the variables; the row names the method:
+
+| Variables in the question | Method | Statistic |
+|---|---|---|
+| **One categorical** vs. a claimed distribution | chi-square **goodness of fit** | $\chi^2$ |
+| **Two categorical** (associated?) | chi-square **test of independence** | $\chi^2$ |
+| **One numerical** outcome across **3+ groups** | **ANOVA** (then post-hoc comparisons) | **F** |
+| **Two numerical** (strength/direction) | **correlation** | $r$ |
+| **Two numerical** (predict / is the slope real?) | **linear regression** | $t$ on the slope |
+
+::: {.important}
+**ANOVA answers "are *any* of the group means different?" — not which ones.** A significant F says at least one pair differs; you need **multiple-comparison** procedures (which guard against the inflated error of many pairwise tests) to say *where* the difference is.
+:::
+
+## A quick decision guide {#sec-review-apply-decision}
+
+1. **What types are the variables?**
+   - **All categorical** → chi-square. *One* variable vs. an expected split → **goodness of fit**; *two* variables → **independence**.
+   - **A numerical outcome split by a categorical group** → **two means? use Unit 3 t**; **three or more groups? → ANOVA**.
+   - **Two numerical variables** → **correlation** (how strong) and/or **regression** (predict, test the slope).
+2. **Check the method's conditions** (e.g., chi-square expected counts; regression's linear, roughly-constant-spread residuals).
+
+## Key ideas to carry forward {#sec-review-apply-vocab}
+
+**Goodness of fit vs. independence** · **expected counts** · **$\chi^2$ statistic** · **ANOVA** · **F-statistic** · **between- vs. within-group variation** · **post-hoc / multiple comparisons** · **correlation $r$** · **least-squares line** · **slope inference** · **$R^2$** · **residual** · **extrapolation**.
+
+## Common pitfalls {#sec-review-apply-pitfalls}
+
+- **Chi-square needs adequate expected counts** (commonly each ≥ 5) — not observed counts.
+- **A significant ANOVA doesn't say which groups differ** — that's what post-hoc comparisons are for, and running many naive t-tests inflates the Type I error.
+- **Correlation captures only *linear* association** — a strong curve can have $r \approx 0$.
+- **$R^2$ is the fraction of variation explained**, not the slope and not a probability.
+- **Don't extrapolate** — a regression line is only trustworthy within the range of the observed data.
+- **A real (discernible) slope is not necessarily a large or useful one** — check the size, not just the p-value.
+
+## Exercises {#sec-review-apply-exercises}
+
+The Unit 4 skill is **reading the variables and choosing the right method.** Answers are provided so you can check your work.
+
+1.  **Which method?** For each scenario, name the procedure (chi-square goodness of fit, chi-square independence, ANOVA, correlation, or linear regression).
+
+    a.  Is eye color associated with whether a person is left- or right-handed?
+    b.  Do mean test scores differ among students taught by four different methods?
+    c.  Does a die's roll distribution match the expected uniform 1/6 for each face?
+    d.  How strongly, and in what direction, are height and arm span related?
+    e.  Can we predict a house's price from its square footage, and is the relationship real?
+
+    <details><summary>Show answer</summary>
+    **a.** chi-square **test of independence** (two categorical). **b.** **ANOVA** (one numerical outcome, four groups). **c.** chi-square **goodness of fit** (one categorical vs. a claimed distribution). **d.** **correlation** (two numerical, strength/direction). **e.** **linear regression** (predict + test the slope).
+    </details>
+
+2.  **Two groups or many?** A study compares a numerical outcome (recovery time) across treatment groups. When does this call for a **two-sample t** (Unit 3) and when for **ANOVA** (Unit 4)?
+
+    <details><summary>Show answer</summary>
+    **Two groups → two-sample t.** **Three or more groups → ANOVA** (the F-test), because running all pairwise t-tests would inflate the overall Type I error. A significant ANOVA is then followed by **multiple-comparison** procedures to locate the differences.
+    </details>
+
+3.  **After a significant F.** An ANOVA on five diets yields a small p-value. A student concludes "diet 1 and diet 5 differ." Is that conclusion justified by the ANOVA alone?
+
+    <details><summary>Show answer</summary>
+    **No.** A significant F only says **at least one** pair of diet means differs — not which. To claim diet 1 vs. diet 5 specifically, use a **multiple-comparison** procedure that controls the family-wise error across all the pairs.
+    </details>
+
+4.  **Correlation gotcha.** Two numerical variables show a strong U-shaped relationship, yet $r \approx 0$. Is "no relationship" the right read?
+
+    <details><summary>Show answer</summary>
+    **No.** $r$ measures only **linear** association. A strong **curved** pattern can produce $r$ near 0 — always look at the **scatterplot**, not just the correlation.
+    </details>
+
+5.  **Don't over-trust the line.** A regression of crop yield on rainfall is fit from seasons with 10–30 inches of rain. A planner uses it to predict yield at **60 inches**. What's the problem?
+
+    <details><summary>Show answer</summary>
+    **Extrapolation.** 60 inches is far outside the observed 10–30 inch range, where the linear pattern may not hold at all (too much rain could *reduce* yield). Predictions are only trustworthy **within** the range of the data used to fit the line.
+    </details>

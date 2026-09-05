@@ -1,0 +1,48 @@
+<!-- StatLens Interactive Exercises — Statistical Power -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: reading power from the Power &  -->
+<!-- Error Visualizer, factors that drive power, and the analytic-vs-sim       -->
+<!-- comparison via the Power Lab.                                            -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Read power off the dual-curve picture.** Open the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/?alpha=0.05&n=30&delta=1&sigma=2&tail=right){target="_blank"}.
+
+    a.  Identify the two curves on the plot. Which is the null distribution and which is the alternative? How do you tell?
+    b.  The shaded regions correspond to $\alpha$, $\beta$, and power. Match each label to the correct region.
+    c.  Read off the current power (the tool reports it as a number). At $\alpha = 0.05$, $n = 30$, $\delta = 1$, $\sigma = 2$, what is it?
+    d.  In one sentence, explain what "power $= 0.5$" would mean in plain English about your experiment.
+
+
+2.  **The four levers --- vary one at a time.** Stay in the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/){target="_blank"}.
+
+    a.  Start at $\alpha = 0.05$, $n = 30$, $\delta = 1$, $\sigma = 2$. Note the power. Now double $n$ to 60. How does power change?
+    b.  Reset to defaults. Double $\delta$ (effect size) to 2. How does power change compared to doubling $n$? Which is the bigger lever?
+    c.  Reset. Double $\sigma$ (population noise) to 4. What happens to power? Why?
+    d.  Reset. Lower $\alpha$ from 0.05 to 0.01. What happens to power? Why is there a tradeoff?
+
+
+3.  **Simulation as a sanity check.** Open the [Power Lab (simulation)]({{< var tool-url >}}/conceptual/power-sim/?delta=1&sigma=2&n=30&alpha=0.05&tail=right){target="_blank"}.
+
+    a.  Run 500 simulated $z$-tests under these parameters. The empirical reject rate is the **simulated power**. How close is it to the analytic power from Exercise 1?
+    b.  Run 5000 simulations and re-read. Tighter agreement?
+    c.  Look at the dance-of-the-p-values panel. Under a real effect, p-values are *not* uniform --- where do they cluster? Why?
+    d.  A student says: "If the analytic power formula already gives the answer, the simulation is pointless." Give two reasons the simulation is still valuable.
+
+
+4.  **Reading studies from the power perspective.** A journal article reports: "A previous trial ($n = 80$, $\alpha = 0.05$) failed to detect an effect of [the new drug] on blood pressure." A second team plans a replication with $n = 200$.
+
+    a.  Why does "the previous trial failed to detect" not mean "the drug doesn't work"?
+    b.  If the true effect size is small (say $\delta/\sigma = 0.2$), use the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/?alpha=0.05&n=80&delta=0.2&sigma=1&tail=right){target="_blank"} to estimate the power of the first trial. Is the failure to detect surprising?
+    c.  At what $n$ would the replication achieve at least 80% power for $\delta/\sigma = 0.2$ and $\alpha = 0.05$? Use the tool's $n$ slider.
+    d.  Suppose the replication achieves power 0.85 and the result is *still* non-significant. What can you conclude --- and what can you not?
+
+
+5.  **Power, replication, and "statistical significance."** Suppose 100 independent labs run the same experiment with true power 0.8 at $\alpha = 0.05$.
+
+    a.  Roughly how many labs will report a "statistically discernible" result? How many will report a non-result?
+    b.  Now suppose only the 80 labs with discernible results publish their findings. What kind of bias does this introduce in the literature?
+    c.  Three independent meta-analyses pool all 100 labs' results (not just the published ones). What advantage does this have over relying on any single significant study?
+    d.  A media headline reads: "New study shows X causes Y." The study was a single trial with power 0.5. Given everything you've learned, how should you read this headline?
+

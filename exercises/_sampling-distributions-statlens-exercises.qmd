@@ -1,0 +1,48 @@
+<!-- StatLens Interactive Exercises — Sampling Distributions / CLT -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: predict-then-verify, reading the -->
+<!-- sampling distribution, distinguishing "more samples" from "larger n",     -->
+<!-- and the conditions under which the CLT actually delivers normality.      -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Predict, then check the CLT.** Open the [Sampling Distribution Lab]({{< var tool-url >}}/conceptual/sampling-lab/){target="_blank"} and pick a **right-skewed** population.
+
+    a.  Before drawing anything: at $n = 5$, do you expect the sampling distribution of $\bar{x}$ to (i) match the shape of the population, (ii) look symmetric and bell-shaped, or (iii) look somewhere in between?
+    b.  Draw 5000 sample means at $n = 5$. What shape do you actually see?
+    c.  Repeat at $n = 30$ and $n = 100$. At what point does the sampling distribution look "approximately normal" to your eye?
+    d.  Now switch the population to **bimodal**. At what $n$ does the sampling distribution of $\bar{x}$ start to look normal, compared to the right-skewed case?
+
+
+2.  **More samples vs. larger $n$ --- which knob does what?** Stay in the [Sampling Distribution Lab]({{< var tool-url >}}/conceptual/sampling-lab/){target="_blank"} with a right-skewed population at $n = 10$.
+
+    a.  Draw 100 samples and note the *spread* (the displayed SD of the sample means). Then draw 5000 more (without changing $n$). Did the spread shrink?
+    b.  Now reset and start over at $n = 40$. Draw 5000 samples. How does the spread compare to your $n = 10$ run?
+    c.  Predict, without computing: if you go from $n = 10$ to $n = 40$, by what factor should the standard error of $\bar{x}$ shrink? Check against what the lab reports for $\sigma/\sqrt{n}$.
+    d.  A student says: "If I just draw enough samples, the standard error will eventually drop to zero." Why is this wrong? What *does* drop to (essentially) zero with more samples?
+
+
+3.  **Sampling distribution of $\hat{p}$.** Switch the Sampling Distribution Lab to **proportion mode**. Set the true population proportion to $p = 0.20$ and the sample size to $n = 20$.
+
+    a.  Predict the **center** and **spread** of the sampling distribution of $\hat{p}$ (use $\sqrt{p(1-p)/n}$ for the spread).
+    b.  Draw 5000 samples. Compare your predicted center and spread to the observed values. How close are they?
+    c.  Look at the **shape** of the sampling distribution. Is it symmetric or skewed? Why?
+    d.  Increase $n$ to 200 (keep $p = 0.20$). Does the shape change? Use the success--failure rule ($np \ge 10$, $n(1-p) \ge 10$) to predict what should happen at $n = 200$ vs. $n = 20$.
+
+
+4.  **Reading sampling distributions in context.** A factory produces light bulbs with mean lifetime $\mu = 1000$ hours and standard deviation $\sigma = 200$ hours. A quality engineer plans to take a random sample of $n = 50$ bulbs and compute the sample mean lifetime $\bar{x}$.
+
+    a.  What is the **sampling distribution** of $\bar{x}$? Give its mean, standard error, and shape (and justify the shape).
+    b.  What is the probability the sample mean is *less than* 950 hours? Use a [normal distribution tool]({{< var tool-url >}}/distribution/normal/?mu=1000&sigma=28.28&tail=left){target="_blank"} (pre-loaded with $\mu = 1000$ and $\sigma = 200/\sqrt{50} \approx 28.28$).
+    c.  Suppose the engineer instead samples $n = 200$ bulbs. Without re-running the tool, will the probability in (b) be smaller or larger? Why?
+    d.  An executive says: "The sample mean has the same distribution as a single bulb's lifetime." Why is this wrong, and what's the impact on planning?
+
+
+5.  **The CLT's escape clauses --- when do you *not* get normality?** The CLT requires (i) an i.i.d. sample and (ii) a *finite* variance.
+
+    a.  Suppose 50 students at one cafeteria table sample sizes their lunches. Why is this **not** an i.i.d. sample for the population of students? What might go wrong if you computed a CLT-based interval for the mean lunch size?
+    b.  The **Cauchy distribution** has no defined mean or variance --- it's a heavy-tailed distribution. What would you expect to see if you drew sample means from a Cauchy population at $n = 30$, $n = 100$, $n = 1000$? (You can't simulate this in the lab, but reason about it.)
+    c.  In practice, why is the violation in (a) (clustering / non-independence) much more common in real data than the violation in (b) (no finite variance)?
+    d.  Suppose you have $n = 5000$ but the data come from social-media engagement (one big viral post can outweigh 4999 normal ones). Is the CLT comforting here? Why or why not?
+

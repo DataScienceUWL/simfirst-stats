@@ -1,0 +1,48 @@
+<!-- StatLens Interactive Exercises — Binomial -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: when to use the binomial,        -->
+<!-- reading PMF + cumulative probabilities, normal-approximation conditions. -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Does this scenario fit the binomial?** The binomial requires (i) a fixed number of trials $n$, (ii) two outcomes per trial, (iii) constant success probability $p$, and (iv) independence across trials. For each scenario, check the four conditions and decide whether the binomial applies.
+
+    a.  Flip a fair coin 50 times; count the number of heads.
+    b.  Draw 5 cards *without replacement* from a deck; count the number of aces.
+    c.  Survey 100 randomly selected adults; count how many own a smartphone.
+    d.  Roll a die until you get the first 6; count the number of rolls.
+    e.  Test 200 light bulbs from one production line; count how many fail within 100 hours.
+
+
+2.  **Read the binomial PMF.** Open the [Binomial tool]({{< var tool-url >}}/distribution/binomial/){target="_blank"}. Set $n = 20$ and $p = 0.3$.
+
+    a.  Report $P(X = 6)$ (the bar at $X = 6$). Where is the mode of the distribution?
+    b.  Compute the mean and standard deviation from the formulas $\mu = np$ and $\sigma = \sqrt{np(1-p)}$. How close is the visible "center" of the bars to your computed $\mu$?
+    c.  Switch to **cumulative** mode. What is $P(X \le 5)$? What is $P(X \ge 8)$?
+    d.  Toggle on the **normal approximation overlay**. Does it match the binomial bars well at $n = 20$, $p = 0.3$? Why or why not?
+
+
+3.  **The normal approximation to the binomial --- when does it work?** Still in the [Binomial tool]({{< var tool-url >}}/distribution/binomial/){target="_blank"}.
+
+    a.  Set $n = 20$, $p = 0.05$ (rare event). What does the PMF look like --- symmetric or skewed? Turn on the normal overlay. Does the normal model fit?
+    b.  Now $n = 200$, $p = 0.05$. PMF shape? Normal fit?
+    c.  State the **success--failure rule**: the normal approximation works well when $np \ge 10$ and $n(1-p) \ge 10$. Check this for cases (a) and (b).
+    d.  Why does the rule use *both* $np \ge 10$ **and** $n(1-p) \ge 10$ rather than just one? (Hint: consider $p = 0.99$, $n = 100$.)
+
+
+4.  **Connecting the binomial to one-proportion inference.** A study of 200 randomly chosen tablet users finds 14 who experienced a side effect, $\hat{p} = 14/200 = 0.07$.
+
+    a.  Under $H_0: p = 0.10$, the count $X$ of side effects is $X \sim \text{Binomial}(200, 0.10)$. Use the [Binomial tool]({{< var tool-url >}}/distribution/binomial/?n=200&p=0.10){target="_blank"} in **cumulative** mode to find the exact $P(X \le 14)$.
+    b.  Now use the [One-Proportion $z$-Test tool]({{< var tool-url >}}/inference/one-prop/){target="_blank"} with this scenario, $H_A: p < 0.10$. Report the (normal-approximation) p-value. How close is it to the binomial's exact answer in (a)?
+    c.  Check the success--failure condition under $H_0$. Should you trust the $z$-test's p-value?
+    d.  In one sentence, when would you prefer the **exact** binomial probability over the **approximate** $z$-test p-value?
+
+
+5.  **Expectation and the law of large numbers.** A casino offers a game with $n = 100$ trials, win probability $p = 0.45$ per trial, and a $\$1$ wager per trial.
+
+    a.  Open [Binomial $n = 100, p = 0.45$]({{< var tool-url >}}/distribution/binomial/?n=100&p=0.45){target="_blank"}. What's the **expected number of wins**? What's the probability you come out **ahead** (more than 50 wins)?
+    b.  Now consider playing 100 *rounds* of this game (100 sessions of 100 trials each). What does the **law of large numbers** predict about your average per-round winnings as the number of rounds grows?
+    c.  A player says: "In each round my expected loss is small ($-\$10$), so I should keep playing." Why is this the **gambler's mathematical mistake** (not just a sentiment)?
+    d.  How does the binomial probability of "coming out ahead" change as $n$ grows from 100 to 1000 to 10000 trials? Why?
+

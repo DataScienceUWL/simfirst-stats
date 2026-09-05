@@ -1,0 +1,31 @@
+<!-- StatLens Interactive Exercises — Type II Error -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: Type II error as the missed-     -->
+<!-- detection region under H_A, β as a function of n, δ, σ, α.                -->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **See $\beta$ on the dual-curve picture.** Open the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/?alpha=0.05&n=30&delta=1&sigma=2&tail=right){target="_blank"}.
+
+    a.  Where on the picture is $\beta$ shaded? Why does it live under the **alternative** curve, not the null?
+    b.  Read the value of $\beta$. What does "$\beta = 0.14$" mean in plain English for an experiment at these settings?
+    c.  Now decrease $\delta$ to 0.5 (smaller effect). What happens to $\beta$? Why?
+    d.  Reset and decrease $\sigma$ to 1 (less noise). What happens to $\beta$? Why?
+
+
+2.  **Simulating Type II errors.** Open the [Power Lab (simulation)]({{< var tool-url >}}/conceptual/power-sim/?delta=0.5&sigma=1&n=20&alpha=0.05&tail=right){target="_blank"}.
+
+    a.  Run 500 simulated $z$-tests at these settings. The empirical reject rate is the simulated power. What's the simulated $\beta = 1 -$ power?
+    b.  In the hit/miss/false-alarm strip, what colour represents Type II errors? Roughly what fraction of dots are that colour?
+    c.  Increase $n$ to 200 and re-run. Does $\beta$ shrink as expected?
+    d.  A researcher says: "I'll just call $\beta$ small because my $\alpha$ is small." Why is this wrong?
+
+
+3.  **When is "no evidence" no evidence?** A trial of $n = 30$ patients tests a new treatment with $H_0: \mu = 0$ vs. $H_A: \mu > 0$ at $\alpha = 0.05$. The result: p = 0.18, "no discernible effect."
+
+    a.  Using the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/?alpha=0.05&n=30&delta=0.3&sigma=1&tail=right){target="_blank"} (preset to $\delta = 0.3, \sigma = 1$), compute the power if the true effect were $\delta = 0.3$. Is that high enough to call "no detected effect" informative?
+    b.  What if the true effect were $\delta = 1$? Re-check with the tool.
+    c.  Explain in one sentence the difference between "no evidence of effect" and "evidence of no effect."
+    d.  What sentence should *actually* appear in the trial's discussion section, given the modest power?
+

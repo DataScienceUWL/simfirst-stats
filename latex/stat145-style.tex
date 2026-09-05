@@ -1,0 +1,180 @@
+% stat145-style.tex — PDF preamble for Introduction to Statistics
+% Adapted from IMS (Introduction to Modern Statistics) ims-style.tex
+% Uses IMSCOL color palette for consistency with HTML and StatLens
+
+% Packages
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage[normalem]{ulem}
+\usepackage[explicit]{titlesec}
+\usepackage{
+  amsmath, calc,
+  footnote, fancyhdr,
+  geometry, graphicx,
+  booktabs,
+  longtable,
+  array,
+  multirow,
+  wrapfig,
+  float,
+  colortbl,
+  tabu,
+  threeparttable,
+  threeparttablex,
+  makecell,
+  xcolor,
+  caption,
+  subcaption
+}
+\usepackage[bottom]{footmisc}
+
+% IMSCOL Color Palette (screen version — matches HTML/StatLens)
+\definecolor{imsBlue}{HTML}{569BBD}
+\definecolor{imsBlueDark}{HTML}{3A7CA5}
+\definecolor{imsGreen}{HTML}{114B5F}
+\definecolor{imsPink}{HTML}{E97583}
+\definecolor{imsRed}{HTML}{F05133}
+\definecolor{imsGray}{HTML}{6C6C6C}
+\definecolor{imsLGray}{HTML}{D9D9D9}
+\definecolor{imsSurface}{HTML}{F8F8F8}
+
+% Hyperref with IMSCOL colors
+\usepackage[
+  bookmarksnumbered,
+  pdfborder={0 0 0},
+  urlcolor=imsBlueDark,
+  colorlinks=true,
+  linkcolor=imsGreen,
+  citecolor=imsGreen,
+  backref=true
+]{hyperref}
+
+% Page geometry — letter size, generous margins for readability
+\setlength\paperheight{11in}
+\setlength\paperwidth{8.5in}
+\geometry{
+  top=1in,
+  bottom=1in,
+  left=1.2in,
+  right=1.2in,
+  marginparwidth=0pt,
+  marginparsep=0pt
+}
+\renewcommand{\baselinestretch}{1.05}
+
+% Headers and footers
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyhead[RO,RE]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[RE]{\small\textsc{\leftmark}}
+\fancyhead[LO]{\small\textsc{\rightmark}}
+\fancyfoot[c]{}
+\raggedbottom
+
+% Fonts (XeLaTeX)
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Pagella}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{DejaVu Sans Mono}[Scale=0.85]
+
+% Footnotes — prevent splitting across pages
+\interfootnotelinepenalty=10000
+
+% Add space between table rows
+\setlength{\defaultaddspace}{8pt}
+
+% Chapter and section title formatting
+\titleformat{\chapter}[display]
+  {\color{imsGreen}\normalfont\Huge\bfseries\sffamily}
+  {\color{imsGreen}Chapter \thechapter}{0.5em}{#1}
+
+\titleformat{\section}
+  {\color{imsGreen}\normalfont\Large\bfseries\sffamily}
+  {\color{imsGreen}\thesection}{1em}{#1}
+
+\titleformat{\subsection}
+  {\color{imsGreen}\normalfont\large\bfseries\sffamily}
+  {\color{imsGreen}\thesubsection}{1em}{#1}
+
+\titleformat{\subsubsection}
+  {\color{imsGreen}\normalfont\normalsize\bfseries\sffamily}
+  {\color{imsGreen}\thesubsubsection}{1em}{#1}
+
+% Part formatting
+\titleformat{\part}[display]
+  {\color{imsRed}\titlerule[5pt]\vspace{3pt}\color{imsPink}\titlerule[2pt]\vspace{3pt}\color{imsGreen}\normalfont\Huge\bfseries\scshape\sffamily}
+  {\color{imsGreen}PART \thepart}{2em}{#1 \\ \noindent \vspace{3pt}\color{imsRed}\titlerule[5pt]}
+
+% mdframed helper environments (with footnote support)
+
+\newenvironment{mdframedChapterIntro}
+{
+    \savenotes
+    \begin{mdframed}[%
+      topline=true, bottomline=true, linecolor=imsBlue, linewidth=1.4pt,
+      rightline=false, leftline=false,
+      backgroundcolor=imsSurface]
+    \renewcommand{\thempfootnote}{\arabic{footnote}}
+}
+{
+    \end{mdframed}
+    \spewnotes
+}
+
+\newenvironment{mdframedGP}
+{
+    \savenotes
+    \begin{mdframed}[%
+      topline=true, bottomline=true, linecolor=imsBlue, linewidth=0.5pt,
+      rightline=false, leftline=false,
+      backgroundcolor=imsSurface]
+    \renewcommand{\thempfootnote}{\arabic{footnote}}
+}
+{
+    \end{mdframed}
+    \spewnotes
+}
+
+\newenvironment{mdframedImportant}
+{
+    \savenotes
+    \begin{mdframed}[%
+      topline=true, bottomline=true, linecolor=imsRed, linewidth=0.5pt,
+      rightline=false, leftline=false,
+      backgroundcolor=imsSurface]
+    \renewcommand{\thempfootnote}{\arabic{footnote}}
+}
+{
+    \end{mdframed}
+    \spewnotes
+}
+
+\newenvironment{mdframedTip}
+{
+    \savenotes
+    \begin{mdframed}[%
+      topline=true, bottomline=true, linecolor=imsGray, linewidth=0.5pt,
+      rightline=false, leftline=false,
+      backgroundcolor=imsSurface]
+    \renewcommand{\thempfootnote}{\arabic{footnote}}
+}
+{
+    \end{mdframed}
+    \spewnotes
+}
+
+% Smaller captions with bold labels
+\usepackage[font=small,labelfont=bf]{caption}
+
+% Reduce space between chapters in TOC
+\usepackage{tocbasic}
+\DeclareTOCStyleEntry[
+  beforeskip=.5em plus 1pt,
+  pagenumberformat=\textbf
+]{tocline}{chapter}

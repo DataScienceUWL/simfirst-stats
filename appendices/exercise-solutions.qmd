@@ -1,0 +1,231 @@
+---
+title: "Exercise Solutions"
+---
+
+Solutions to the **odd-numbered** end-of-chapter exercises are provided below, organized by chapter. Even-numbered exercises are reserved for graded assignments; full solutions are available to instructors.
+
+::: {.callout-note appearance="minimal" collapse="false"}
+## Jump to a chapter
+
+<div style="column-count: 2; column-gap: 2em;">
+
+- [Ch 1 --- Introduction to Data](#sec-solutions-intro-to-data)
+- [Ch 2 --- Data Collection and Study Design](#sec-solutions-study-design)
+- [Ch 3 --- Exploring Categorical Data](#sec-solutions-data-visualization)
+- [Ch 4 --- Exploring Quantitative Data](#sec-solutions-describing-distributions)
+- [Ch 5 --- Relationships Between Variables](#sec-solutions-relationships)
+- [Ch 6 --- Sampling Variability](#sec-solutions-sampling-variability)
+- [Ch 7 --- Randomization Tests](#sec-solutions-randomization-tests)
+- [Ch 8 --- Decision Errors](#sec-solutions-decision-errors)
+- [Ch 9 --- Bootstrap Confidence Intervals](#sec-solutions-bootstrap-ci)
+- [Ch 10 --- Sampling Distributions via Simulation](#sec-solutions-sampling-distributions)
+- [Ch 11 --- Normal Approximation](#sec-solutions-normal-approximation)
+- [Ch 12 --- Inference for Proportions](#sec-solutions-inference-proportions)
+- [Ch 13 --- Confidence Intervals for Means](#sec-solutions-ci-for-means)
+- [Ch 14 --- Hypothesis Tests for Means](#sec-solutions-hypothesis-tests-means)
+- [Ch 15 --- Chi-Square Goodness of Fit](#sec-solutions-chisq-gof)
+- [Ch 16 --- Chi-Square Test of Independence](#sec-solutions-chisq-independence)
+- [Ch 17 --- Analysis of Variance](#sec-solutions-anova)
+- [Ch 18 --- Multiple Comparisons](#sec-solutions-multiple-comparisons)
+- [Ch 19 --- Correlation](#sec-solutions-correlation)
+- [Ch 20 --- Linear Regression](#sec-solutions-linear-regression)
+- [Ch 21 --- Prediction and Model Fit](#sec-solutions-prediction-model-fit)
+- [Ch 22 --- ANOVA for Regression](#sec-solutions-anova-for-regression)
+- [Ch 23 --- Multiple Regression](#sec-solutions-multiple-regression)
+- [Ch 24 --- Probability Rules](#sec-solutions-probability-rules)
+- [Ch 25 --- Random Variables](#sec-solutions-random-variables)
+- [Ch 26 --- Expected Value and Variance](#sec-solutions-expected-value)
+- [Ch 27 --- Binomial Distribution](#sec-solutions-binomial)
+- [Ch 28 --- More About the Normal Distribution](#sec-solutions-normal-distribution)
+- [Ch 29 --- Type II Error and Power](#sec-solutions-type-ii-error)
+- [Ch 30 --- Statistical Power](#sec-solutions-statistical-power)
+- [Ch 31 --- Sample Size Planning](#sec-solutions-sample-size)
+
+</div>
+:::
+
+## Chapter 1 --- Introduction to Data {#sec-solutions-intro-to-data}
+
+Solutions to the odd-numbered exercises in [Chapter 1 --- Introduction to Data](../chapters/intro-to-data.qmd).
+
+{{< include ../exercises/_intro-to-data-solutions.qmd >}}
+
+## Chapter 2 --- Data Collection and Study Design {#sec-solutions-study-design}
+
+Solutions to the odd-numbered exercises in [Chapter 2 --- Data Collection and Study Design](../chapters/study-design.qmd).
+
+{{< include ../exercises/_study-design-solutions.qmd >}}
+
+## Chapter 3 --- Exploring Categorical Data {#sec-solutions-data-visualization}
+
+Solutions to the odd-numbered exercises in [Chapter 3 --- Exploring Categorical Data](../chapters/data-visualization.qmd).
+
+{{< include ../exercises/_data-visualization-solutions.qmd >}}
+
+## Chapter 4 --- Exploring Quantitative Data {#sec-solutions-describing-distributions}
+
+Solutions to the odd-numbered exercises in [Chapter 4 --- Exploring Quantitative Data](../chapters/describing-distributions.qmd).
+
+{{< include ../exercises/_describing-distributions-solutions.qmd >}}
+
+## Chapter 5 --- Relationships Between Variables {#sec-solutions-relationships}
+
+Solutions to the odd-numbered exercises in [Chapter 5 --- Relationships Between Variables](../chapters/relationships.qmd).
+
+{{< include ../exercises/_relationships-solutions.qmd >}}
+
+## Chapter 6 --- Sampling Variability {#sec-solutions-sampling-variability}
+
+Solutions to the odd-numbered exercises in [Chapter 6 --- Sampling Variability](../chapters/sampling-variability.qmd).
+
+{{< include ../exercises/_sampling-variability-solutions.qmd >}}
+
+## Chapter 7 --- Randomization Tests {#sec-solutions-randomization-tests}
+
+Solutions to the odd-numbered exercises in [Chapter 7 --- Randomization Tests](../chapters/randomization-tests.qmd).
+
+{{< include ../exercises/_randomization-tests-solutions.qmd >}}
+
+## Chapter 8 --- Decision Errors {#sec-solutions-decision-errors}
+
+Solutions to the odd-numbered exercises in [Chapter 8 --- Decision Errors](../chapters/decision-errors.qmd).
+
+{{< include ../exercises/_decision-errors-solutions.qmd >}}
+
+## Chapter 9 --- Bootstrap Confidence Intervals {#sec-solutions-bootstrap-ci}
+
+Solutions to the odd-numbered exercises in [Chapter 9 --- Bootstrap Confidence Intervals](../chapters/bootstrap-ci.qmd).
+
+{{< include ../exercises/_bootstrap-ci-solutions.qmd >}}
+
+## Chapter 10 --- Sampling Distributions via Simulation {#sec-solutions-sampling-distributions}
+
+Solutions to the odd-numbered exercises in [Chapter 10 --- Sampling Distributions via Simulation](../chapters/sampling-distributions.qmd).
+
+{{< include ../exercises/_sampling-distributions-solutions.qmd >}}
+
+## Chapter 11 --- Normal Approximation {#sec-solutions-normal-approximation}
+
+Solutions to the odd-numbered exercises in [Chapter 11 --- Normal Approximation](../chapters/normal-approximation.qmd).
+
+{{< include ../exercises/_normal-approximation-solutions.qmd >}}
+
+## Chapter 12 --- Inference for Proportions {#sec-solutions-inference-proportions}
+
+Solutions to the odd-numbered exercises in [Chapter 12 --- Inference for Proportions](../chapters/inference-proportions.qmd).
+
+{{< include ../exercises/_inference-proportions-solutions.qmd >}}
+
+## Chapter 13 --- Confidence Intervals for Means {#sec-solutions-ci-for-means}
+
+Solutions to the odd-numbered exercises in [Chapter 13 --- Confidence Intervals for Means](../chapters/ci-for-means.qmd).
+
+{{< include ../exercises/_ci-for-means-solutions.qmd >}}
+
+## Chapter 14 --- Hypothesis Tests for Means {#sec-solutions-hypothesis-tests-means}
+
+Solutions to the odd-numbered exercises in [Chapter 14 --- Hypothesis Tests for Means](../chapters/hypothesis-tests-means.qmd).
+
+{{< include ../exercises/_hypothesis-tests-means-solutions.qmd >}}
+
+## Chapter 15 --- Chi-Square Goodness of Fit {#sec-solutions-chisq-gof}
+
+Solutions to the odd-numbered exercises in [Chapter 15 --- Chi-Square Goodness of Fit](../chapters/chisq-gof.qmd).
+
+{{< include ../exercises/_chisq-gof-solutions.qmd >}}
+
+## Chapter 16 --- Chi-Square Test of Independence {#sec-solutions-chisq-independence}
+
+Solutions to the odd-numbered exercises in [Chapter 16 --- Chi-Square Test of Independence](../chapters/chisq-independence.qmd).
+
+{{< include ../exercises/_chisq-independence-solutions.qmd >}}
+
+## Chapter 17 --- Analysis of Variance {#sec-solutions-anova}
+
+Solutions to the odd-numbered exercises in [Chapter 17 --- Analysis of Variance](../chapters/anova.qmd).
+
+{{< include ../exercises/_anova-solutions.qmd >}}
+
+## Chapter 18 --- Multiple Comparisons {#sec-solutions-multiple-comparisons}
+
+Solutions to the odd-numbered exercises in [Chapter 18 --- Multiple Comparisons](../chapters/multiple-comparisons.qmd).
+
+{{< include ../exercises/_multiple-comparisons-solutions.qmd >}}
+
+## Chapter 19 --- Correlation {#sec-solutions-correlation}
+
+Solutions to the odd-numbered exercises in [Chapter 19 --- Correlation](../chapters/correlation.qmd).
+
+{{< include ../exercises/_correlation-solutions.qmd >}}
+
+## Chapter 20 --- Linear Regression {#sec-solutions-linear-regression}
+
+Solutions to the odd-numbered exercises in [Chapter 20 --- Linear Regression](../chapters/linear-regression.qmd).
+
+{{< include ../exercises/_linear-regression-solutions.qmd >}}
+
+## Chapter 21 --- Prediction and Model Fit {#sec-solutions-prediction-model-fit}
+
+Solutions to the odd-numbered exercises in [Chapter 21 --- Prediction and Model Fit](../chapters/prediction-model-fit.qmd).
+
+{{< include ../exercises/_prediction-model-fit-solutions.qmd >}}
+
+## Chapter 22 --- ANOVA for Regression {#sec-solutions-anova-for-regression}
+
+Solutions to the odd-numbered exercises in [Chapter 22 --- ANOVA for Regression](../chapters/anova-for-regression.qmd).
+
+{{< include ../exercises/_anova-for-regression-solutions.qmd >}}
+
+## Chapter 23 --- Multiple Regression {#sec-solutions-multiple-regression}
+
+Solutions to the odd-numbered exercises in [Chapter 23 --- Multiple Regression](../chapters/multiple-regression.qmd).
+
+{{< include ../exercises/_multiple-regression-solutions.qmd >}}
+
+## Chapter 24 --- Probability Rules {#sec-solutions-probability-rules}
+
+Solutions to the odd-numbered exercises in [Chapter 24 --- Probability Rules](../chapters/probability-rules.qmd).
+
+{{< include ../exercises/_probability-rules-solutions.qmd >}}
+
+## Chapter 25 --- Random Variables {#sec-solutions-random-variables}
+
+Solutions to the odd-numbered exercises in [Chapter 25 --- Random Variables](../chapters/random-variables.qmd).
+
+{{< include ../exercises/_random-variables-solutions.qmd >}}
+
+## Chapter 26 --- Expected Value and Variance {#sec-solutions-expected-value}
+
+Solutions to the odd-numbered exercises in [Chapter 26 --- Expected Value and Variance](../chapters/expected-value.qmd).
+
+{{< include ../exercises/_expected-value-solutions.qmd >}}
+
+## Chapter 27 --- Binomial Distribution {#sec-solutions-binomial}
+
+Solutions to the odd-numbered exercises in [Chapter 27 --- Binomial Distribution](../chapters/binomial.qmd).
+
+{{< include ../exercises/_binomial-solutions.qmd >}}
+
+## Chapter 28 --- More About the Normal Distribution {#sec-solutions-normal-distribution}
+
+Solutions to the odd-numbered exercises in [Chapter 28 --- More About the Normal Distribution](../chapters/normal-distribution.qmd).
+
+{{< include ../exercises/_normal-distribution-solutions.qmd >}}
+
+## Chapter 29 --- Type II Error and Power {#sec-solutions-type-ii-error}
+
+Solutions to the odd-numbered exercises in [Chapter 29 --- Type II Error and Power](../chapters/type-ii-error.qmd).
+
+{{< include ../exercises/_type-ii-error-solutions.qmd >}}
+
+## Chapter 30 --- Statistical Power {#sec-solutions-statistical-power}
+
+Solutions to the odd-numbered exercises in [Chapter 30 --- Statistical Power](../chapters/statistical-power.qmd).
+
+{{< include ../exercises/_statistical-power-solutions.qmd >}}
+
+## Chapter 31 --- Sample Size Planning {#sec-solutions-sample-size}
+
+Solutions to the odd-numbered exercises in [Chapter 31 --- Sample Size Planning](../chapters/sample-size.qmd).
+
+{{< include ../exercises/_sample-size-solutions.qmd >}}

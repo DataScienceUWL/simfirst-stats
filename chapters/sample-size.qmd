@@ -1,0 +1,377 @@
+---
+title: "Sample Size Planning"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+:::{.callout-note appearance="simple" icon=false}
+**Extended Content.** This chapter extends beyond UWL's core STAT 145 curriculum. It is included for completeness and for instructors who wish to cover additional topics. Content is in draft form.
+:::
+
+::: {.chapterintro}
+How many observations do you need? This deceptively simple question is one of the most important in all of applied statistics. Too few observations and the study lacks the power to detect real effects (the statistical power chapter). Too many and the study wastes time, money, and — in medical contexts — exposes unnecessary participants to risk. This chapter develops formulas and strategies for determining the right sample size before a study begins.
+:::
+
+
+## Why plan sample size? {#sec-why-plan}
+
+::: {.original}
+Sample size planning — also called **sample size determination** or **power analysis** — is the process of deciding how many observations to collect before beginning a study. There are three main reasons to plan carefully.
+
+### Statistical reasons
+
+As we saw in the statistical power chapter, the power of a hypothesis test depends critically on the sample size. A study that is too small has low power and a high probability of committing a Type II error — missing a real effect. A study that is too large may have power close to 100%, but the excess observations provide diminishing returns.
+
+Similarly, for estimation, the width of a confidence interval depends on the sample size through the standard error. More observations produce narrower intervals and more precise estimates. Sample size planning for confidence intervals asks: "How many observations do I need to achieve a desired margin of error?"
+
+### Ethical reasons
+
+In medical research, participants are exposed to potential risks: side effects, discomfort, time away from proven treatments. If a study is underpowered and unlikely to produce useful results, participants bear risk without commensurate benefit. Many institutional review boards (IRBs) and research ethics committees require a sample size justification as part of the study approval process.
+
+At the other extreme, an unnecessarily large study exposes more people to risk than needed. If a treatment has a large, harmful side effect, ethical principles demand that we detect it with as few participants as possible.
+
+### Practical reasons
+
+Research costs money. Each additional participant means more time, more supplies, more lab work, more data entry. A well-planned sample size ensures that resources are used efficiently — enough to answer the research question, but not so many that the budget is strained or the timeline is unrealistic.
+
+::: {.important}
+**Plan your sample size before collecting data.** Determining the sample size after data have been collected defeats the purpose. The goal is to ensure that the study *will have* adequate power or precision, not to verify that it *did*.
+:::
+:::
+
+## Sample size for estimating a mean {#sec-sample-size-mean}
+
+::: {.original}
+One of the most common sample size questions is: "How many observations do I need to estimate a population mean with a given margin of error?"
+
+### The margin of error formula
+
+Recall that a confidence interval for a population mean $\mu$ takes the form:
+
+$$\bar{x} \pm z^* \cdot \frac{\sigma}{\sqrt{n}}$$
+
+where $z^*$ is the critical value for the desired confidence level (e.g., $z^* = 1.96$ for 95% confidence) and $\sigma$ is the population standard deviation. The **margin of error** (ME) is the "plus-or-minus" part:
+
+$$ME = z^* \cdot \frac{\sigma}{\sqrt{n}}$$
+
+If we want the margin of error to be no larger than some target value, we can solve for $n$:
+
+$$ME = z^* \cdot \frac{\sigma}{\sqrt{n}} \quad \Longrightarrow \quad \sqrt{n} = \frac{z^* \cdot \sigma}{ME} \quad \Longrightarrow \quad n = \left(\frac{z^* \cdot \sigma}{ME}\right)^2$$
+
+::: {.definition}
+The **sample size for estimating a mean** with margin of error $ME$ at confidence level $C$ is:
+
+$$n = \left(\frac{z^* \cdot \sigma}{ME}\right)^2$$
+
+where $z^*$ is the critical value corresponding to confidence level $C$ (e.g., $z^* = 1.96$ for 95% confidence) and $\sigma$ is the population standard deviation.
+:::
+
+::: {.important}
+**Always round up.** When the formula gives a non-integer answer, always round *up* to the next whole number. Rounding down would give a margin of error slightly larger than desired.
+:::
+
+::: {.workedexample}
+A university wants to estimate the average amount of student loan debt among its graduates to within \$1,500 with 95% confidence. Previous studies suggest the standard deviation of student loan debt is about \$12,000. How many graduates should they survey?
+
+---
+
+We have:
+
+- $ME = 1{,}500$
+- $z^* = 1.96$ (for 95% confidence)
+- $\sigma = 12{,}000$
+
+$$n = \left(\frac{1.96 \times 12{,}000}{1{,}500}\right)^2 = \left(\frac{23{,}520}{1{,}500}\right)^2 = (15.68)^2 = 245.86$$
+
+Rounding up, the university should survey **$n = 246$ graduates**.
+:::
+
+::: {.guidedpractice}
+A health researcher wants to estimate the average daily calorie intake of adults in a city to within 50 calories with 99% confidence. From national data, the standard deviation of daily calorie intake is approximately 500 calories. How large a sample does she need?
+
+<details>
+<summary>Show answer</summary>
+With $ME = 50$, $z^* = 2.576$ (for 99% confidence), and $\sigma = 500$: $n = (2.576 \times 500 / 50)^2 = (25.76)^2 = 663.6$. Rounding up, she needs $n = 664$ participants.
+</details>
+:::
+
+### Where does $\sigma$ come from?
+
+There is a practical catch in the formula: we need to know the population standard deviation $\sigma$ before we collect data. But if we already knew $\sigma$, we would know more about the population than we actually do. In practice, $\sigma$ is estimated from:
+
+- **Previous studies**: Published research on similar populations often reports standard deviations that can be used for planning.
+- **Pilot studies**: A small preliminary study can provide a rough estimate of $\sigma$.
+- **Expert judgment**: Subject-matter experts may have reasonable estimates based on experience.
+- **Conservative estimates**: When in doubt, use a larger estimate of $\sigma$. This produces a larger (more conservative) sample size, ensuring the margin of error target is met even if the true variability is somewhat less than assumed.
+
+::: {.caution}
+**Using $s$ from pilot data.** If you estimate $\sigma$ from a pilot study with a small sample, the estimate may be unreliable. When using pilot data, it is wise to inflate the estimate somewhat — for example, using the upper end of a confidence interval for $\sigma$ — to provide a safety margin.
+:::
+
+::: {.workedexample}
+Referring to the student loan debt example, suppose the \$12,000 standard deviation came from a pilot survey of 30 graduates. The sample standard deviation was $s = 12{,}000$. Should the researcher use exactly $\sigma = 12{,}000$ in the sample size formula?
+
+---
+
+With only 30 observations, the estimate of $\sigma$ is itself uncertain. A 95% confidence interval for $\sigma$ would be roughly \$9,600 to \$16,000. To be safe, the researcher might use $\sigma = 14{,}000$ or even $\sigma = 16{,}000$ in the formula, which would give $n = (1.96 \times 14{,}000 / 1{,}500)^2 = 335$ or $n = (1.96 \times 16{,}000 / 1{,}500)^2 = 437$. Using the larger value ensures the margin of error target is likely met.
+:::
+:::
+
+## Sample size for estimating a proportion {#sec-sample-size-proportion}
+
+::: {.original}
+When estimating a population proportion $p$, the confidence interval takes the form:
+
+$$\hat{p} \pm z^* \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}$$
+
+The margin of error is:
+
+$$ME = z^* \sqrt{\frac{p^*(1 - p^*)}{n}}$$
+
+where $p^*$ is a planning value for $p$ (since we don't know $p$ yet — that's what we're trying to estimate). Solving for $n$:
+
+$$n = \left(\frac{z^*}{ME}\right)^2 \cdot p^*(1 - p^*)$$
+
+::: {.definition}
+The **sample size for estimating a proportion** with margin of error $ME$ at confidence level $C$ is:
+
+$$n = \left(\frac{z^*}{ME}\right)^2 \cdot p^*(1 - p^*)$$
+
+where $z^*$ is the critical value for confidence level $C$ and $p^*$ is a planning estimate of the proportion.
+:::
+
+### Choosing $p^*$
+
+The value $p^*(1 - p^*)$ is largest when $p^* = 0.5$ and smallest when $p^*$ is near 0 or 1. This means:
+
+- If you have a reasonable estimate of $p$ from prior research, use it as $p^*$.
+- If you have no idea what $p$ might be, **use $p^* = 0.5$**. This gives the largest (most conservative) sample size, ensuring the margin of error target is met regardless of the true proportion.
+
+::: {.workedexample}
+A political polling firm wants to estimate the proportion of voters who support a ballot measure to within 3 percentage points with 95% confidence. They have no prior information about voter support. How many voters should they survey?
+
+---
+
+With no prior information, we use $p^* = 0.5$ for the most conservative estimate:
+
+- $ME = 0.03$ (3 percentage points)
+- $z^* = 1.96$
+- $p^* = 0.5$
+
+$$n = \left(\frac{1.96}{0.03}\right)^2 \times 0.5 \times 0.5 = (65.33)^2 \times 0.25 = 4{,}268.4 \times 0.25 = 1{,}067.1$$
+
+Rounding up, they need **$n = 1{,}068$ voters**.
+
+This is why political polls typically survey about 1,000 people — it gives roughly a $\pm 3\%$ margin of error at 95% confidence.
+:::
+
+::: {.guidedpractice}
+A quality control manager wants to estimate the proportion of defective items in a production run to within 1 percentage point with 95% confidence. Based on historical data, the defect rate is usually around 4%. How large a sample should she inspect?
+
+<details>
+<summary>Show answer</summary>
+With $ME = 0.01$, $z^* = 1.96$, and $p^* = 0.04$: $n = (1.96/0.01)^2 \times 0.04 \times 0.96 = (196)^2 \times 0.0384 = 38{,}416 \times 0.0384 = 1{,}475.2$. Rounding up, she needs $n = 1{,}476$ items. Note: if she had used $p^* = 0.5$ instead, she would have gotten $n = 9{,}604$ — a much larger and unnecessarily conservative sample. Using prior information about $p$ can save a lot of resources.
+</details>
+:::
+
+::: {.workedexample}
+Compare the required sample sizes when $p^* = 0.5$ versus $p^* = 0.10$ for a 95% confidence interval with $ME = 0.04$.
+
+---
+
+With $p^* = 0.5$:
+$$n = \left(\frac{1.96}{0.04}\right)^2 \times 0.5 \times 0.5 = (49)^2 \times 0.25 = 2{,}401 \times 0.25 = 600.25 \to n = 601$$
+
+With $p^* = 0.10$:
+$$n = \left(\frac{1.96}{0.04}\right)^2 \times 0.10 \times 0.90 = 2{,}401 \times 0.09 = 216.09 \to n = 217$$
+
+Using prior knowledge that $p$ is near 0.10 reduces the required sample from 601 to 217 — a 64% reduction. This illustrates why it is valuable to use a good planning estimate when one is available.
+:::
+:::
+
+## Sample size for comparing two groups {#sec-sample-size-two-groups}
+
+::: {.original}
+When comparing two group means, the sample size calculation involves the power framework from the statistical power chapter. The goal is to find $n$ such that the test has at least 80% power (or another target) to detect an effect of a specified size.
+
+### Conceptual approach
+
+The idea is the same as in the one-sample case, but now we need to account for two sources of variability (one from each group). For a two-sample $t$-test comparing means with equal group sizes ($n$ per group), equal standard deviations ($\sigma$), and $\alpha = 0.05$ (two-sided):
+
+$$SE = \sigma\sqrt{\frac{2}{n}}$$
+
+To achieve 80% power, we need the true effect size to be about $2.8 \times SE$ away from the null value.^[The 2.8 comes from $z_{0.025} + z_{0.20} = 1.96 + 0.84 = 2.80$, where $z_{0.025}$ defines the rejection boundary and $z_{0.20}$ defines the 80% power point on the alternative distribution.] Setting the minimum detectable effect $\delta$ equal to $2.8 \times SE$ and solving for $n$:
+
+$$\delta = 2.8 \times \sigma\sqrt{\frac{2}{n}} \quad \Longrightarrow \quad n = 2\left(\frac{2.8 \cdot \sigma}{\delta}\right)^2$$
+
+::: {.workedexample}
+Returning to the blood pressure example from the statistical power chapter: a new drug is expected to lower blood pressure by at least 3 mmHg compared to a standard medication. The standard deviation is $\sigma = 12$ mmHg. How many patients per group are needed for 80% power with $\alpha = 0.05$?
+
+---
+
+Using the formula:
+
+$$n = 2\left(\frac{2.8 \times 12}{3}\right)^2 = 2\left(\frac{33.6}{3}\right)^2 = 2 \times (11.2)^2 = 2 \times 125.44 = 250.88$$
+
+Rounding up, **$n = 251$ patients per group** — a total of 502 patients.
+
+This matches the result we found in the statistical power chapter when we computed the power for various sample sizes and found that $n \approx 250$ per group gave approximately 80% power.
+:::
+
+::: {.guidedpractice}
+A psychologist plans a study comparing reaction times under two conditions. She expects a difference of 25 milliseconds, with a standard deviation of 60 ms in each group. How many participants does she need per group for 80% power at $\alpha = 0.05$?
+
+<details>
+<summary>Show answer</summary>
+Using the formula: $n = 2(2.8 \times 60 / 25)^2 = 2(6.72)^2 = 2 \times 45.16 = 90.32$. Rounding up, she needs $n = 91$ per group, or 182 total participants.
+</details>
+:::
+
+### Different power targets
+
+The constant 2.8 in the formula above is specific to 80% power and $\alpha = 0.05$ (two-sided). For other targets:
+
+| Power | $\alpha = 0.05$ (two-sided) | $\alpha = 0.01$ (two-sided) |
+|:------|:---------------------------:|:---------------------------:|
+| 80%   | 2.80                        | 3.36                        |
+| 90%   | 3.24                        | 3.86                        |
+| 95%   | 3.60                        | 4.20                        |
+
+: Multiplier values ($z_{\alpha/2} + z_{\beta}$) for common power and discernibility level combinations. {#tbl-multipliers}
+
+::: {.guidedpractice}
+Using @tbl-multipliers, how many patients per group would be needed in the blood pressure example ($\sigma = 12$, $\delta = 3$) for **90% power** at $\alpha = 0.01$?
+
+<details>
+<summary>Show answer</summary>
+Using the multiplier 3.86: $n = 2(3.86 \times 12/3)^2 = 2(15.44)^2 = 2 \times 238.4 = 476.8$. Rounding up, $n = 477$ per group, or 954 total — nearly double the 502 needed for 80% power at $\alpha = 0.05$. Higher power and stricter $\alpha$ both demand more observations.
+</details>
+:::
+:::
+
+## Practical considerations {#sec-practical-considerations}
+
+::: {.original}
+Formulas give a starting point, but real-world sample size planning involves several additional considerations.
+
+### Budget and resources
+
+The formula might say you need 500 participants, but your budget only supports 200. In this case, you have several options:
+
+- **Accept lower power** and acknowledge the study may not detect small effects.
+- **Narrow the research question** to focus on larger effects that require fewer observations to detect.
+- **Reduce variability** through more precise measurements, a more homogeneous study population, or a paired design (if applicable).
+- **Seek additional funding** if the research question is important enough.
+- **Don't run the study** if the available sample size gives unacceptably low power. A study that is almost certain to produce null results wastes everyone's time and resources.
+
+::: {.important}
+**Sometimes the best decision is not to run the study.** If a power analysis shows that the achievable sample size gives power below 50%, the study is more likely to miss a real effect than to detect one. Researchers should seriously consider whether conducting such a study is worthwhile.
+:::
+
+### Recruitment and attrition
+
+Not everyone you recruit will complete the study. Participants drop out, miss appointments, provide unusable data, or are lost to follow-up. The sample size formula tells you how many *completed* observations you need. You should plan to recruit more participants to account for expected attrition.
+
+::: {.workedexample}
+A longitudinal health study requires $n = 300$ completed observations. Based on similar studies, the researchers expect 15% attrition. How many participants should they recruit initially?
+
+---
+
+If 15% will be lost, then 85% of the recruited participants will complete the study. Let $n_{\text{recruit}}$ be the number to recruit:
+
+$$0.85 \times n_{\text{recruit}} = 300 \quad \Longrightarrow \quad n_{\text{recruit}} = \frac{300}{0.85} = 352.9$$
+
+They should recruit **353 participants** to end up with approximately 300 completed observations.
+:::
+
+### Pilot studies
+
+A **pilot study** is a small preliminary study conducted before the main study. Pilot studies serve several purposes relevant to sample size planning:
+
+- **Estimate $\sigma$** (or $p$) for use in the sample size formula.
+- **Test procedures**: Identify problems with the survey instrument, experimental protocol, or data collection process.
+- **Estimate attrition rates**: How many participants drop out or provide unusable data?
+- **Check feasibility**: Is it realistic to recruit the number of participants the formula requires?
+
+Pilot studies typically involve 10-30 participants — enough to get rough estimates but not so many that significant resources are consumed before the main study begins.
+
+::: {.caution}
+**Pilot study data should not be combined with main study data** (at least not without careful statistical adjustment). The pilot study is used to *design* the main study. Combining the two can bias the results because the main study design was chosen based on the pilot data.
+:::
+
+### When formulas don't apply: simulation
+
+The sample size formulas in this chapter assume specific test procedures (z-tests and t-tests) and specific distributional assumptions (normality). When these conditions don't hold — for example, when using a bootstrap or permutation test, or when the data are highly skewed — simulation provides an alternative.
+
+The simulation approach for sample size planning is an extension of the simulation-based power estimation from the statistical power chapter:
+
+1. **Choose a candidate sample size** $n$.
+2. **Simulate** many datasets of size $n$ under the assumed alternative.
+3. **Run the analysis** on each simulated dataset.
+4. **Compute the proportion** that reject $H_0$ — this is the estimated power for that $n$.
+5. **Repeat** for different values of $n$ until you find the smallest $n$ that achieves the desired power.
+
+This approach is computationally intensive but extremely flexible. It can handle any test procedure, any data distribution, and any study design.
+
+::: {.workedexample}
+A researcher wants to use a permutation test (the randomization tests chapter) to compare two groups, but the data are expected to be heavily right-skewed. Formulas for the $t$-test may not apply. How could she determine the sample size?
+
+---
+
+She would use simulation:
+
+1. Specify the alternative: for example, Group A has median 50 with a right-skewed distribution, and Group B has median 60 with the same shape.
+2. For a candidate $n$ (say, $n = 40$ per group), simulate 10,000 experiments: draw 40 values from each group's assumed distribution, run a permutation test, and record whether $H_0$ is rejected.
+3. Compute the proportion of rejections — this is the estimated power at $n = 40$.
+4. Repeat for $n = 50, 60, 80, 100, \ldots$ and find the smallest $n$ where power $\geq 0.80$.
+
+This avoids any assumption about normality and accounts for the specific properties of the permutation test.
+:::
+:::
+
+::: {.original}
+::: {.statlens}
+**See it in action.** Open the [Power & Error Visualizer]({{< var tool-url >}}/distribution/power/?alpha=0.05&n=30&delta=1&sigma=2&tail=right){target="_blank"} and slide the sample size $n$. The null and alternative curves narrow as $n$ grows; the shaded $\beta$ region shrinks and power $1-\beta$ climbs. Pair with the [Power Lab]({{< var tool-url >}}/conceptual/power-sim/?delta=1&sigma=2&n=30&alpha=0.05&tail=right){target="_blank"} to confirm empirically: at each $n$, the simulated reject-rate converges to the analytic power.
+:::
+:::
+
+## Summary of sample size formulas {#sec-formulas-summary}
+
+::: {.original}
+The table below collects the key formulas from this chapter for quick reference.
+
+| Goal | Formula | Key inputs |
+|:-----|:--------|:-----------|
+| Estimate a mean to within $ME$ | $n = \left(\frac{z^* \cdot \sigma}{ME}\right)^2$ | $z^*$, $\sigma$, $ME$ |
+| Estimate a proportion to within $ME$ | $n = \left(\frac{z^*}{ME}\right)^2 \cdot p^*(1-p^*)$ | $z^*$, $p^*$, $ME$ |
+| Compare two means (80% power, $\alpha = 0.05$) | $n = 2\left(\frac{2.8 \cdot \sigma}{\delta}\right)^2$ per group | $\sigma$, $\delta$ (min. detectable effect) |
+
+: Summary of sample size formulas. In all cases, round the result up to the next whole number. {#tbl-formulas}
+
+::: {.caution}
+**These formulas are starting points, not final answers.** Always adjust for attrition, consider practical constraints, and verify assumptions. When in doubt, simulation provides a robust alternative.
+:::
+:::
+
+## Chapter review {#sec-sample-size-review}
+
+::: {.original}
+### Summary
+
+Sample size planning is a critical step in study design. For estimating a population mean, the required sample size is $n = (z^* \cdot \sigma / ME)^2$, where $ME$ is the desired margin of error. For estimating a proportion, $n = (z^*/ME)^2 \cdot p^*(1-p^*)$, where $p^*$ is a planning value for the proportion (use $p^* = 0.5$ if unknown). For comparing two group means with 80% power, $n = 2(2.8\sigma/\delta)^2$ per group, where $\delta$ is the minimum detectable effect.
+
+In all cases, the formula requires prior information about variability ($\sigma$ or $p$), which may come from previous studies, pilot data, or conservative estimates. Results should always be rounded up and adjusted for expected attrition.
+
+When standard formulas do not apply — for example, with non-normal data, complex study designs, or non-standard test procedures — simulation-based power analysis offers a flexible alternative. The researcher simulates many datasets under the assumed alternative, runs the planned analysis on each, and identifies the sample size that achieves the desired power.
+
+Practical considerations — budget, recruitment feasibility, attrition, and ethical constraints — always play a role in the final sample size decision. Sometimes the most honest conclusion of a power analysis is that the study cannot be conducted at an adequate scale, and resources should be directed elsewhere.
+:::
+
+## Exercises {.exercises}
+
+{{< include ../exercises/_sample-size-statlens-exercises.qmd >}}

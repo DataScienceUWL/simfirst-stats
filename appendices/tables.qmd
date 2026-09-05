@@ -1,0 +1,162 @@
+---
+title: "Statistical Tables"
+---
+
+```{r}
+#| include: false
+#| cache: false
+library(dplyr)
+library(kableExtra)
+library(tibble)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Standard reference tables for the four distributions used in this textbook: **standard normal** ($z$), **Student's $t$**, **chi-square** ($\chi^2$), and **$F$**. Use them for exams or offline work; for everyday computation, use StatLens's [distribution calculators](https://learnlens.org/statlens/distribution/), R, or Jamovi.
+
+## Common critical values --- cheat sheet {#sec-crit-values-cheat}
+
+The values below appear most often when constructing confidence intervals or two-sided tests. Read across each row: for a 95% CI or $\alpha = 0.05$ two-sided test, use 1.96 for $z^{*}$; use the $t^{*}$ row for the appropriate $df$. The last row shows the large-sample limit $t^{*} \to z^{*}$.
+
+```{r}
+#| label: tbl-crit-cheat
+#| tbl-cap: "Common two-sided critical values (t-star, and z-star in the last row)."
+levels <- c("90%", "95%", "98%", "99%")
+alpha  <- c(0.10, 0.05, 0.02, 0.01)
+z_star <- qnorm(1 - alpha / 2)
+
+t_star <- function(df) qt(1 - alpha / 2, df)
+dfs <- c(5, 10, 20, 30, 50, 100, 1000)
+t_rows <- sapply(dfs, t_star)
+t_df <- as.data.frame(t(t_rows))
+colnames(t_df) <- levels
+t_df <- tibble(`df` = as.character(dfs)) |> bind_cols(t_df)
+
+# z-star row: plain-text label (kable captions/cells don't render inline math)
+z_row <- tibble(`df` = "∞ (z*)", `90%` = z_star[1], `95%` = z_star[2],
+                `98%` = z_star[3], `99%` = z_star[4])
+
+crit <- t_df |>
+  mutate(across(-df, ~ formatC(.x, digits = 3, format = "f"))) |>
+  bind_rows(z_row |> mutate(across(-df, ~ formatC(.x, digits = 3, format = "f"))))
+
+kbl(crit, align = "c", booktabs = TRUE) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE)
+```
+
+## Standard normal (z) {#sec-z-table}
+
+Entries are cumulative left-tail probabilities $P(Z \le z)$ for the standard normal distribution. Read the leading digit and first decimal from the row label, then the second decimal from the column. For right-tail probabilities use $1 - P(Z \le z)$; for two-tailed use symmetry.
+
+```{r}
+#| label: tbl-z-table
+#| tbl-cap: "Cumulative standard normal probabilities."
+z_row  <- seq(-3.4, 3.4, by = 0.1)
+z_col  <- seq(0.00, 0.09, by = 0.01)
+zvals  <- outer(z_row, z_col, FUN = "+")
+probs  <- pnorm(zvals)
+
+tbl <- as.data.frame(round(probs, 4))
+colnames(tbl) <- sprintf("0.%02d", 0:9)
+rownames(tbl) <- sprintf("%+.1f", z_row)
+
+kbl(tbl, align = "c", booktabs = TRUE) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                font_size = 10, full_width = FALSE) |>
+  column_spec(1, bold = TRUE, border_right = TRUE)
+```
+
+## Student's t {#sec-t-table}
+
+Entries are critical values $t^{*}$ such that $P(T > t^{*}) = \alpha_{\text{right-tail}}$ for a $t$-distribution with the row's degrees of freedom. For a two-sided CI at confidence level $C$, use the column headed $\alpha_{\text{two-tail}} = 1 - C$.
+
+**Row**: degrees of freedom. **Columns**: one-tail area $\alpha$ to the right of $t^{*}$.
+
+```{r}
+#| label: tbl-t-table
+#| tbl-cap: "Upper-tail critical values of the t-distribution."
+one_tail <- c(0.10, 0.05, 0.025, 0.01, 0.005, 0.001)
+dfs <- c(1:30, 40, 50, 60, 80, 100, 200, 500, 1000)
+
+crit <- sapply(one_tail, function(a) qt(1 - a, dfs))
+tbl <- as.data.frame(round(crit, 3))
+colnames(tbl) <- sprintf("%.3f", one_tail)
+tbl <- cbind(df = dfs, tbl)
+
+kbl(tbl, align = "c", booktabs = TRUE) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                font_size = 10, full_width = FALSE)
+```
+
+::: {.callout-tip}
+## Reading the t-table for a confidence interval
+
+For a two-sided $C\%$ confidence interval, use one-tail area $\alpha = (1 - C/100) / 2$. So a 95% CI uses the $\alpha = 0.025$ column; a 99% CI uses the $\alpha = 0.005$ column.
+:::
+
+## Chi-square ($\chi^2$) {#sec-chisq-table}
+
+Entries are critical values $\chi^{2\,*}$ such that $P(X^{2} > \chi^{2\,*}) = \alpha$ for a $\chi^2$-distribution with the row's degrees of freedom.
+
+**Row**: degrees of freedom. **Columns**: right-tail area $\alpha$ (i.e., $P(X^{2} > \chi^{2\,*}) = \alpha$).
+
+```{r}
+#| label: tbl-chisq-table
+#| tbl-cap: "Upper-tail critical values of the chi-square distribution."
+alphas <- c(0.995, 0.99, 0.975, 0.95, 0.90, 0.10, 0.05, 0.025, 0.01, 0.005)
+dfs <- c(1:30, 40, 50, 60, 80, 100)
+
+crit <- sapply(alphas, function(a) qchisq(1 - a, dfs))
+tbl <- as.data.frame(round(crit, 3))
+colnames(tbl) <- sprintf("%.3f", alphas)
+tbl <- cbind(df = dfs, tbl)
+
+kbl(tbl, align = "c", booktabs = TRUE) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                font_size = 10, full_width = FALSE)
+```
+
+## $F$-distribution {#sec-f-table}
+
+Entries are critical values $F^{*}$ such that $P(F > F^{*}) = \alpha$ for an $F$-distribution with numerator degrees of freedom $df_1$ (columns) and denominator degrees of freedom $df_2$ (rows). Separate tables for $\alpha = 0.05$ and $\alpha = 0.01$.
+
+### $\alpha = 0.05$
+
+**Rows**: denominator df ($df_2$). **Columns**: numerator df ($df_1$).
+
+```{r}
+#| label: tbl-f-05
+#| tbl-cap: "F-star with right-tail area 0.05."
+df1s <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 60, 120)
+df2s <- c(1:20, 25, 30, 40, 60, 120, 1000)
+crit <- outer(df2s, df1s, function(d2, d1) qf(0.95, d1, d2))
+tbl <- as.data.frame(round(crit, 2))
+colnames(tbl) <- df1s
+tbl <- cbind(df2 = df2s, tbl)
+
+kbl(tbl, align = "c", booktabs = TRUE) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                font_size = 9, full_width = FALSE)
+```
+
+### $\alpha = 0.01$
+
+**Rows**: denominator df ($df_2$). **Columns**: numerator df ($df_1$).
+
+```{r}
+#| label: tbl-f-01
+#| tbl-cap: "F-star with right-tail area 0.01."
+crit <- outer(df2s, df1s, function(d2, d1) qf(0.99, d1, d2))
+tbl <- as.data.frame(round(crit, 2))
+colnames(tbl) <- df1s
+tbl <- cbind(df2 = df2s, tbl)
+
+kbl(tbl, align = "c", booktabs = TRUE) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                font_size = 9, full_width = FALSE)
+```
+
+## Alternatives
+
+- **StatLens distribution calculators** at [learnlens.org/statlens/distribution/](https://learnlens.org/statlens/distribution/) --- interactive versions of the same distributions with visual tail-shading.
+- **R**: `pnorm`, `qnorm`, `pt`, `qt`, `pchisq`, `qchisq`, `pf`, `qf` (the `p*` functions give left-tail probabilities; the `q*` functions give quantiles/critical values).
+- **Jamovi**: use the `descriptives` panel with the `p-value` and `quantile` options, or the distributions module.

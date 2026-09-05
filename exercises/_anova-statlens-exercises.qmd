@@ -1,0 +1,51 @@
+<!-- StatLens Interactive Exercises — One-Way ANOVA -->
+<!-- HAND-AUTHORED (not generated). Pedagogy: problem framing, choosing the -->
+<!-- right procedure, checking conditions, and interpreting tool output —     -->
+<!-- the reasoning a calculator can't do for you. Answers are reasoning-based.-->
+
+### StatLens Exercises {.unnumbered}
+
+Let [StatLens]({{< var tool-url >}}){target="_blank"} do the arithmetic; spend your effort on the reasoning a calculator can't do.
+
+1.  **Frame the question.** An agronomist randomly assigns plots to one of **four** fertilizer brands and measures yield (bushels/acre) at harvest. She has 30 plots per brand.
+
+    a.  Identify the explanatory variable, its number of levels, and the response.
+    b.  Write $H_0$ and $H_A$ for the omnibus ANOVA $F$-test in symbols *and* in words.
+    c.  Why does ANOVA use an $F$-statistic that compares two *variances*, when the question is really about *means*?
+
+
+2.  **Choose the procedure.** For each scenario, name the procedure --- **one-way ANOVA $F$-test**, **two-sample $t$-test**, **paired $t$-test**, or **not an ANOVA problem**.
+
+    a.  Compare mean test scores across three teaching methods (random assignment).
+    b.  Compare mean test scores between two teaching methods (random assignment).
+    c.  Compare the *proportion* of students passing across four schools.
+    d.  Compare yields across four fertilizer brands, where the *same* plots received different brands in different years (within-plot pairing).
+    e.  Compare the mean grade of every student in three sections of the same course.
+
+
+3.  **Check the conditions.** Open the [One-Way ANOVA tool]({{< var tool-url >}}/inference/anova/){target="_blank"} with any multi-group numeric dataset.
+
+    a.  Name the **three** ANOVA conditions and state each in plain language.
+    b.  Inspect the side-by-side boxplots in StatLens. What pattern would convince you the **equal-variance** condition has failed?
+    c.  Suppose one group has $n_1 = 8$ with a strong right skew, while two other groups have $n_2 = n_3 = 50$ and look symmetric. Is ANOVA's $F$-test trustworthy here? What's a defensible alternative?
+
+
+4.  **Run it and interpret it.** Open the [One-Way ANOVA tool]({{< var tool-url >}}/inference/anova/){target="_blank"} with any multi-group numeric dataset.
+
+    a.  Report the $F$-statistic, the two df values (between and within), and the p-value.
+    b.  State your decision at $\alpha = 0.05$ and write a one-sentence conclusion **in context**.
+    c.  Suppose $F$ is large and the p-value is 0.002. The conclusion "the four groups all have different means" is **wrong**. Why? What is the correct conclusion?
+    d.  Which statement is the correct interpretation of $F = 4.5$?
+
+        i.   Group means differ by an average of 4.5 units.
+        ii.  The between-group variance is 4.5 times the within-group variance, in this sample.
+        iii. About 4.5% of the variability is explained by the group factor.
+
+
+5.  **Simulation as a sanity check.** Open the [Randomization ANOVA]({{< var tool-url >}}/simulate/randomization-anova/){target="_blank"} on the same data.
+
+    a.  Run 5000 simulated $F$ statistics under $H_0$ (group labels shuffled). What does the null distribution **look like**? Is it $F$-shaped?
+    b.  Compare the **simulation** p-value to the **$F$-distribution** p-value from Exercise 4. How close are they?
+    c.  Repeat on a dataset where one group has only $n = 6$ observations with a clear outlier. Are the two p-values still close? Which is the safer one to report?
+    d.  A student says: "If I'm going to run the randomization version anyway, why learn the $F$-distribution?" Give two good reasons. (Hint: think about *understanding* the $F$ statistic, and *speed* for routine reporting.)
+

@@ -1,0 +1,163 @@
+# Tech Tutorial: Simulate {.unnumbered}
+
+::: {.project-meta}
+**Tech Tutorial — Simulate.** This unit's tools build a sampling distribution by
+**resampling** — shuffling for a hypothesis test, bootstrapping for a confidence
+interval. Pick **one** tool and follow its tab.
+
+- **StatLens** — purpose-built for resampling; the natural home for this unit.
+- **R** — the `infer` package mirrors the same logic in code.
+- **Jamovi** — its standard menus do *not* do randomization/bootstrap (see its tab).
+
+We reuse the class survey from the Explore tutorial: [`class_survey.csv`]({{< var data-url >}}/class_survey.csv){download="class_survey.csv"}.
+:::
+
+## What you'll do {#sec-tech-sim-skills}
+
+1. A **randomization test** — is mean `commute_min` different for On- vs. Off-campus students?
+2. A **bootstrap confidence interval** — estimate the mean `sleep_hours`.
+
+---
+
+## 1. Randomization test for a difference in means {#sec-tech-sim-rand}
+
+We ask whether on-campus and off-campus students differ in mean one-way commute.
+The **null** says housing doesn't matter, so any labeling of students as
+on/off-campus is interchangeable. We **shuffle** the housing labels many times to
+build the null distribution of the difference in means, then see where the
+observed difference falls.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Randomization: Difference in Means tool]({{< var tool-url >}}/simulate/randomization-diff-means/?csv={{< var data-url >}}/class_survey.csv){target="_blank"}.
+2.  Set the **response** to `commute_min` and the **grouping** variable to `housing`.
+3.  Generate ~1000 shuffles. Read the **p-value** — the share of shuffles at least
+    as extreme as the observed difference.
+
+### R
+
+```{r}
+#| label: tech-sim-rand
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-height: 3
+#| fig-cap: "Randomization (null) distribution of the difference in mean commute. The observed difference sits far in the tail."
+#| fig-alt: "A bell-shaped null distribution centered at zero with the observed difference marked well into the right tail."
+
+library(readr)
+library(dplyr)
+library(infer)
+library(ggplot2)
+
+survey <- read_csv("../datasets/class_survey.csv")
+
+obs_diff <- survey |>
+  specify(commute_min ~ housing) |>
+  calculate(stat = "diff in means", order = c("Off-campus", "On-campus"))
+
+null_dist <- survey |>
+  specify(commute_min ~ housing) |>
+  hypothesize(null = "independence") |>
+  generate(reps = 1000, type = "permute") |>
+  calculate(stat = "diff in means", order = c("Off-campus", "On-campus"))
+
+null_dist |> get_p_value(obs_stat = obs_diff, direction = "two-sided")
+
+null_dist |>
+  visualize() +
+  shade_p_value(obs_stat = obs_diff, direction = "two-sided")
+```
+
+### Jamovi
+
+<!-- MADDIE (Jamovi owner): esci / BrawStats add-on modules offer *menu-driven*
+sampling-variability and null-distribution demos, but NOT a general permutation
+p-value on loaded data. If you want a Jamovi-only simulation path here, evaluate
+esci and add a click-path. See docs/jamovi-screenshots-todo.md. -->
+::: {.callout-note}
+## Jamovi: built-in menus don't shuffle
+
+Jamovi's *built-in* menus don't run randomization (permutation) tests — a general
+permutation test on your data needs the **StatLens** tab (no install) or the **R**
+tab. (Add-on modules such as **esci** give menu-driven *sampling-variability*
+demos, but not a permutation p-value.) Jamovi returns in force in the next unit,
+*Calculate*, with the formula-based version of this comparison — a two-sample
+*t*-test.
+:::
+
+:::
+
+---
+
+## 2. Bootstrap confidence interval for a mean {#sec-tech-sim-boot}
+
+To estimate the mean nightly sleep with a margin of error, we **bootstrap**:
+resample the data *with replacement* many times, record each resample's mean, and
+take the middle 95% of those means as the interval.
+
+::: {.panel-tabset group="tool"}
+
+### StatLens
+
+1.  Open the [Bootstrap: One Mean tool]({{< var tool-url >}}/simulate/bootstrap-mean/?csv={{< var data-url >}}/class_survey.csv){target="_blank"}.
+2.  Choose `sleep_hours`. Generate ~1000 bootstrap resamples.
+3.  Read the **95% confidence interval** (the 2.5th–97.5th percentiles).
+
+### R
+
+```{r}
+#| label: tech-sim-boot
+#| echo: true
+#| message: false
+#| warning: false
+#| fig-height: 3
+#| fig-cap: "Bootstrap distribution of the mean sleep hours, with the 95% percentile interval shaded."
+#| fig-alt: "A roughly normal bootstrap distribution of sample means with the central 95 percent shaded."
+
+boot_dist <- survey |>
+  specify(response = sleep_hours) |>
+  generate(reps = 1000, type = "bootstrap") |>
+  calculate(stat = "mean")
+
+ci <- boot_dist |> get_confidence_interval(level = 0.95, type = "percentile")
+ci
+
+boot_dist |>
+  visualize() +
+  shade_confidence_interval(endpoints = ci)
+```
+
+### Jamovi
+
+::: {.callout-note}
+## Jamovi: bootstrapping needs a module
+
+A bootstrap CI for a plain mean isn't in Jamovi's built-in menus — use the
+**StatLens** or **R** tab. (The **esci** add-on does menu-driven interval
+estimation and the "dance of the means"; **GAMLj** does true bootstrap CIs for
+regression/ANOVA models.) In the *Calculate* unit, Jamovi produces the
+formula-based one-sample *t* interval for this same mean.
+:::
+
+:::
+
+---
+
+## Check yourself {#sec-tech-sim-check}
+
+- [ ] run a randomization test for a difference and read its p-value;
+- [ ] build and read a bootstrap confidence interval;
+- [ ] explain what is being shuffled (test) vs. resampled with replacement (interval).
+
+::: {.callout-tip collapse="true"}
+## Going further in R (optional)
+
+OpenIntro *IMS* interactive tutorials for this unit (same `infer` style as above):
+
+- [Sampling variability](https://openintro.shinyapps.io/ims-04-foundations-01/){target="_blank"}
+- [Randomization test](https://openintro.shinyapps.io/ims-04-foundations-02/){target="_blank"}
+- [Bootstrapping](https://openintro.shinyapps.io/ims-05-infer-05/){target="_blank"}
+:::

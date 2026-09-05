@@ -1,0 +1,5 @@
+---
+title: "Unit 1: Explore"
+---
+
+Before we can draw conclusions from data, we need to understand what data *is*, where it comes from, and what it looks like. We develop the vocabulary and visual tools for exploring data — identifying variable types, visualizing distributions, and describing relationships. These skills form the foundation for everything that follows.

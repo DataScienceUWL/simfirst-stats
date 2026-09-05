@@ -1,0 +1,251 @@
+---
+title: "Multiple Comparisons"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+:::{.callout-note appearance="simple" icon=false}
+**Extended Content.** This chapter extends beyond UWL's core STAT 145 curriculum. It is included for completeness and for instructors who wish to cover additional topics. Content is in draft form.
+:::
+
+::: {.chapterintro}
+When an ANOVA test rejects the null hypothesis, we know that at least one group mean differs from the others -- but we do not know *which* groups differ. This chapter addresses the natural follow-up question: which specific pairs of groups have different means? Attempting many pairwise comparisons inflates the overall Type I error rate, so we need specialized methods that control for the fact that we are conducting multiple tests simultaneously. We introduce the multiple testing problem, the Bonferroni correction, and Tukey's Honest Significant Difference (HSD) method.
+:::
+
+::: {.statlens}
+**See it in action.** For the multiple-testing problem itself, work through the story-driven [Do Green Jelly Beans Cause Acne?]({{< var tool-url >}}/conceptual/decision-errors/?activity=jelly-bean-multiple-comparisons.json){target="_blank"} activity (family-wise error inflation, built around xkcd #882). For the actual post-hoc procedure, open [Multiple Comparisons]({{< var tool-url >}}/inference/multiple-comparisons/){target="_blank"} on any 3+ group numeric dataset --- pairwise-CI table + forest plot, toggle Tukey HSD ↔ Bonferroni. Try [insectsprays]({{< var tool-url >}}/inference/multiple-comparisons/?dataset=insectsprays){target="_blank"} for the classic clean pattern.
+:::
+
+## The multiple testing problem {#sec-multiple-testing}
+
+When we conduct a single hypothesis test at discernibility level $\alpha = 0.05$, there is a 5% chance of incorrectly rejecting a true null hypothesis (a Type I error). But what happens when we conduct many tests?
+
+::: {.workedexample}
+Suppose we compare $k = 4$ groups. How many pairwise comparisons are possible? If we conduct each test at $\alpha = 0.05$ and all null hypotheses are actually true, what is the probability that we make at least one Type I error?
+
+---
+
+With 4 groups, there are $\binom{4}{2} = 6$ pairwise comparisons. If we conduct each at $\alpha = 0.05$, the probability that any *single* test does not produce a Type I error is $1 - 0.05 = 0.95$. If the tests were independent, the probability that *none* of the 6 tests produces a Type I error would be:
+
+$$P(\text{no errors}) = 0.95^6 = 0.735$$
+
+So the probability of making **at least one** Type I error is:
+
+$$P(\text{at least one error}) = 1 - 0.735 = 0.265$$
+
+That is about a 27% chance of at least one false positive -- much higher than the 5% we intended.
+:::
+
+::: {.original}
+### Family-wise error rate
+
+The probability of making at least one Type I error across all tests in a family of comparisons is called the **family-wise error rate** (FWER). When conducting $m$ independent tests, each at discernibility level $\alpha$, the FWER is:
+
+$$\text{FWER} = 1 - (1 - \alpha)^m$$
+
+The table below shows how the FWER grows with the number of comparisons when $\alpha = 0.05$:
+
+| Number of groups ($k$) | Number of comparisons ($m$) | FWER |
+|:---:|:---:|:---:|
+| 3 | 3 | 0.143 |
+| 4 | 6 | 0.265 |
+| 5 | 10 | 0.401 |
+| 6 | 15 | 0.537 |
+| 10 | 45 | 0.901 |
+
+With 10 groups, there is a 90% chance of making at least one Type I error if we use unadjusted pairwise tests. This is the core of the multiple comparisons problem: we need procedures that control the FWER at an acceptable level (typically 0.05).
+
+::: {.definition}
+**Family-wise error rate (FWER).**
+
+The **family-wise error rate** is the probability of making one or more Type I errors among all the hypothesis tests in a family of comparisons. Methods like the Bonferroni correction and Tukey's HSD are designed to keep the FWER at or below a specified level $\alpha$.
+:::
+:::
+
+## The Bonferroni correction {#sec-bonferroni}
+
+::: {.original}
+The simplest method for controlling the family-wise error rate is the **Bonferroni correction**. The idea is straightforward: if we are conducting $m$ tests and want the overall FWER to be at most $\alpha$, we use a stricter discernibility level for each individual test.
+
+::: {.important}
+**Bonferroni correction.**
+
+When conducting $m$ hypothesis tests and we want the family-wise error rate to be at most $\alpha$, the Bonferroni correction uses an adjusted discernibility level for each individual test:
+
+$$\alpha^* = \frac{\alpha}{m}$$
+
+Equivalently, we can multiply each p-value by $m$ (the adjusted p-value) and compare the result to the original $\alpha$.
+:::
+
+::: {.workedexample}
+After an ANOVA with $k = 4$ groups rejects $H_0$, we want to conduct all pairwise comparisons at an overall $\alpha = 0.05$. How many comparisons are there, and what adjusted discernibility level should we use for each?
+
+---
+
+There are $\binom{4}{2} = 6$ pairwise comparisons. The Bonferroni-adjusted discernibility level is:
+
+$$\alpha^* = \frac{0.05}{6} = 0.0083$$
+
+So each individual two-sample $t$-test must have a p-value below 0.0083 to be considered discernible.
+:::
+
+The Bonferroni correction is simple and broadly applicable -- it can be used with any type of test, not just pairwise comparisons of means. However, it is **conservative**, meaning it may fail to detect real differences when they exist (higher Type II error). When the number of comparisons is very large, the Bonferroni correction can be overly strict.
+
+### Example: Exam scores
+
+Suppose an ANOVA comparing three exam versions (A, B, C) gave $F = 3.48$ with $p = 0.036$. We rejected $H_0$ and now want to know which exams differ.
+
+With $k = 3$ groups, there are $\binom{3}{2} = 3$ pairwise comparisons. The Bonferroni-adjusted discernibility level is $\alpha^* = 0.05/3 = 0.0167$.
+
+Suppose the three pairwise $t$-test p-values are:
+
+| Comparison | p-value | Discernible at $\alpha^* = 0.0167$? |
+|---|:---:|:---:|
+| A vs. B | 0.245 | No |
+| A vs. C | 0.068 | No |
+| B vs. C | 0.011 | Yes |
+
+Only the comparison between exams B and C is discernible after the Bonferroni correction. We conclude that there is evidence of a difference in difficulty between exams B and C, but we cannot say the other pairs differ.
+:::
+
+## Tukey's Honest Significant Difference {#sec-tukey-hsd}
+
+::: {.original}
+A more powerful alternative to the Bonferroni correction for pairwise comparisons of means is **Tukey's Honest Significant Difference (HSD)** method. While the Bonferroni correction is general-purpose, Tukey's method is specifically designed for comparing all pairs of group means after ANOVA, and it is less conservative.
+
+### How Tukey's HSD works
+
+Tukey's HSD computes a single critical difference -- the minimum difference between two group means that would be considered statistically discernible. The procedure uses the **Studentized range distribution** to determine this critical value.
+
+For each pair of groups $j$ and $j'$, the test statistic is:
+
+$$q = \frac{\bar{x}_j - \bar{x}_{j'}}{\sqrt{MSE / n^*}}$$
+
+where $MSE$ is the mean square error from the ANOVA, and $n^*$ is a measure of the group sample size (when group sizes are equal, $n^* = n_j$; when unequal, a harmonic mean is often used). The statistic $q$ is compared to critical values from the Studentized range distribution.
+
+::: {.important}
+**Tukey's HSD.**
+
+Tukey's Honest Significant Difference method controls the family-wise error rate at $\alpha$ when making all pairwise comparisons of group means. It computes a confidence interval for each pairwise difference:
+
+$$(\bar{x}_j - \bar{x}_{j'}) \pm q^* \cdot \sqrt{\frac{MSE}{n^*}}$$
+
+where $q^*$ is the critical value from the Studentized range distribution with $k$ groups and $n - k$ degrees of freedom. If the confidence interval does not contain zero, the difference is discernible.
+:::
+
+### Example: MLB batting positions
+
+After the ANOVA for MLB batting data ($F = 5.077$, $p = 0.0066$), we rejected $H_0$ and want to identify which position pairs differ in on-base percentage. Tukey's HSD produces the following pairwise comparisons:
+
+| Comparison | Difference | 95% CI | Discernible? |
+|---|:---:|:---:|:---:|
+| IF - OF | -0.002 | (-0.016, 0.012) | No |
+| C - OF | -0.018 | (-0.038, 0.002) | No |
+| C - IF | -0.016 | (-0.035, 0.003) | No |
+
+Interestingly, although the overall ANOVA was discernible, none of the individual Tukey pairwise comparisons reaches discernibility at the 0.05 level. This can happen because the ANOVA considers all groups simultaneously, while the pairwise comparisons are more conservative. In this case, the overall pattern of catchers having lower OBP than the other two positions drives the ANOVA result, but no single pairwise difference is large enough to be declared discernible on its own.
+:::
+
+## Interpreting post-hoc results {#sec-posthoc-interpretation}
+
+::: {.original}
+Post-hoc tests (like Bonferroni or Tukey's HSD) are conducted *after* a discernible ANOVA result. Several important principles guide their interpretation:
+
+### When to use post-hoc tests
+
+Post-hoc pairwise comparisons should only be conducted after ANOVA rejects the null hypothesis. If the ANOVA p-value is not discernible, there is no justification for exploring pairwise differences -- doing so would be data snooping.
+
+### Reporting results
+
+When reporting results of multiple comparisons, it is common to use **compact letter displays**. Groups that share a letter are not discernibly different from each other:
+
+| Group | Mean | Grouping |
+|---|:---:|:---:|
+| A | 75.1 | ab |
+| B | 72.0 | a |
+| C | 79.4 | b |
+
+In this notation, Groups A and B share the letter "a" (not discernibly different), and Groups A and C share the letter "b" is not shared by B and C (they are discernibly different). Group A, sharing a letter with both B and C, is not discernibly different from either.
+
+### Confidence intervals for differences
+
+An especially useful way to present multiple comparison results is through confidence intervals for pairwise differences. If a confidence interval contains zero, the two groups are not discernibly different. If the interval is entirely positive or entirely negative, the groups differ.
+
+```{r}
+#| label: fig-pairwise-ci
+#| fig-cap: "Confidence intervals for pairwise differences in mean exam scores. The interval for B vs. C does not contain zero, indicating a discernible difference. [↗ Try this live](https://learnlens.org/statlens/inference/multiple-comparisons/) — see every pair's Tukey/Bonferroni CI in a live forest plot."
+#| fig-alt: "Three horizontal confidence intervals for pairwise differences in exam scores. The interval for B minus C is entirely below zero, indicating B has a discernibly lower mean than C. The other two intervals contain zero."
+
+library(ggplot2)
+
+ci_data <- data.frame(
+  comparison = factor(c("A - B", "A - C", "B - C"),
+                      levels = c("B - C", "A - C", "A - B")),
+  diff = c(75.1 - 72.0, 75.1 - 79.4, 72.0 - 79.4),
+  lower = c(-1.5, -9.0, -12.5),
+  upper = c(7.7, 0.4, -2.3)
+)
+
+ggplot(ci_data, aes(x = diff, y = comparison)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2,
+                 linewidth = 1, color = COL_BLUE) +
+  geom_point(size = 3, color = COL_GREEN) +
+  labs(x = "Difference in Mean Score", y = "Comparison") +
+  theme_minimal(base_size = 14)
+```
+
+### Common mistakes
+
+1. **Running multiple pairwise tests without correction.** This inflates the Type I error rate. Always use a correction method when conducting multiple comparisons.
+
+2. **Conducting post-hoc tests after a non-discernible ANOVA.** If the overall $F$-test does not reject $H_0$, there is no justification for exploring pairwise differences.
+
+3. **Ignoring practical importance.** A statistically discernible difference may be too small to matter in practice. Always consider the magnitude of the differences, not just the p-values.
+
+4. **Over-interpreting non-discernible pairwise comparisons.** A non-discernible pairwise comparison after a discernible ANOVA does not mean the groups are equal -- it means we do not have enough evidence to declare them different individually.
+:::
+
+## Bonferroni vs. Tukey: When to use which
+
+::: {.original}
+Both methods control the family-wise error rate, but they have different strengths:
+
+| Feature | Bonferroni | Tukey's HSD |
+|---|---|---|
+| Generality | Any set of tests | Pairwise comparisons of means only |
+| Power | More conservative (less powerful) | Less conservative (more powerful) |
+| Assumptions | None beyond the individual tests | Equal group variances (same as ANOVA) |
+| Best for | Small number of planned comparisons | All pairwise comparisons after ANOVA |
+
+**Rule of thumb:** If you are comparing all pairs of group means after a discernible ANOVA, use Tukey's HSD. If you have a small number of pre-planned comparisons (not necessarily all pairs), the Bonferroni correction is appropriate.
+:::
+
+## Chapter review {#sec-multiple-comparisons-review}
+
+### Summary
+
+When ANOVA rejects the null hypothesis, the natural follow-up question is: which groups differ? Performing many pairwise tests without correction inflates the family-wise error rate, making false positives likely. The Bonferroni correction divides the discernibility level by the number of comparisons, which is simple but conservative. Tukey's HSD method is specifically designed for all pairwise comparisons of means after ANOVA and is typically more powerful. Both methods control the family-wise error rate at the desired level.
+
+### Key terms
+
+- Multiple comparisons problem
+- Family-wise error rate (FWER)
+- Bonferroni correction
+- Tukey's Honest Significant Difference (HSD)
+- Post-hoc test
+- Compact letter display
+
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-multiple-comparisons) at the back of the book.
+
+{{< include ../exercises/_multiple-comparisons-exercises.qmd >}}
+
+{{< include ../exercises/_multiple-comparisons-statlens-exercises.qmd >}}

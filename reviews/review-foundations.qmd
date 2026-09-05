@@ -1,0 +1,89 @@
+# Foundations — Unit Review {.unnumbered}
+
+::: {.chapterintro}
+Unit 5 supplies the machinery underneath everything else: the **rules of
+probability**, the **distributions** that model random outcomes, and the
+**power/sample-size** ideas that decide whether a study can detect an effect at
+all. This review connects those pieces and drills two judgments — *which
+distribution models this situation?* and *what makes a study powerful?*
+:::
+
+## The big picture {#sec-review-foundations-bigpicture}
+
+- **Probability** is the language of chance. [Probability rules](../chapters/probability-rules.qmd) (complements, unions, conditional probability, independence) let you reason about uncertain events, and [random variables](../chapters/random-variables.qmd) and [expected value](../chapters/expected-value.qmd) summarize a random process by its long-run average and spread.
+- **Distributions** are the standard models. The [binomial](../chapters/binomial.qmd) counts **successes in a fixed number of independent yes/no trials**; the [normal](../chapters/normal-distribution.qmd) models **continuous, bell-shaped** measurements — and, via the earlier mathematical-models idea, approximates many statistics in large samples.
+- **Power and design.** [Type II error](../chapters/type-ii-error.qmd), [statistical power](../chapters/statistical-power.qmd), and [sample size](../chapters/sample-size.qmd) ask the *planning* question: given the choices, how likely is the study to **detect a real effect** — and how many observations does that take?
+
+## Which distribution models this? {#sec-review-foundations-compare}
+
+| Situation | Model | You compute |
+|---|---|---|
+| **Count of successes** in $n$ independent yes/no trials, constant $p$ | **binomial** | $P(X = k)$, mean $np$, SD $\sqrt{np(1-p)}$ |
+| A **continuous, bell-shaped** measurement | **normal** | areas/probabilities via z-scores |
+| A count with **large** $n$ (many successes & failures) | normal **approximation** to the binomial | area under a normal curve |
+
+::: {.important}
+**The binomial needs four things:** a **fixed** number of trials $n$, **two** outcomes per trial, **independent** trials, and a **constant** success probability $p$. If any fails (e.g. sampling without replacement from a small population), the binomial model doesn't apply.
+:::
+
+## What makes a study powerful? {#sec-review-foundations-decision}
+
+**Power** = the probability of detecting a real effect = $1 - \beta$ (where $\beta$ is the Type II error rate). Power goes **up** when:
+
+1. the **sample size** $n$ is larger,
+2. the **true effect** is larger,
+3. the **discernibility level** $\alpha$ is larger (a more lenient bar), or
+4. the data are **less variable**.
+
+Planning a study is choosing $n$ to reach a target power (often 0.80) for an effect worth detecting — the job of the **sample-size** calculation.
+
+## Key ideas to carry forward {#sec-review-foundations-vocab}
+
+**Complement / union / intersection** · **conditional probability** · **independence** · **random variable** · **expected value** · **binomial ($n$, $p$)** · **normal model** · **z-score** · **normal approximation to the binomial** · **Type I error ($\alpha$)** · **Type II error ($\beta$)** · **power ($1-\beta$)** · **effect size** · **sample-size planning**.
+
+## Common pitfalls {#sec-review-foundations-pitfalls}
+
+- **Using the binomial when trials aren't independent or $p$ isn't constant** (e.g. drawing without replacement from a small group).
+- **Confusing $P(A \mid B)$ with $P(B \mid A)$** — conditional probabilities are *directional*.
+- **Treating "independent" and "mutually exclusive" as the same** — they're different ideas (mutually exclusive events with nonzero probability are *not* independent).
+- **Thinking a non-significant result proves no effect** — it may just reflect **low power** (too small an $n$).
+- **Raising power by raising $\alpha$ has a cost** — it increases the Type I error rate.
+
+## Exercises {#sec-review-foundations-exercises}
+
+The Unit 5 skills are **choosing the right distribution** and **reasoning about power.** Answers are provided so you can check your work.
+
+1.  **Binomial or normal?** For each, name the model you'd use.
+
+    a.  The number of heads in 20 fair coin flips.
+    b.  The heights of adult women, modeled as bell-shaped with a known mean and SD.
+    c.  The number of defective items in a random sample of 50, each defective with probability 0.03.
+    d.  A standardized test score, used to find the percentile of a 1300.
+
+    <details><summary>Show answer</summary>
+    **a.** binomial ($n=20$, $p=0.5$). **b.** normal. **c.** binomial ($n=50$, $p=0.03$). **d.** normal (z-score → percentile).
+    </details>
+
+2.  **Do the binomial conditions hold?** You draw 5 cards from a standard deck *without replacement* and count the aces. Is the count binomial? Why or why not?
+
+    <details><summary>Show answer</summary>
+    **No.** Without replacement, the probability of an ace **changes** from draw to draw and the trials are **not independent** — two of the binomial requirements fail. (With replacement, it would be binomial.)
+    </details>
+
+3.  **What raises power?** A team's study has only 60% power to detect the effect they care about. List three distinct changes that would raise the power, and one cost to watch for.
+
+    <details><summary>Show answer</summary>
+    Raise power by: **(1)** increasing the **sample size**, **(2)** reducing **variability** (better measurement/design), or **(3)** raising $\alpha$ (a more lenient threshold). Watch the cost: raising $\alpha$ **increases the Type I error rate**, so the usual lever is a larger $n$. (Detecting a larger true effect also gives more power, but the effect size isn't ours to choose.)
+    </details>
+
+4.  **Type I vs. Type II.** A drug trial sets $\alpha = 0.05$. In plain terms, what is the Type I error here, what is the Type II error, and which one does $\alpha$ control?
+
+    <details><summary>Show answer</summary>
+    **Type I:** concluding the drug works when it truly doesn't (false positive) — its rate is controlled by **$\alpha$** (here 0.05). **Type II:** concluding the drug doesn't work when it truly does (false negative) — its rate is $\beta$, reduced mainly by a **larger sample**. Power is $1-\beta$.
+    </details>
+
+5.  **Conditional probability.** 1% of a population has a disease. A test is positive in 90% of sick people and in 8% of healthy people. Is $P(\text{disease} \mid \text{positive})$ large or small, and why does intuition often get this wrong?
+
+    <details><summary>Show answer</summary>
+    It's **small** (roughly 10%): because the disease is rare, the many **false positives** from the 99% healthy population outnumber the true positives. Intuition conflates $P(\text{positive} \mid \text{disease}) = 0.90$ with $P(\text{disease} \mid \text{positive})$ — the **reversed** conditional — which is the base-rate fallacy.
+    </details>

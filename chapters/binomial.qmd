@@ -1,0 +1,301 @@
+---
+title: "Binomial Distribution"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+
+::: {.chapterintro}
+How many of 400 randomly sampled adults are left-handed? How many of 20 randomly selected parts from an assembly line are defective? These "count of successes" questions arise constantly in statistics and are answered by the **binomial distribution**. In this chapter, we identify the four conditions that define a binomial setting, develop the formula for computing binomial probabilities, derive the mean and standard deviation, and show how the normal distribution can approximate binomial probabilities when the sample size is large.
+:::
+
+
+## The binomial setting {#sec-binomial-conditions}
+
+The binomial distribution describes the number of successes in a fixed number of independent trials, where each trial has only two possible outcomes.
+
+::: {.important}
+**The four binomial conditions.** A random variable $X$ follows a binomial distribution if:
+
+1. **Fixed number of trials**: The number of trials $n$ is fixed in advance.
+2. **Binary outcomes**: Each trial results in one of two outcomes, which we label "success" and "failure."
+3. **Independence**: The trials are independent — the outcome of one trial does not affect the outcome of any other trial.
+4. **Constant probability**: The probability of success $p$ is the same for every trial.
+
+If all four conditions are met, we say $X$ follows a binomial distribution with parameters $n$ and $p$, written $X \sim \text{Binomial}(n, p)$.
+:::
+
+::: {.workedexample}
+A health insurance company found that 70% of the people they insure stay below their deductible in any given year. Consider a random sample of four individuals. Does the number who stay below their deductible follow a binomial distribution?
+
+1. **Fixed $n$**: Yes, $n = 4$ individuals.
+2. **Binary**: Yes, each person either stays below the deductible (success) or exceeds it (failure).
+3. **Independence**: Yes, because the sample is random from a large population.
+4. **Constant $p$**: Yes, each person has a 70% chance of staying below the deductible.
+
+All four conditions are met, so $X \sim \text{Binomial}(n = 4, p = 0.70)$.
+:::
+
+::: {.caution}
+The labels "success" and "failure" are just conventions — a "success" does not have to be a good outcome. If we are counting defective parts, a "success" might be finding a defective part. The mathematical framework does not depend on which outcome we call a success, as long as we are consistent.
+:::
+
+::: {.guidedpractice}
+The probability that a random smoker will develop a severe lung condition is about 0.3. If you have 4 friends who smoke, are the conditions for the binomial model satisfied?
+
+<details>
+<summary>Show answer</summary>
+This is questionable. If the friends know each other, the independence condition may be violated. Acquaintances may have similar smoking habits or might influence each other. If, however, we could treat them as a random sample of smokers, the conditions would be approximately met.
+</details>
+:::
+
+### The Bernoulli distribution: a single trial
+
+A single trial with two outcomes is called a **Bernoulli trial**, and the resulting random variable is a **Bernoulli random variable**.
+
+::: {.definition}
+If $X$ is a random variable that takes value 1 with probability $p$ (success) and 0 with probability $1 - p$ (failure), then $X$ is a **Bernoulli random variable** with:
+
+$$\mu = p \qquad \sigma = \sqrt{p(1-p)}$$
+:::
+
+A binomial random variable is simply the sum of $n$ independent Bernoulli random variables, each with the same probability $p$.
+
+## Computing binomial probabilities {#sec-binomial-formula}
+
+### Building the formula
+
+Let's find the probability that exactly 1 of 4 randomly selected insured individuals exceeds the deductible (so 3 "successes" — staying below — and 1 "failure").
+
+Consider the specific scenario where person A exceeds and persons B, C, D do not:
+
+$$P(A = \text{exceed}, B = \text{not}, C = \text{not}, D = \text{not}) = (0.3)(0.7)(0.7)(0.7) = (0.7)^3(0.3)^1 = 0.103$$
+
+But there are four such scenarios — any one of the four people could be the one who exceeds. Each scenario has the same probability. So:
+
+$$P(\text{exactly 3 successes in 4 trials}) = 4 \times (0.7)^3(0.3)^1 = 0.412$$
+
+The general pattern is:
+
+$$P(X = k) = [\text{number of arrangements}] \times [\text{probability of one arrangement}]$$
+
+### The binomial coefficient
+
+The number of ways to arrange $k$ successes in $n$ trials is given by the **binomial coefficient**:
+
+$$\binom{n}{k} = \frac{n!}{k!(n-k)!}$$
+
+read as "$n$ choose $k$," where $n!$ (read "$n$ factorial") means $n \times (n-1) \times \cdots \times 2 \times 1$, with the special case $0! = 1$.
+
+For our example: $\binom{4}{3} = \frac{4!}{3! \cdot 1!} = \frac{24}{6 \times 1} = 4$, confirming the four arrangements we identified.
+
+### The binomial probability formula
+
+::: {.important}
+**Binomial probability formula.** If $X \sim \text{Binomial}(n, p)$, the probability of exactly $k$ successes is:
+
+$$P(X = k) = \binom{n}{k} p^k (1-p)^{n-k} = \frac{n!}{k!(n-k)!} \, p^k (1-p)^{n-k}$$
+
+for $k = 0, 1, 2, \ldots, n$.
+:::
+
+::: {.workedexample}
+What is the probability that 5 of 8 randomly selected insured individuals will not exceed the deductible?
+
+With $n = 8$, $k = 5$, and $p = 0.70$:
+
+$$P(X = 5) = \binom{8}{5}(0.70)^5(0.30)^3$$
+
+Computing the binomial coefficient:
+
+$$\binom{8}{5} = \frac{8!}{5! \cdot 3!} = \frac{8 \times 7 \times 6}{3 \times 2 \times 1} = 56$$
+
+And the probability of a single arrangement: $(0.70)^5(0.30)^3 \approx 0.00454$.
+
+$$P(X = 5) = 56 \times 0.00454 \approx 0.254$$
+:::
+
+::: {.guidedpractice}
+Suppose 4 friends who smoke can be treated as a random sample, with $P(\text{severe lung condition}) = 0.3$ for each. (a) What is the probability that none develop a severe lung condition? (b) What is the probability that exactly one does? (c) What is the probability that at most one does?
+
+<details>
+<summary>Show answer</summary>
+(a) $P(X = 0) = \binom{4}{0}(0.3)^0(0.7)^4 = 1 \times 1 \times 0.2401 = 0.2401$. (b) $P(X = 1) = \binom{4}{1}(0.3)^1(0.7)^3 = 4 \times 0.3 \times 0.343 = 0.4116$. (c) $P(X \leq 1) = P(X = 0) + P(X = 1) = 0.2401 + 0.4116 = 0.6517$.
+</details>
+:::
+
+::: {.guidedpractice}
+What is the probability that at least 2 of the 4 smoking friends will develop a severe lung condition?
+
+<details>
+<summary>Show answer</summary>
+Using the complement: $P(X \geq 2) = 1 - P(X \leq 1) = 1 - 0.6517 = 0.3483$.
+</details>
+:::
+
+::: {.original}
+### Computing binomial probabilities in practice
+
+For small values of $n$ and $k$, the binomial formula can be computed by hand. For larger problems, use technology:
+
+- **StatLens**: The [Binomial Distribution calculator](https://learnlens.org/statlens/distribution/binomial/){target="_blank"} computes probabilities and visualizes the distribution.
+- **Calculator**: Most graphing calculators have a `binompdf` and `binomcdf` function.
+- **Software**: Any statistical software can compute binomial probabilities. Look for functions named something like "binomial CDF" or "binomial probability."
+
+For example, to find $P(X \leq 42)$ when $X \sim \text{Binomial}(400, 0.15)$, computing 43 individual probabilities by hand would be impractical. Using the StatLens Binomial calculator with $n = 400$, $p = 0.15$, and $P(X \leq 42)$, we get approximately 0.0054.
+:::
+
+## Mean and standard deviation {#sec-binomial-mean-sd}
+
+::: {.important}
+**Mean and standard deviation of a binomial distribution.** If $X \sim \text{Binomial}(n, p)$, then:
+
+$$\mu = np \qquad \sigma = \sqrt{np(1-p)}$$
+:::
+
+These formulas follow from the fact that a binomial random variable is the sum of $n$ independent Bernoulli random variables, each with mean $p$ and variance $p(1-p)$.
+
+::: {.workedexample}
+If 40 individuals are randomly sampled and each has a 70% chance of staying below their insurance deductible, how many would you expect to stay below? What is the standard deviation?
+
+$$\mu = np = 40 \times 0.70 = 28$$
+
+$$\sigma = \sqrt{np(1-p)} = \sqrt{40 \times 0.70 \times 0.30} = \sqrt{8.4} \approx 2.9$$
+
+We expect about 28 individuals to stay below their deductible, give or take about 2.9. Using the rough "95% within 2 standard deviations" guideline, we would expect between about 22 and 34 individuals in most samples.
+:::
+
+::: {.guidedpractice}
+Suppose 7 friends who smoke can be treated as a random sample, with $p = 0.3$ for developing a severe lung condition. How many would you expect to develop the condition? What is the standard deviation?
+
+<details>
+<summary>Show answer</summary>
+$\mu = np = 7 \times 0.3 = 2.1$. $\sigma = \sqrt{7 \times 0.3 \times 0.7} = \sqrt{1.47} \approx 1.21$. You would expect about 2 of the 7 friends to develop a severe lung condition.
+</details>
+:::
+
+::: {.original}
+### Simulation perspective: Does the formula match reality?
+
+We can verify the binomial formulas using simulation. Consider $X \sim \text{Binomial}(n = 20, p = 0.3)$:
+
+- **Theory**: $\mu = 20 \times 0.3 = 6$ and $\sigma = \sqrt{20 \times 0.3 \times 0.7} = \sqrt{4.2} \approx 2.05$
+- **Simulation**: Generate 10,000 binomial random samples, each with $n = 20$ and $p = 0.3$. The sample mean of the 10,000 counts will be very close to 6, and the sample standard deviation will be very close to 2.05.
+
+This is another instance of the Law of Large Numbers: the simulated distribution converges to the theoretical distribution as we increase the number of simulations.
+
+::: {.statlens}
+**See it in action.** Open the [Binomial Distribution Explorer]({{< var tool-url >}}/distribution/binomial/){target="_blank"}, set $n = 20$ and $p = 0.3$, then simulate 1,000 experiments and watch the histogram converge to the theoretical distribution.
+:::
+:::
+
+## Normal approximation to the binomial {#sec-normal-approx-binomial}
+
+The binomial formula can be cumbersome for large $n$, especially when computing cumulative probabilities like $P(X \leq 42)$ for $n = 400$. Fortunately, when $n$ is large enough, the binomial distribution is well approximated by the normal distribution.
+
+::: {.workedexample}
+Approximately 15% of the US population smokes cigarettes. A local government surveyed 400 randomly selected individuals and found only 42 smokers. If the true proportion is 0.15, what is the probability of observing 42 or fewer smokers?
+
+The exact answer requires summing 43 binomial probabilities, which gives $P(X \leq 42) = 0.0054$.
+:::
+
+As the sample size increases, the binomial distribution becomes increasingly bell-shaped and symmetric. This is illustrated in the figure below.
+
+```{r}
+#| label: fig-binom-normal-approx
+#| fig-cap: "Binomial distributions with p = 0.10 and sample sizes n = 10, 30, 100, and 300. As n increases, the distribution approaches a normal curve. [↗ Try this live](https://learnlens.org/statlens/distribution/binomial/) — drive $n$ and $p$ in the Binomial PMF and watch the shape settle."
+#| fig-alt: "Four histograms of binomial distributions with p = 0.10. For n = 10, the distribution is right-skewed. For n = 30, it is slightly skewed. For n = 100 and n = 300, the distribution is approximately symmetric and bell-shaped."
+
+library(ggplot2)
+
+p <- 0.10
+ns <- c(10, 30, 100, 300)
+
+par(mfrow = c(2, 2), mar = c(4, 4, 2.5, 1))
+for (n in ns) {
+  k <- 0:n
+  probs <- dbinom(k, n, p)
+  # Only plot range with meaningful probability
+  keep <- probs > 0.0005
+  k_plot <- k[keep]
+  p_plot <- probs[keep]
+
+  barplot(p_plot, names.arg = k_plot, col = COL_BLUE, border = "white",
+          main = paste0("n = ", n, ", p = 0.10"),
+          xlab = "Number of successes", ylab = "Probability",
+          cex.main = 1.2, cex.lab = 1.0)
+
+  # Overlay normal curve
+  mu <- n * p
+  sigma <- sqrt(n * p * (1 - p))
+  x_seq <- seq(min(k_plot) - 0.5, max(k_plot) + 0.5, length.out = 200)
+  lines(x_seq - min(k_plot) + 0.7,
+        dnorm(x_seq, mu, sigma),
+        col = COL_RED, lwd = 2)
+}
+```
+
+::: {.important}
+**Normal approximation to the binomial.** The binomial distribution with parameters $n$ and $p$ is approximately normal when both $np \geq 10$ and $n(1-p) \geq 10$. The approximating normal distribution has:
+
+$$\mu = np \qquad \sigma = \sqrt{np(1-p)}$$
+:::
+
+::: {.workedexample}
+Use the normal approximation to estimate $P(X \leq 42)$ for $X \sim \text{Binomial}(400, 0.15)$.
+
+First, check the conditions: $np = 400 \times 0.15 = 60 \geq 10$ and $n(1-p) = 400 \times 0.85 = 340 \geq 10$. The normal approximation is appropriate.
+
+The approximating distribution is $N(\mu = 60, \sigma = 7.14)$, where $\sigma = \sqrt{400 \times 0.15 \times 0.85} = 7.14$.
+
+Compute the Z-score:
+
+$$Z = \frac{42 - 60}{7.14} = \frac{-18}{7.14} = -2.52$$
+
+Using the standard normal distribution: $P(Z \leq -2.52) = 0.0059$.
+
+This is very close to the exact binomial probability of 0.0054.
+:::
+
+::: {.guidedpractice}
+A coin is flipped 100 times. Use the normal approximation to find the probability of getting 60 or more heads.
+
+<details>
+<summary>Show answer</summary>
+Check conditions: $np = 100 \times 0.5 = 50 \geq 10$ and $n(1-p) = 50 \geq 10$. The approximation is appropriate. $\mu = 50$, $\sigma = \sqrt{100 \times 0.5 \times 0.5} = 5$. $Z = (60 - 50)/5 = 2$. $P(Z \geq 2) = 1 - 0.9772 = 0.0228$. There is about a 2.3% chance of getting 60 or more heads in 100 flips of a fair coin.
+</details>
+:::
+
+::: {.original}
+### Connecting to inference
+
+The normal approximation to the binomial is not just a computational shortcut — it is the theoretical basis for the inference methods we developed in Parts II and III. When we studied the sampling distribution of the sample proportion $\hat{p}$ in the sampling distributions chapter, we were implicitly using the fact that the count of successes $X$ in a sample of size $n$ follows a binomial distribution, and that this binomial distribution is approximately normal for large $n$.
+
+Specifically, if $X \sim \text{Binomial}(n, p)$, then $\hat{p} = X/n$, and the normal approximation tells us:
+
+$$\hat{p} \approx N\left(p, \sqrt{\frac{p(1-p)}{n}}\right)$$
+
+This is exactly the result we used when constructing confidence intervals and performing hypothesis tests for proportions in the inference for proportions chapter. The theory developed in this chapter *explains* why those methods work.
+:::
+
+## Chapter review {#sec-binomial-review}
+
+### Summary
+
+- The **binomial distribution** counts the number of successes in $n$ independent trials, each with the same probability of success $p$.
+- **Four conditions**: fixed $n$, binary outcomes, independence, constant $p$.
+- **Binomial probability formula**: $P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$
+- **Mean and standard deviation**: $\mu = np$ and $\sigma = \sqrt{np(1-p)}$.
+- When $np \geq 10$ and $n(1-p) \geq 10$, the binomial distribution is well approximated by the normal distribution $N(np, \sqrt{np(1-p)})$.
+- The normal approximation to the binomial provides the theoretical justification for the inference methods on proportions from the inference for proportions chapter.
+
+## Exercises {.exercises}
+
+{{< include ../exercises/_binomial-exercises.qmd >}}
+
+{{< include ../exercises/_binomial-statlens-exercises.qmd >}}

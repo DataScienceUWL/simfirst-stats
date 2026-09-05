@@ -1,0 +1,414 @@
+---
+title: "Hypothesis Tests for Means"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+::: {.chapterintro}
+In the randomization tests chapter, we developed the logic of hypothesis testing using simulation: shuffle the data under the null hypothesis, build a null distribution, and measure how extreme the observed statistic is. In the confidence intervals for means chapter, we introduced the $t$-distribution as a mathematical model for the sampling distribution of means. Now we bring these ideas together. In this chapter, we use the $t$-distribution to conduct hypothesis tests for a single mean, the difference between two independent means, and the mean of paired differences. Along the way, we will see that the $t$-test and simulation-based tests generally agree when conditions are met, and we will discuss what to do when they disagree.
+:::
+
+## The $t$-test framework {#sec-t-test-framework}
+
+::: {.original}
+Every hypothesis test follows the same four-step structure --- the same one we used for proportions --- whether we use simulation or a mathematical model:
+
+1. **State hypotheses.** Write $H_0$ (null hypothesis) and $H_A$ (alternative hypothesis) in both words and symbols.
+2. **Check conditions.** Verify that the mathematical model is appropriate.
+3. **Compute the test statistic and p-value.** Calculate how far the observed data are from what $H_0$ predicts, and determine how unusual that distance is.
+4. **Draw a conclusion.** Compare the p-value to the discernibility level $\alpha$ and state the conclusion in context.
+
+For means, the test statistic is a **$T$ score** -- the standardized distance from the observed sample mean to the hypothesized value, measured in units of standard errors.
+:::
+
+::: {.statlens}
+**See it in action.** Guided walkthroughs for each $t$-test: [one-sample]({{< var tool-url >}}/inference/one-mean/?activity=one-mean-t.json){target="_blank"} · [two-sample]({{< var tool-url >}}/inference/two-means/?activity=two-mean-t.json){target="_blank"} · [paired]({{< var tool-url >}}/inference/paired/?activity=paired-t.json){target="_blank"}. Each gates you through framing → conditions → test → interpretation. Or open the corresponding [analytical CI + test tool]({{< var tool-url >}}/inference/one-mean/){target="_blank"} directly on your own data.
+:::
+
+## One-sample $t$-test {#sec-one-sample-t-test}
+
+### Setup and hypotheses
+
+The one-sample $t$-test is used when we have a single sample of quantitative data and want to test a claim about the population mean $\mu$.
+
+::: {.important}
+**The test statistic for a single mean is a $T$.**
+
+$$T = \frac{\bar{x} - \mu_0}{s / \sqrt{n}}$$
+
+where $\bar{x}$ is the sample mean, $\mu_0$ is the hypothesized value from $H_0$, $s$ is the sample standard deviation, and $n$ is the sample size.
+
+When the null hypothesis is true and the conditions are met, $T$ follows a $t$-distribution with $df = n - 1$.
+
+**Conditions:**
+
+- **Independent observations** (e.g., random sample).
+- **Normality / sample size:** The population distribution should be approximately normal, or $n$ should be large enough ($n \geq 30$). Check for strong skewness or extreme outliers.
+:::
+
+### Worked example: Cherry Blossom race times
+
+::: {.workedexample}
+The average finishing time for all runners in the Cherry Blossom 10-mile race in 2006 was $\mu = 93.29$ minutes. A random sample of 100 runners from a more recent year had a mean finishing time of $\bar{x} = 97.32$ minutes with $s = 16.98$ minutes. Is there evidence that the average finishing time has changed?
+
+---
+
+**Step 1: State hypotheses.**
+
+- $H_0$: $\mu = 93.29$ (the average finishing time has not changed)
+- $H_A$: $\mu \neq 93.29$ (the average finishing time has changed)
+
+This is a two-sided test because we are looking for a change in either direction.
+
+**Step 2: Check conditions.**
+
+- *Independence.* The sample is a random sample of runners, so observations are independent.
+- *Sample size.* With $n = 100 \geq 30$, the CLT guarantees the sampling distribution of $\bar{x}$ is approximately normal, even if the population distribution of finishing times is skewed.
+
+**Step 3: Compute the test statistic and p-value.**
+
+$$SE = \frac{s}{\sqrt{n}} = \frac{16.98}{\sqrt{100}} = 1.698$$
+
+$$T = \frac{\bar{x} - \mu_0}{SE} = \frac{97.32 - 93.29}{1.698} = \frac{4.03}{1.698} = 2.37$$
+
+With $df = 100 - 1 = 99$, we find the area to the right of $T = 2.37$ on the $t$-distribution: approximately 0.0099. Since this is a two-sided test, the p-value is $2 \times 0.0099 = 0.0198$.
+
+```{r}
+#| label: fig-t-two-tailed-df99
+#| fig-cap: "A t-distribution with df = 99 showing the two-sided p-value. The shaded areas in both tails represent the probability of observing a test statistic at least as extreme as 2.37 in either direction. [↗ Try this live](https://learnlens.org/statlens/conceptual/t-distribution/) — drag the cutlines to see the two-tail p-value change with $t$."
+#| fig-alt: "A t-distribution curve with 99 degrees of freedom. Both tails are shaded beyond T equals negative 2.37 and T equals positive 2.37. The combined shaded area represents the two-sided p-value."
+
+library(ggplot2)
+
+x <- seq(-4, 4, length.out = 500)
+y <- dt(x, df = 99)
+base_df <- data.frame(x = x, y = y)
+left_tail <- data.frame(x = x[x <= -2.37], y = dt(x[x <= -2.37], df = 99))
+right_tail <- data.frame(x = x[x >= 2.37], y = dt(x[x >= 2.37], df = 99))
+
+ggplot(base_df, aes(x = x, y = y)) +
+  geom_area(data = left_tail, aes(x = x, y = y), fill = COL_PINK, alpha = 0.5) +
+  geom_area(data = right_tail, aes(x = x, y = y), fill = COL_PINK, alpha = 0.5) +
+  geom_line(linewidth = 1, color = COL_GREEN) +
+  geom_vline(xintercept = c(-2.37, 2.37), linetype = "dashed", color = COL_RED) +
+  annotate("text", x = -2.37, y = -0.015, label = "T = -2.37", size = 4, color = COL_RED) +
+  annotate("text", x = 2.37, y = -0.015, label = "T = 2.37", size = 4, color = COL_RED) +
+  labs(x = "T", y = NULL) +
+  theme_minimal(base_size = 14)
+```
+
+**Step 4: Conclusion.** The p-value of 0.0198 is less than $\alpha = 0.05$, so we reject $H_0$. The data provide statistically discernible evidence that the average finishing time has changed from the 2006 average of 93.29 minutes. Based on the sample, runners appear to be finishing more slowly on average.
+
+[Try this in StatLens →]({{< var tool-url >}}/inference/one-mean/?dataset=cherry){.open-in-statlens target='_blank' aria-label='Run the one-sample t-test on the Cherry Blossom data in StatLens'}
+:::
+
+::: {.guidedpractice}
+A nutrition study claims that the average American adult consumes 2,000 mg of sodium per day. A random sample of 45 adults shows $\bar{x} = 3,120$ mg and $s = 1,100$ mg. Test whether the data provide evidence that the true average sodium intake differs from 2,000 mg. Use $\alpha = 0.05$.
+
+<details>
+<summary>Show answer</summary>
+Hypotheses: $H_0: \mu = 2000$, $H_A: \mu \neq 2000$. Conditions: random sample (independence), $n = 45 \geq 30$ (normality via CLT). Test statistic: $SE = 1100/\sqrt{45} = 163.9$, $T = (3120 - 2000)/163.9 = 6.83$. With $df = 44$, the two-tailed p-value is essentially 0 (far less than 0.05). We reject $H_0$. There is very strong evidence that the average sodium intake is different from (and appears much higher than) 2,000 mg per day.
+</details>
+:::
+
+## Two-sample $t$-test {#sec-two-sample-t-test}
+
+### Setup and hypotheses
+
+The two-sample $t$-test compares the means of two independent groups. The parameter of interest is $\mu_1 - \mu_2$, and the null hypothesis typically claims no difference.
+
+::: {.important}
+**The test statistic for comparing two independent means is a $T$.**
+
+$$T = \frac{(\bar{x}_1 - \bar{x}_2) - 0}{\sqrt{s_1^2/n_1 + s_2^2/n_2}}$$
+
+When the null hypothesis is true and conditions are met, $T$ follows a $t$-distribution with $df = \min(n_1 - 1, n_2 - 1)$ (conservative approximation; software computes the exact $df$).
+
+**Conditions:**
+
+- **Independence (extended).** Observations are independent within and between the two groups.
+- **Normality / sample size.** Each group should be approximately normal or have a large enough sample size. Check each group separately for strong skewness or extreme outliers.
+:::
+
+### Worked example: Birth weights and smoking
+
+::: {.workedexample}
+Is there evidence that newborns of mothers who smoke during pregnancy have a different average birth weight than newborns of non-smoking mothers? Data from a random sample of 1,000 US births in 2014:
+
+| Group | $n$ | Mean (lbs) | SD (lbs) |
+|-------|-----|-----------|---------|
+| Nonsmoker | 867 | 7.27 | 1.23 |
+| Smoker | 114 | 6.68 | 1.60 |
+
+: Summary statistics for birth weights by smoking status. {.striped}
+
+---
+
+**Step 1: State hypotheses.**
+
+- $H_0$: $\mu_n - \mu_s = 0$ (no difference in average birth weight)
+- $H_A$: $\mu_n - \mu_s \neq 0$ (there is a difference in average birth weight)
+
+**Step 2: Check conditions.**
+
+- *Independence.* The data come from a simple random sample, so observations are independent within and between groups.
+- *Normality.* Both groups have large sample sizes ($n_n = 867$ and $n_s = 114$), both well above 30. Histograms of the data show no extreme outliers. Conditions are met.
+
+**Step 3: Compute the test statistic and p-value.**
+
+$$\bar{x}_n - \bar{x}_s = 7.27 - 6.68 = 0.59$$
+
+$$SE = \sqrt{\frac{1.23^2}{867} + \frac{1.60^2}{114}} = \sqrt{\frac{1.5129}{867} + \frac{2.56}{114}} = \sqrt{0.001745 + 0.02246} = \sqrt{0.02420} = 0.156$$
+
+$$T = \frac{0.59 - 0}{0.156} = 3.78$$
+
+Using the conservative $df = \min(867 - 1, 114 - 1) = 113$, the one-tail area for $T = 3.78$ is approximately 0.00012. The two-tailed p-value is $2 \times 0.00012 = 0.00024$.
+
+**Step 4: Conclusion.** With a p-value of 0.00024, which is far less than $\alpha = 0.05$, we reject $H_0$. The data provide strong evidence that there is a difference in average birth weight between babies born to smoking and non-smoking mothers. Specifically, babies born to non-smoking mothers weigh about 0.59 lbs more on average.
+
+[Try this in StatLens →]({{< var tool-url >}}/inference/two-means/?dataset=smoking){.open-in-statlens target='_blank' aria-label='Run the two-sample t-test on the smoking birth-weight data in StatLens'}
+:::
+
+### Worked example: Exam versions
+
+::: {.workedexample}
+An instructor created two versions of an exam and randomly distributed them. Summary statistics:
+
+| Version | $n$ | Mean | SD | Min | Max |
+|---------|-----|------|----|-----|-----|
+| A | 58 | 75.1 | 13.9 | 44 | 100 |
+| B | 55 | 72.0 | 13.8 | 38 | 100 |
+
+: Summary statistics for exam versions. {.striped}
+
+Test whether there is convincing evidence that one version is more difficult. Use $\alpha = 0.01$.
+
+---
+
+**Step 1: State hypotheses.**
+
+- $H_0$: $\mu_A - \mu_B = 0$ (the exams are equally difficult)
+- $H_A$: $\mu_A - \mu_B \neq 0$ (one exam is more difficult)
+
+**Step 2: Check conditions.**
+
+- *Independence.* Exams were randomly assigned, so independence is satisfied.
+- *Normality.* Both groups have $n > 30$ and the summary statistics suggest roughly symmetric distributions. Conditions are met.
+
+**Step 3: Compute the test statistic and p-value.**
+
+$$\bar{x}_A - \bar{x}_B = 75.1 - 72.0 = 3.1$$
+
+$$SE = \sqrt{\frac{13.9^2}{58} + \frac{13.8^2}{55}} = \sqrt{\frac{193.21}{58} + \frac{190.44}{55}} = \sqrt{3.331 + 3.463} = \sqrt{6.794} = 2.607$$
+
+$$T = \frac{3.1}{2.607} = 1.19$$
+
+Using $df = \min(57, 54) = 54$, the one-tail area for $T = 1.19$ is about 0.12. The two-tailed p-value is approximately 0.24.
+
+**Step 4: Conclusion.** The p-value of 0.24 is much larger than $\alpha = 0.01$, so we fail to reject $H_0$. The data do not provide convincing evidence that one exam version is more difficult than the other.
+:::
+
+::: {.guidedpractice}
+Does the conclusion above mean that the two exams are equally difficult?
+
+<details>
+<summary>Show answer</summary>
+No. Failing to reject $H_0$ does not prove that $H_0$ is true. The data are consistent with the exams being equally difficult, but they are also consistent with exam A being about 3.1 points easier. The test simply did not find strong enough evidence to distinguish these possibilities.
+</details>
+:::
+
+## Paired $t$-test {#sec-paired-t-test}
+
+### Setup and hypotheses
+
+When data are paired (see the confidence intervals for means chapter for what makes data "paired"), we compute the difference within each pair and test whether the mean difference is zero.
+
+::: {.important}
+**The test statistic for a paired mean difference is a $T$.**
+
+$$T = \frac{\bar{x}_{diff} - 0}{s_{diff} / \sqrt{n_{diff}}}$$
+
+When the null hypothesis is true and conditions are met, $T$ follows a $t$-distribution with $df = n_{diff} - 1$.
+
+**Conditions:**
+
+- **Independently sampled pairs.**
+- **Normality of differences.** The differences should be approximately normal, or $n_{diff}$ should be large. Check for extreme outliers in the differences.
+:::
+
+### Worked example: Textbook prices
+
+::: {.workedexample}
+Is there evidence that UCLA Bookstore prices differ from Amazon prices, on average? Summary statistics for the 68 price differences (UCLA $-$ Amazon):
+
+| $n_{diff}$ | $\bar{x}_{diff}$ | $s_{diff}$ |
+|---|---|---|
+| 68 | \$3.58 | \$13.42 |
+
+: Summary statistics for the 68 price differences. {.striped}
+
+---
+
+**Step 1: State hypotheses.**
+
+- $H_0$: $\mu_{diff} = 0$ (no difference in average textbook price)
+- $H_A$: $\mu_{diff} \neq 0$ (there is a difference in average price)
+
+**Step 2: Check conditions.**
+
+- *Independence.* The textbooks were a simple random sample of courses; pairs are independent.
+- *Normality.* With $n_{diff} = 68$, the CLT applies. While some outliers exist (a few textbooks with large price differences), none are extreme enough to invalidate the approach given the large sample size.
+
+**Step 3: Compute the test statistic and p-value.**
+
+$$SE = \frac{s_{diff}}{\sqrt{n_{diff}}} = \frac{13.42}{\sqrt{68}} = 1.628$$
+
+$$T = \frac{3.58 - 0}{1.628} = 2.20$$
+
+With $df = 68 - 1 = 67$, the one-tail area for $T = 2.20$ is approximately 0.0156. The two-tailed p-value is $2 \times 0.0156 = 0.0312$.
+
+```{r}
+#| label: fig-t-two-tailed-df67
+#| fig-cap: "A t-distribution with df = 67 showing the two-sided p-value. The shaded areas in both tails represent the p-value of 0.0312. [↗ Try this live](https://learnlens.org/statlens/conceptual/t-distribution/) — drag the cutlines to reproduce this p-value with different df."
+#| fig-alt: "A t-distribution curve with 67 degrees of freedom. Both tails beyond T equals negative 2.20 and T equals positive 2.20 are shaded. The combined shaded area represents the two-sided p-value of 0.0312."
+
+x <- seq(-4, 4, length.out = 500)
+y <- dt(x, df = 67)
+base_df <- data.frame(x = x, y = y)
+left_tail <- data.frame(x = x[x <= -2.20], y = dt(x[x <= -2.20], df = 67))
+right_tail <- data.frame(x = x[x >= 2.20], y = dt(x[x >= 2.20], df = 67))
+
+ggplot(base_df, aes(x = x, y = y)) +
+  geom_area(data = left_tail, aes(x = x, y = y), fill = COL_PINK, alpha = 0.5) +
+  geom_area(data = right_tail, aes(x = x, y = y), fill = COL_PINK, alpha = 0.5) +
+  geom_line(linewidth = 1, color = COL_GREEN) +
+  geom_vline(xintercept = c(-2.20, 2.20), linetype = "dashed", color = COL_RED) +
+  annotate("text", x = -2.20, y = -0.015, label = "T = -2.20", size = 4, color = COL_RED) +
+  annotate("text", x = 2.20, y = -0.015, label = "T = 2.20", size = 4, color = COL_RED) +
+  annotate("text", x = 3.2, y = 0.05, label = "p-value = 0.0312", size = 4, fontface = "bold", color = COL_PINK) +
+  labs(x = "T", y = NULL) +
+  theme_minimal(base_size = 14)
+```
+
+**Step 4: Conclusion.** The p-value of 0.0312 is less than $\alpha = 0.05$, so we reject $H_0$. The data provide evidence that UCLA Bookstore prices are different from Amazon prices on average. Based on the positive mean difference, the UCLA Bookstore tends to charge more.
+
+[Try this in StatLens →]({{< var tool-url >}}/inference/paired/?dataset=textbooks){.open-in-statlens target='_blank' aria-label='Run the paired t-test on the textbooks data in StatLens'}
+:::
+
+::: {.guidedpractice}
+Researchers measured tire tread (in cm) for 25 cars, each equipped with one Smooth Turn and one Quick Spin tire. The mean tread difference (Smooth Turn $-$ Quick Spin) was $\bar{x}_{diff} = 0.002$ cm with $s_{diff} = 0.004$ cm. Test whether there is a difference in average tread wear between the two brands. Use $\alpha = 0.05$.
+
+<details>
+<summary>Show answer</summary>
+Hypotheses: $H_0: \mu_{diff} = 0$, $H_A: \mu_{diff} \neq 0$. Conditions: cars are independent, $n = 25$ and no extreme outliers reported. $SE = 0.004/\sqrt{25} = 0.0008$. $T = 0.002/0.0008 = 2.50$. With $df = 24$, the two-tailed p-value is approximately 0.020. Since $0.020 < 0.05$, we reject $H_0$ and conclude there is evidence of a difference in tread wear between the two tire brands.
+</details>
+:::
+
+## Connecting simulation-based and $t$-based tests {#sec-sim-vs-t}
+
+::: {.original}
+An important theme throughout this course is that simulation-based methods and mathematical models are complementary approaches to the same questions. When conditions are met, they should give similar answers. Here we compare the two approaches explicitly.
+
+### When they agree
+
+For the birth weights example:
+
+- **Randomization test:** Shuffle smoking/nonsmoking labels 10,000 times, compute the difference in means each time, and find the proportion of shuffled differences as extreme as 0.59 lbs. This gives a p-value around 0.001.
+- **$t$-test:** The p-value was 0.00024.
+
+Both approaches lead to the same conclusion (reject $H_0$) by a wide margin. This agreement is typical when sample sizes are moderate to large and conditions are met.
+
+### When they might disagree
+
+Disagreement arises primarily in two situations:
+
+1. **Small samples from skewed populations.** The $t$-test assumes the sampling distribution is symmetric, which may not hold for small samples from skewed distributions. A simulation-based approach can capture the asymmetry.
+2. **Extreme outliers.** The $t$-test relies on $\bar{x}$ and $s$, both of which are sensitive to outliers. A randomization test, which works with ranks and permutations, can be more robust.
+
+### Practical guidance
+
+- **When conditions are clearly met** (large samples, no extreme outliers), use the $t$-test -- it is simpler and faster.
+- **When conditions are borderline** (moderate samples, mild skewness), consider running both approaches. If they agree, report the $t$-test. If they disagree, investigate why and consider the simulation-based result more trustworthy.
+- **When conditions are clearly violated** (small samples, strong skewness, extreme outliers), prefer the simulation-based approach.
+:::
+
+## Practical vs. statistical discernibility {#sec-practical-significance}
+
+::: {.important}
+**Statistical discernibility $\neq$ practical importance.**
+
+A result is **statistically discernible** if the p-value is below the chosen discernibility level $\alpha$. But statistical discernibility only means the observed effect is unlikely to be due to chance alone. It says nothing about whether the effect is *large enough to matter in practice*.
+
+With very large samples, even trivially small differences can be statistically discernible. With very small samples, even large differences may not be statistically discernible (due to low power).
+:::
+
+::: {.workedexample}
+A large study of 50,000 students found that students who eat breakfast score an average of 0.5 points higher on a 100-point exam than students who skip breakfast ($p < 0.001$). Is this result practically important?
+
+---
+
+The result is statistically discernible (the p-value is very small), but the effect size of 0.5 points on a 100-point exam is tiny. A teacher or student would likely not consider half a point to be a meaningful difference. This is an example where statistical discernibility does not imply practical importance.
+:::
+
+### Effect sizes
+
+::: {.original}
+To bridge the gap between statistical and practical importance, researchers often report **effect sizes** -- standardized measures of how large the observed effect is.
+
+::: {.definition}
+**Cohen's $d$** is a common measure of effect size for comparing two means. It expresses the difference in means as a multiple of the pooled standard deviation:
+
+$$d = \frac{\bar{x}_1 - \bar{x}_2}{s_p}$$
+
+where $s_p$ is the pooled standard deviation. General guidelines for interpreting $d$:
+
+| $|d|$ | Interpretation |
+|-------|---------------|
+| 0.2 | Small effect |
+| 0.5 | Medium effect |
+| 0.8 | Large effect |
+
+: Guidelines for interpreting Cohen's $d$. {.striped}
+:::
+
+These guidelines are rough benchmarks. What constitutes a "meaningful" effect depends on the context. In medicine, even a small effect size might be important if it concerns a life-threatening condition. In education, a medium effect might be required for a costly intervention to be worthwhile.
+:::
+
+::: {.guidedpractice}
+In the birth weights study, the difference was 0.59 lbs with a pooled standard deviation of approximately 1.30 lbs. Compute Cohen's $d$ and interpret it.
+
+<details>
+<summary>Show answer</summary>
+$d = 0.59 / 1.30 = 0.45$. This is between a small and medium effect. While the difference is statistically discernible, the practical impact is moderate -- about half a standard deviation in birth weight.
+</details>
+:::
+
+## Chapter review {#sec-hypothesis-tests-means-review}
+
+### Summary
+
+This chapter presented hypothesis tests for means using the $t$-distribution:
+
+- **One-sample $t$-test**: Tests whether a population mean $\mu$ equals a hypothesized value $\mu_0$. Test statistic: $T = \frac{\bar{x} - \mu_0}{s/\sqrt{n}}$ with $df = n - 1$.
+- **Two-sample $t$-test**: Tests whether two population means are equal. Test statistic: $T = \frac{(\bar{x}_1 - \bar{x}_2)}{\sqrt{s_1^2/n_1 + s_2^2/n_2}}$ with $df = \min(n_1 - 1, n_2 - 1)$.
+- **Paired $t$-test**: Tests whether the mean of paired differences equals zero. Compute differences first, then apply the one-sample $t$-test to the differences: $T = \frac{\bar{x}_{diff}}{s_{diff}/\sqrt{n_{diff}}}$ with $df = n_{diff} - 1$.
+- All three tests require **independence** and **approximate normality or large sample size**.
+- **Simulation-based and $t$-based tests** generally agree when conditions are met. When conditions are questionable, simulation is more reliable.
+- **Statistical discernibility** (small p-value) does not imply **practical importance** (large enough to matter). Effect sizes like **Cohen's $d$** help assess practical importance.
+
+### Key terms
+
+$T$ test statistic, one-sample $t$-test, two-sample $t$-test, paired $t$-test, degrees of freedom, p-value, discernibility level ($\alpha$), statistical discernibility, practical importance, effect size, Cohen's $d$.
+
+## Exercises {.exercises}
+
+Answers to odd-numbered exercises are provided in the [Exercise Solutions appendix](../appendices/exercise-solutions.qmd#sec-solutions-hypothesis-tests-means) at the back of the book.
+
+{{< include ../exercises/_hypothesis-tests-means-exercises.qmd >}}
+
+{{< include ../exercises/_hypothesis-tests-means-statlens-exercises.qmd >}}

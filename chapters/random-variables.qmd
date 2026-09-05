@@ -1,0 +1,270 @@
+---
+title: "Random Variables"
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("../_colors.R")
+```
+
+
+:::{.callout-note appearance="simple" icon=false}
+**Extended Content.** This chapter extends beyond UWL's core STAT 145 curriculum. It is included for completeness and for instructors who wish to cover additional topics. Content is in draft form.
+:::
+
+::: {.chapterintro}
+In the previous chapter, we developed rules for computing probabilities of events. Now we shift our focus to **random variables** — numerical summaries of random processes. A random variable assigns a number to each outcome of a random process, which allows us to apply mathematical tools for prediction and analysis. We distinguish between discrete and continuous random variables, introduce probability distributions, and build the foundation for the specific distributions (binomial and normal) that follow in later chapters.
+:::
+
+## Random variables {#sec-random-variables-defined}
+
+It is often useful to model a random process by assigning a number to each outcome. This numerical model is called a **random variable**.
+
+::: {.definition}
+A **random variable** is a numerical outcome of a random process. We typically denote random variables with capital letters such as $X$, $Y$, or $Z$, and their observed values with the corresponding lowercase letters $x$, $y$, or $z$.
+:::
+
+::: {.workedexample}
+Two books are assigned for a statistics class: a textbook (\$137) and a study guide (\$33). The university bookstore has determined that 20% of enrolled students buy neither book, 55% buy the textbook only, and 25% buy both books. If $X$ represents the amount a single student spends on books, then $X$ is a random variable with possible values \$0, \$137, and \$170.
+:::
+
+Random variables come in two types — discrete and continuous — and the distinction matters because they require different mathematical tools.
+
+## Discrete random variables {#sec-discrete-rvs}
+
+::: {.definition}
+A **discrete random variable** takes on a finite or countably infinite number of distinct values. These values can be listed (even if the list is infinitely long).
+:::
+
+Examples of discrete random variables:
+
+- The number showing when you roll a die: $X \in \{1, 2, 3, 4, 5, 6\}$
+- The number of heads in 10 coin flips: $X \in \{0, 1, 2, \ldots, 10\}$
+- The number of customers arriving at a store in an hour: $X \in \{0, 1, 2, 3, \ldots\}$
+
+::: {.original}
+### Why the distinction matters
+
+In Parts II and III, we worked extensively with sample statistics like the sample mean $\bar{x}$ and the sample proportion $\hat{p}$. These are actually *observed values* of random variables. The sampling distribution of $\bar{x}$ that we studied in the sampling distributions chapter is really the probability distribution of a random variable. Formalizing the language of random variables helps us state results more precisely and connect our earlier simulation-based reasoning to mathematical theory.
+:::
+
+### Probability mass functions
+
+The complete description of a discrete random variable is given by its **probability mass function** (PMF), which specifies the probability of each possible value.
+
+::: {.definition}
+The **probability mass function** (PMF) of a discrete random variable $X$ is the function $P(X = x)$ that gives the probability that $X$ takes on each possible value $x$. A valid PMF must satisfy:
+
+1. $P(X = x) \geq 0$ for every value $x$.
+2. The sum of all probabilities equals 1: $\sum_{\text{all } x} P(X = x) = 1$.
+:::
+
+The bookstore example from the previous section has the following PMF:
+
+| $x_i$ | \$0 | \$137 | \$170 |
+|:-------|:---:|:-----:|:-----:|
+| $P(X = x_i)$ | 0.20 | 0.55 | 0.25 |
+
+We can verify this is a valid PMF: all probabilities are between 0 and 1, and $0.20 + 0.55 + 0.25 = 1.00$.
+
+::: {.guidedpractice}
+Suppose a campus shuttle arrives every 10 minutes. The number of students who board the shuttle at a particular stop can be modeled with the following distribution:
+
+| Number of students ($x$) | 0 | 1 | 2 | 3 | 4 |
+|:--------------------------|:---:|:---:|:---:|:---:|:---:|
+| $P(X = x)$ | 0.10 | 0.25 | 0.35 | 0.20 | 0.10 |
+
+(a) Verify this is a valid probability distribution. (b) What is the probability that 2 or fewer students board? (c) What is the probability that more than 2 students board?
+
+<details>
+<summary>Show answer</summary>
+(a) All probabilities are between 0 and 1, and $0.10 + 0.25 + 0.35 + 0.20 + 0.10 = 1.00$. (b) $P(X \leq 2) = 0.10 + 0.25 + 0.35 = 0.70$. (c) $P(X > 2) = 1 - P(X \leq 2) = 1 - 0.70 = 0.30$, or equivalently $0.20 + 0.10 = 0.30$.
+</details>
+:::
+
+### Visualizing discrete distributions
+
+Discrete probability distributions are often displayed as bar plots where the height of each bar represents the probability of that outcome. When the outcomes are numerical, we place the bars at their numerical locations, creating a plot that resembles a histogram.
+
+```{r}
+#| label: fig-dice-sum-dist
+#| fig-cap: "Probability distribution for the sum of two dice displayed as a bar plot."
+#| fig-alt: "Bar plot showing the probability distribution for the sum of two dice. The horizontal axis shows sums from 2 to 12, and the bar heights form a symmetric triangular shape peaking at 7 with probability 6/36."
+
+library(ggplot2)
+
+dice_sum <- 2:12
+dice_prob <- c(1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1) / 36
+df <- data.frame(sum = dice_sum, probability = dice_prob)
+
+ggplot(df, aes(x = sum, y = probability)) +
+  geom_col(fill = COL_BLUE, width = 0.7) +
+  scale_x_continuous(breaks = 2:12) +
+  scale_y_continuous(labels = function(x) paste0(round(x * 36), "/36"),
+                     breaks = seq(0, 6/36, by = 1/36)) +
+  labs(x = "Sum of two dice", y = "Probability") +
+  theme_minimal(base_size = 14)
+```
+
+::: {.original}
+### Building intuition with simulation
+
+We can also *estimate* a probability distribution by simulating the random process many times and recording the relative frequencies of each outcome. For example, if we simulate rolling two dice 10,000 times and record the sum each time, the histogram of those 10,000 sums will closely approximate the theoretical probability distribution. As the number of simulations increases, the approximation improves — this is the Law of Large Numbers in action.
+
+This connection between simulation and theory is one of the most important ideas in the course. Every time we used simulation in Parts II and III to build a null distribution or a bootstrap distribution, we were approximating a theoretical probability distribution.
+:::
+
+## Cumulative distribution functions {#sec-cdf}
+
+::: {.definition}
+The **cumulative distribution function** (CDF) of a random variable $X$ is the function:
+
+$$F(x) = P(X \leq x)$$
+
+The CDF gives the probability that $X$ takes a value less than or equal to $x$.
+:::
+
+::: {.original}
+The CDF is a useful alternative to the PMF for answering "at most" or "at least" types of questions. For a discrete random variable, the CDF is a step function that jumps at each possible value of $X$.
+
+Consider the sum of two dice. The CDF at a few key values:
+
+| $x$ | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+|:----|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| $F(x) = P(X \leq x)$ | $\frac{1}{36}$ | $\frac{3}{36}$ | $\frac{6}{36}$ | $\frac{10}{36}$ | $\frac{15}{36}$ | $\frac{21}{36}$ | $\frac{26}{36}$ | $\frac{30}{36}$ | $\frac{33}{36}$ | $\frac{35}{36}$ | $\frac{36}{36}$ |
+
+Key properties of any CDF:
+
+- $F(x)$ is non-decreasing: if $a < b$, then $F(a) \leq F(b)$.
+- $F(x) \to 0$ as $x \to -\infty$ and $F(x) \to 1$ as $x \to +\infty$.
+- $P(a < X \leq b) = F(b) - F(a)$.
+
+The CDF becomes especially important for continuous random variables, where individual values have zero probability and we must always work with intervals.
+:::
+
+::: {.guidedpractice}
+Using the CDF for the sum of two dice above, find: (a) $P(X \leq 5)$. (b) $P(X > 9)$. (c) $P(4 < X \leq 8)$.
+
+<details>
+<summary>Show answer</summary>
+(a) $F(5) = 10/36$. (b) $P(X > 9) = 1 - F(9) = 1 - 30/36 = 6/36 = 1/6$. (c) $P(4 < X \leq 8) = F(8) - F(4) = 26/36 - 6/36 = 20/36 = 5/9$.
+</details>
+:::
+
+## Continuous random variables {#sec-continuous-rvs}
+
+::: {.definition}
+A **continuous random variable** can take any value in some interval of real numbers. Its probability distribution is described by a smooth curve called a **probability density function** (PDF).
+:::
+
+Examples of continuous random variables:
+
+- The height of a randomly selected adult
+- The time until the next bus arrives
+- The temperature at noon tomorrow
+
+### From histograms to density curves
+
+When we have a very large sample and use very narrow bins in a histogram, the outline of the histogram starts to look like a smooth curve. This smooth curve is a probability density function.
+
+```{r}
+#| label: fig-hist-to-density
+#| fig-cap: "The transition from a histogram to a smooth density curve as the bin width decreases and sample size increases. [↗ Try this live](https://learnlens.org/statlens/explore/descriptive/) — overlay a density curve on the histogram of your own data."
+#| fig-alt: "Four histograms of US adult heights with decreasing bin widths. As bins get narrower, the histogram outline becomes smoother and approaches a continuous bell-shaped curve."
+
+set.seed(42)
+heights <- rnorm(5000, mean = 170, sd = 8)
+binwidths <- c(8, 4, 2, 1)
+titles <- c("Bin width = 8 cm", "Bin width = 4 cm",
+             "Bin width = 2 cm", "Bin width = 1 cm")
+
+par(mfrow = c(2, 2), mar = c(4, 4, 2.5, 1))
+for (i in seq_along(binwidths)) {
+  bw <- binwidths[i]
+  lo <- floor(min(heights) / bw) * bw - bw
+  hi <- ceiling(max(heights) / bw) * bw + bw
+  hist(heights, breaks = seq(lo, hi, by = bw),
+       freq = FALSE, col = COL_BLUE, border = "white",
+       main = titles[i], xlab = "Height (cm)", ylab = "Density",
+       cex.main = 1.2, cex.lab = 1.1)
+  curve(dnorm(x, mean = 170, sd = 8), add = TRUE,
+        col = COL_RED, lwd = 2)
+}
+```
+
+::: {.important}
+**Properties of a probability density function (PDF):**
+
+1. The density curve is always on or above the horizontal axis: $f(x) \geq 0$ for all $x$.
+2. The total area under the curve equals 1.
+3. The probability that $X$ falls between $a$ and $b$ equals the area under the curve between $a$ and $b$: $P(a \leq X \leq b) = \text{area between } a \text{ and } b$.
+:::
+
+### Probabilities from continuous distributions
+
+For a continuous random variable, probabilities are *areas* under the density curve.
+
+::: {.workedexample}
+The heights of US adults follow a continuous distribution. What proportion of the population has heights between 180 cm and 185 cm?
+
+Using the density curve, we find the area under the curve between 180 and 185:
+
+$$P(180 \leq X \leq 185) = \text{area between 180 and 185} \approx 0.1157$$
+
+About 11.6% of US adults are between 180 and 185 cm tall.
+:::
+
+::: {.important}
+**A key difference: the probability of an exact value is zero for continuous random variables.**
+
+For a continuous random variable, $P(X = c) = 0$ for any specific value $c$. There is no area under the curve at a single point. This means:
+
+$$P(X \leq a) = P(X < a)$$
+
+This is *not* true for discrete random variables, where individual outcomes carry positive probability.
+:::
+
+::: {.guidedpractice}
+If $P(180 \leq \text{height} \leq 185) = 0.1157$ for a randomly selected US adult, and three adults are selected at random: (a) What is the probability all three have heights between 180 and 185 cm? (b) What is the probability none of them do?
+
+<details>
+<summary>Show answer</summary>
+(a) Since the selections are independent: $0.1157^3 \approx 0.0015$. (b) $(1 - 0.1157)^3 = 0.8843^3 \approx 0.692$.
+</details>
+:::
+
+::: {.original}
+### Discrete vs. continuous: a summary
+
+| Feature | Discrete | Continuous |
+|:--------|:---------|:-----------|
+| Values | Finite or countable list | Any value in an interval |
+| Described by | Probability mass function (PMF) | Probability density function (PDF) |
+| $P(X = c)$ | Can be positive | Always equals 0 |
+| Probabilities | Sum probabilities of individual values | Find areas under the curve |
+| Visualization | Bar plot | Smooth curve |
+| Example | Number of coin flips until heads | Height of a randomly selected person |
+
+In this course, we will work primarily with two specific distributions:
+
+- The **binomial distribution** (the binomial distribution chapter) — a discrete distribution
+- The **normal distribution** (the normal distribution chapter) — a continuous distribution
+
+Understanding the general concepts from this chapter will make those specific distributions much easier to work with.
+:::
+
+## Chapter review {#sec-random-variables-review}
+
+### Summary
+
+- A **random variable** assigns a numerical value to each outcome of a random process.
+- **Discrete random variables** take on a finite or countable set of values. Their distributions are described by probability mass functions (PMFs).
+- **Continuous random variables** can take any value in an interval. Their distributions are described by probability density functions (PDFs), and probabilities are calculated as areas under the curve.
+- The **cumulative distribution function** (CDF) gives $P(X \leq x)$ and works for both discrete and continuous random variables.
+- For continuous random variables, $P(X = c) = 0$ for any specific value $c$.
+- A valid probability distribution has non-negative probabilities that sum (or integrate) to 1.
+
+## Exercises {.exercises}
+
+{{< include ../exercises/_random-variables-exercises.qmd >}}

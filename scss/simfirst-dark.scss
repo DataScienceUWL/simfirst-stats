@@ -1,0 +1,143 @@
+/*-- scss:defaults --*/
+
+/* ================================================================
+   DARK MODE — flips the simfirst design system to a dark palette.
+   Loaded after simfirst.scss (see _quarto.yml `dark:` theme list),
+   so these values override the light defaults/rules.
+   ================================================================ */
+
+/* Base surfaces & text */
+$body-bg:            #1b1e21;
+$body-color:         #dfe3e6;
+$link-color:         #6fb3d6;
+
+/* Components Bootstrap derives from these */
+$card-bg:            #25292e;
+$code-bg:            #2a2e33;
+$code-color:         #e58fa2;
+$border-color:       #3a3f44;
+$table-color:        #dfe3e6;
+$table-border-color: #3a3f44;
+$input-bg:           #2a2e33;
+$input-color:        #dfe3e6;
+
+/*-- scss:rules --*/
+
+/* Brightened accents — the light-mode green (#114B5F) is far too dark to
+   read on a dark background, so callouts use lifted variants. */
+$d-blue:  #79b4d4;
+$d-teal:  #4fa3bf;
+$d-pink:  #ef8d99;
+$d-red:   #f8836a;
+
+body { background-color: #1b1e21; }
+
+/* Headings keep the blue identity, lifted for contrast on dark */
+h1, h2, h3, h4, h5, h6 { color: $d-blue; }
+h1 { border-top-color: $d-blue; border-bottom-color: $d-blue; }
+h2 { border-top-color: $d-pink; border-bottom-color: $d-pink; }
+h3 { border-top-color: #3a3f44; }
+
+a { color: $link-color; }
+.sidebar-title { color: $d-blue; }
+
+/* Docked nav sidebar — Quarto hardcodes a light #f8f9fa background on
+   `.sidebar.sidebar-navigation:not(.rollup)` even in the dark theme. Override
+   with ID specificity so it follows dark mode, and keep links readable. */
+#quarto-sidebar {
+  background-color: #202428;
+  color: #cdd3d8;
+}
+#quarto-sidebar a,
+#quarto-sidebar .sidebar-item-text { color: #cdd3d8; }
+#quarto-sidebar a:hover,
+#quarto-sidebar a.active,
+#quarto-sidebar .active > a { color: $d-blue; }
+#quarto-sidebar .sidebar-item-container .active { color: $d-blue; }
+
+/* Custom environment boxes -------------------------------------- */
+.chapterintro {
+  background: #1f2a30;
+  border-top-color: $d-blue;
+  border-bottom-color: $d-blue;
+}
+.guidedpractice,
+.workedexample {
+  background: #23272b;
+  border-top-color: $d-blue;
+  border-bottom-color: $d-blue;
+}
+.guidedpractice::before,
+.workedexample::before,
+.guidedpractice details summary { color: $d-blue; }
+.guidedpractice details { border-top-color: #3a3f44; }
+.guidedpractice details summary:hover { color: lighten($d-blue, 10%); }
+.guidedpractice details p { border-left-color: #3a5a6b; }
+
+.definition {
+  background: #16242a;
+  border-left-color: $d-teal;
+}
+.definition::before { color: $d-teal; }
+
+.important {
+  background: #2a1f22;
+  border-top-color: $d-pink;
+  border-bottom-color: $d-pink;
+}
+.important strong { color: $d-pink; }
+
+.caution {
+  background: #2a1d1a;
+  border-left-color: $d-red;
+}
+.caution::before { color: $d-red; }
+
+.tip {
+  background: #23272b;
+  border-left-color: #5a5f64;
+}
+
+.statlens {
+  background: #182830;
+  border-color: $d-blue;
+}
+.statlens::before { color: $d-blue; }
+
+.original {
+  border-left-color: #b07cc6;
+  color: #d9c2e6;
+}
+.original::before { color: #b07cc6; }
+
+.underconstruction {
+  background: #2e2912;
+  border-color: #b89020;
+}
+.underconstruction::before { color: #e3c34a; }
+
+/* Tables --------------------------------------------------------- */
+th {
+  background-color: #1f2a30;
+  border-bottom-color: $d-blue;
+}
+td { border-bottom-color: #3a3f44; }
+caption { color: #aab2b8; }
+
+/* Inline code / code blocks ------------------------------------- */
+pre { background-color: #2a2e33; }
+:not(pre) > code { background-color: #2a2e33; color: $code-color; }
+
+/* Figures: R plots render on a white background, which is jarring on a
+   dark page. Frame them as deliberate light cards rather than bare
+   white rectangles. */
+.cell-output-display img,
+.quarto-figure img {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 6px;
+}
+
+/* Accent text reused elsewhere */
+.exercises strong { color: $d-blue; }
+.open-in-statlens { color: $d-blue; }
