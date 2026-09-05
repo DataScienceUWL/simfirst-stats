@@ -11,16 +11,6 @@ c.  Points hug the line in the middle but curve **downward** away from the line 
 
 d.  Points fall below the line at the left end **and** above the line at the right end.
 
-<details><summary>Show answer</summary>
-a. **Approximately normal** — a straight-line QQ plot is exactly what we hope to see; the observed quantiles match the normal quantiles at every point.
-
-b. **Right-skewed** — the upper tail of the data extends farther than a normal distribution would predict, so the largest observed values are *bigger* than the normal quantiles → points rise above the line.
-
-c. **Left-skewed** — the lower tail extends farther than normal, so the smallest observed values are *smaller* than the normal quantiles → points fall below the line on the left.
-
-d. **Heavy-tailed** — both extremes are more extreme than a normal would predict. Common with a $t$-distribution with low df or with data that have occasional extreme outliers on both sides.
-</details>
-
 <!--- MOM original-29-01
 title: "Reading a QQ plot"
 type: multipart
@@ -46,20 +36,6 @@ e.  The proportion of a small sample that responds "yes" to a survey question.
 
 f.  Systolic blood pressure of healthy adults.
 
-<details><summary>Show answer</summary>
-a. **Yes** — heights within a sex are approximately normal (well-documented; symmetric, unimodal, bell-shaped, no natural boundary issues in the observed range).
-
-b. **No** — income is strongly right-skewed with a long upper tail from high earners; use a log-transformation or a different family.
-
-c. **No** — count data are usually modeled by the **Poisson** distribution, not the normal. (For high rates the normal can be a rough approximation, but not the primary model.)
-
-d. **Yes** — by the **Central Limit Theorem**, the *sampling distribution* of the mean is approximately normal for large enough $n$, regardless of the population.
-
-e. **Depends** — the sampling distribution of a proportion is approximately normal only when the success-failure condition holds ($np \ge 10$ and $n(1-p) \ge 10$). Small $n$ or extreme $p$ makes the normal a poor model.
-
-f. **Yes** — blood pressure in healthy adults is roughly symmetric, unimodal, and bell-shaped (a standard example in medical statistics).
-</details>
-
 <!--- MOM original-29-02
 title: "Which variables would you model as normal?"
 type: multipart
@@ -78,14 +54,6 @@ a.  Is this stronger evidence *for* or *against* the data being approximately no
 b.  If the same amount of scatter appeared in a QQ plot with $n = 500$, would your conclusion change? Why?
 
 c.  A colleague says "the points don't fall exactly on the line, so we can't use a $t$-test." Is this reasoning sound? Explain.
-
-<details><summary>Show answer</summary>
-a. **Consistent with normality.** With small $n$, we *expect* some scatter around the line even when the data truly are normal — random sampling variability alone produces wobble. Absence of a systematic curve (S-shape, monotonic curve at one end) is the signal that matters, not the amount of wobble.
-
-b. **Yes.** With $n = 500$, random sampling variability is much smaller and the plot should look much cleaner. Persistent scatter at $n = 500$ would indicate the data actually depart from normal in some way (mixture distribution, heteroscedasticity, etc.).
-
-c. **No — this misunderstands what we're checking.** The $t$-test is robust to moderate departures from normality, especially with modest-to-large $n$. Perfect linearity of the QQ plot is not required. The right questions are: is the departure severe (clear skew, heavy tails)? and is $n$ small enough that departures matter? Modest wobble at any $n$ is not a reason to abandon the $t$-test.
-</details>
 
 <!--- MOM original-29-03
 title: "Small-sample QQ plot interpretation"
@@ -108,16 +76,6 @@ c.  You want to estimate the mean systolic blood pressure of adult women. Your $
 
 d.  You want to test whether the mean wait time at an emergency room exceeds 30 minutes. Your $n = 8$ observations are strongly right-skewed and bounded below by 0.
 
-<details><summary>Show answer</summary>
-a. **$t$-test reasonable.** With $n = 40$ and symmetric-no-outliers, the CLT plus $t$'s robustness handles the mild departures from perfect normality.
-
-b. **Bootstrap safer.** $n = 25$ is not big enough for the CLT to fully rescue strongly skewed + outlier-driven data; $\bar{x}$ and $s$ are both distorted, so the $t$-test standard error is unreliable. A percentile bootstrap CI makes fewer assumptions.
-
-c. **$t$-test reasonable.** Large $n$ + approximately normal — this is exactly the setting the $t$-test was designed for.
-
-d. **Bootstrap safer.** $n = 8$ is too small for the CLT with strong right skew and a hard boundary at zero. The sampling distribution of $\bar{x}$ won't be close to normal here, and the $t$-test could give misleading results. A bootstrap CI is more trustworthy.
-</details>
-
 <!--- MOM original-29-04
 title: "Pick a method: t-test vs. bootstrap"
 type: multipart
@@ -136,14 +94,6 @@ a.  Do the two plots agree or disagree on normality?
 b.  Suggest one transformation of the data that might make the transformed values more nearly normal, and explain why it would help.
 
 c.  Suppose you compute a 95% one-sample $t$ confidence interval for the mean daily rainfall from these 300 observations. Given the CLT and $n = 300$, do you trust it? What's the caveat?
-
-<details><summary>Show answer</summary>
-a. **Agree.** Both diagnostics point to strong right skew. The histogram makes the shape visible directly; the QQ plot's upward curve at the right end confirms an over-long upper tail versus a normal.
-
-b. **Log transformation** ($\log(x + \varepsilon)$ or $\sqrt{x}$ for zero-heavy data) is a natural choice for right-skewed positive data — it compresses the long upper tail and expands the crowded region near zero, often producing an approximately symmetric transformed distribution.
-
-c. **Cautiously trust it, with the caveat that "the mean" may not be the interesting quantity.** With $n = 300$ the CLT makes the sampling distribution of $\bar{x}$ approximately normal even from skewed data, so the $t$ CI's coverage is roughly right. The deeper caveat: for very skewed data the mean is not always the best summary — the median or another percentile may answer the substantive question better.
-</details>
 
 <!--- MOM original-29-05
 title: "Two normality checks, one dataset"

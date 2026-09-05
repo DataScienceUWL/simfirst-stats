@@ -56,16 +56,6 @@ c.  A common misstatement of the CLT is: *"When $n$ is large, the sample data wi
 
 d.  Roughly how large does $n$ need to be for the CLT to give a good approximation? Discuss briefly.
 
-<details><summary>Show answer</summary>
-a. **(i) and (iii) are true.** The CLT is about the sampling distribution of $\bar{X}$, not the population. The population distribution and $\mu$ don't change when we take samples.
-
-b. Mean: $\mu = 3.15$. Standard error: $\sigma / \sqrt{n} = 0.60 / \sqrt{400} = 0.60 / 20 = 0.030$.
-
-c. The CLT is about the **sampling distribution of $\bar{X}$** (many sample means, one from each of many samples), NOT about the sample itself. A single sample from a skewed population is still skewed no matter how large — only the *distribution of means* smooths out.
-
-d. A common rule of thumb is $n \ge 30$ for a not-too-skewed population; strongly skewed populations may need $n = 100$ or more. There is no single magic number — the rougher the population, the larger $n$ needs to be.
-</details>
-
 <!--- MOM original-11-01
 title: "Stating the Central Limit Theorem"
 type: multipart

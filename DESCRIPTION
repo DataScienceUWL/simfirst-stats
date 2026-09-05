@@ -1,0 +1,45 @@
+Package: simfirststats
+Title: Introduction to Statistics: A Simulation-First Approach
+Version: 1.0.0
+Authors@R:
+    person("Jeff", "Baggett", role = c("aut", "cre"))
+Description: Source for an open (CC BY-SA 3.0) simulation-first introductory
+    statistics textbook, adapted from Introduction to Modern Statistics and
+    OpenIntro Statistics. This DESCRIPTION exists so the book's R
+    dependencies are installable in one step; the repository is a Quarto
+    book, not an R package.
+License: CC BY-SA 3.0
+Encoding: UTF-8
+Imports:
+    MASS,
+    Stat2Data,
+    airports,
+    boot,
+    broom,
+    cherryblossom,
+    dplyr,
+    forcats,
+    ggplot2,
+    ggrepel,
+    ggridges,
+    glue,
+    gridExtra,
+    infer,
+    janitor,
+    kableExtra,
+    knitr,
+    lubridate,
+    maps,
+    measurements,
+    nycflights13,
+    openintro,
+    palmerpenguins,
+    patchwork,
+    readr,
+    scales,
+    stringr,
+    tibble,
+    tidyr,
+    ukbabynames,
+    unvotes,
+    usdata

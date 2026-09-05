@@ -389,18 +389,6 @@ d.  A study has $n = 12$; the bootstrap distribution looks lumpy and irregular b
 
 e.  In one sentence, explain the underlying reason the two methods can disagree.
 
-<details><summary>Show answer</summary>
-a. **Both methods agree.** The SE method assumes an approximately normal bootstrap distribution (statistic ± 2 SE). When the bootstrap distribution is symmetric and bell-shaped, this assumption holds and the two methods give nearly identical intervals.
-
-b. **Percentile is more trustworthy.** The SE method centers the CI symmetrically around $\bar{x}$, but a skewed bootstrap distribution has an asymmetric middle 95% — the upper tail is longer. Percentile captures that asymmetry; SE forces symmetry it doesn't have.
-
-c. **Percentile is more trustworthy.** The SE method could push the upper endpoint above 1 (impossible for a proportion). Percentile respects the natural boundary because it just reports what's in the middle 95% of the bootstrap draws.
-
-d. **Neither method is fully trustworthy** — a lumpy bootstrap distribution suggests $n$ is too small for the bootstrap to work well. If you must report an interval, percentile is safer than SE because it doesn't require the bootstrap distribution to be roughly normal.
-
-e. **The SE method assumes the bootstrap distribution is approximately symmetric and bell-shaped** (so that statistic ± 2 SE captures the middle 95%). Percentile makes no shape assumption — it just reads off the 2.5th and 97.5th percentiles of the bootstrap draws. When the bootstrap distribution is skewed, bounded, or lumpy, percentile is the safer default.
-</details>
-
 <!--- MOM original-10-01
 title: "Percentile or SE method?"
 type: multipart

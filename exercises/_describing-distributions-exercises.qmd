@@ -525,16 +525,6 @@ c.  About 99.7% of adults have IQ scores in what range?
 
 d.  A common cutoff for "gifted" is $\text{IQ} \ge 130$. Roughly what percent of adults fall at or above this cutoff? (Hint: 130 is exactly two SDs above the mean, and the empirical rule tells you about the two-tailed range.)
 
-<details><summary>Show answer</summary>
-a. About 68% fall within $(100 - 15, \ 100 + 15) = (85, 115)$.
-
-b. About 95% fall within $(100 - 30, \ 100 + 30) = (70, 130)$.
-
-c. About 99.7% fall within $(100 - 45, \ 100 + 45) = (55, 145)$.
-
-d. About 5% of adults fall *outside* $(70, 130)$, split evenly between the two tails, so about **2.5%** fall at or above 130.
-</details>
-
 <!--- MOM original-05-01
 title: "Empirical rule for adult IQ scores"
 type: multipart
@@ -556,16 +546,6 @@ b.  Why is the empirical rule inappropriate for this dataset even at the upper e
 c.  What shape would you expect a distribution of household incomes to have? Sketch or describe it in words.
 
 d.  For a distribution shaped like this one, would the mean or the median be a better summary of a "typical" household income? Why?
-
-<details><summary>Show answer</summary>
-a. Income can't be negative, so the interval $(-\$40{,}000, \ \$176{,}000)$ is impossible on its face. This is a strong signal that the distribution is **not symmetric** — the SD is so large relative to the mean that a symmetric-bell interpretation runs off the boundary. The distribution is likely **right-skewed**.
-
-b. The empirical rule requires the distribution to be **approximately normal (bell-shaped and symmetric)**. Income distributions are strongly right-skewed by a small number of very-high earners. The rule's 68 / 95 / 99.7 percentages simply don't apply.
-
-c. **Right-skewed and unimodal**: a large peak in the low-to-middle range with a long tail stretching to very high incomes. There is a natural boundary at \$0 on the left.
-
-d. **Median.** For a right-skewed distribution the mean is pulled upward by a few high earners and misrepresents a typical household. This is why the U.S. Census reports **median** household income, not mean.
-</details>
 
 <!--- MOM original-05-02
 title: "When the empirical rule fails"

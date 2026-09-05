@@ -56,14 +56,25 @@ reordering the book never renames a file.
 
 ## Building
 
-Requires [Quarto](https://quarto.org/) 1.6+ and R with the packages loaded in
-`_common.R` (notably `tidyverse`, `openintro`, `usdata`, `knitr`,
-`kableExtra`).
+Requires [Quarto](https://quarto.org/) 1.6+ and R (4.2 or newer). Every R
+package the book uses is listed in [`DESCRIPTION`](DESCRIPTION), so a clean
+clone installs in one step:
+
+```r
+# install.packages("remotes")
+remotes::install_deps()
+```
+
+Then:
 
 ```bash
 quarto render          # HTML book into _book/
-quarto render --to pdf # PDF
+quarto render --to pdf # PDF (needs a LaTeX install; TinyTeX is enough)
 ```
+
+The first full render is slow because every code chunk executes. Quarto's
+`freeze: auto` caches the results, so later renders only re-run chunks in files
+you actually changed.
 
 Chunk output is cached via Quarto's `freeze: auto`, so a first full render is
 slow and subsequent renders are fast.

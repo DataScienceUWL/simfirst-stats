@@ -259,16 +259,6 @@ c.  The chapter states the success-failure condition ($np \ge 10$ and $n(1-p) \g
 
 d.  What does this tell you about *why* the normal approximation is a useful tool? What does it require to work?
 
-<details><summary>Show answer</summary>
-a. **Panel C ($n = 200$).** Larger $n$ makes the sampling distribution smoother, more symmetric, and more centered — the normal curve hugs it closely.
-
-b. The histogram at $n = 10$ has visible right-skew and a boundary effect at 0 (proportions can't be negative, but the normal curve extends below 0). The success-failure condition fails: $np = 10 \times 0.30 = 3$, well below the threshold of 10.
-
-c. Panel A: $np = 3$, $n(1-p) = 7$ — **fails.** Panel B: $np = 15$, $n(1-p) = 35$ — **passes.** Panel C: $np = 60$, $n(1-p) = 140$ — **passes clearly.**
-
-d. The normal approximation works because *sampling distributions* (not populations, not samples) tend to become nearly normal as $n$ grows. It requires enough sample size for the discreteness and skewness to smooth out — a fact you can *see* by comparing the panels. When the condition fails, prefer a simulation approach (from an earlier chapter) over the normal formula.
-</details>
-
 <!--- MOM original-12-01
 title: "Bridge: normal curve on a simulated sampling distribution"
 type: multipart
@@ -290,16 +280,6 @@ b.  Now compute the **normal-approximation p-value** for the same test. Treat th
 c.  Do the two p-values agree? Within what tolerance?
 
 d.  Under what conditions would you expect the two p-values to *disagree*? Name one situation where the simulation p-value would be more trustworthy.
-
-<details><summary>Show answer</summary>
-a. **Simulation p-value $= 47 / 10{,}000 = 0.0047$.**
-
-b. $Z = (0.292 - 0) / 0.115 \approx 2.54$. Right-tail probability under $N(0,1)$: $P(Z \ge 2.54) \approx 0.0055$.
-
-c. **Yes — very close.** 0.0047 vs. 0.0055 differ by less than one part in a thousand. Both would lead to the same conclusion at any reasonable $\alpha$.
-
-d. They can disagree when the randomization distribution isn't well-approximated by a normal — for example: small sample size (chunky, non-smooth distribution), extreme observed statistic in the far tail (where normal approximation is least accurate), or a bounded / heavily-skewed statistic like a correlation near ±1 or a proportion near 0 or 1. In those cases the **simulation p-value is more trustworthy** — it just counts shuffles, it doesn't assume a bell shape.
-</details>
 
 <!--- MOM original-12-02
 title: "Bridge: simulation p-value vs. normal-approximation p-value"

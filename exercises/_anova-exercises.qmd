@@ -540,16 +540,6 @@ c.  Name one method (from Ch 19 in this textbook, or from other courses) that ad
 
 d.  Why do we care about joint coverage rather than just individual coverage?
 
-<details><summary>Show answer</summary>
-a. The rejected $F$-test tells you that **at least one pair of population means differs**, but it does not tell you **which pair(s)** or **by how much**. Follow-up pairwise CIs are needed to see the specific structure.
-
-b. **Below 95%.** Each individual CI has a 5% chance of missing its target; with six CIs, the chance that at least one misses is much higher than 5%. Roughly, if the errors were independent, joint coverage would be $(0.95)^6 \approx 0.74$ — a joint miss rate near 26%.
-
-c. Common corrections: the **Bonferroni** method (use $\alpha / k$ per CI, where $k$ is the number of intervals), the **Tukey HSD** method (specifically designed for all-pairwise comparisons after ANOVA), or **Scheffé** (works for any linear contrasts). See Ch 19 (Multiple Comparisons).
-
-d. In practice, you'll act on **all** the CIs you compute — a policy decision based on many pairwise comparisons is only as trustworthy as the joint set. If any one CI could be wrong at 5% but you have six of them, the *set of conclusions* is much less trustworthy than 95%.
-</details>
-
 <!--- MOM original-18-01
 title: "After a significant ANOVA, then what?"
 type: multipart
